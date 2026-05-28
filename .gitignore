@@ -1,0 +1,40 @@
+# ─── Environment ──────────────────────────────────────
+.env
+.env.production
+*.env.local
+backend/.env
+backend/.env.production
+
+# ─── IDE ──────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# ─── OS ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Java / Maven ─────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.log
+
+# ─── Node / React ─────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.production
+frontend/.eslintcache
+frontend/coverage/
+
+# ─── Agents and Scratch ───────────────────────────────
+.agents/
+.codex/
+scratch/
+git_tracked_files.txt
+internal_docs/
+bank_statements/
+uploads/

@@ -1,0 +1,31 @@
+{
+  "rules": [
+    { "pattern": "SWIGGY",     "matchType": "CONTAINS", "category": "Food",          "purpose": "Food Delivery" },
+    { "pattern": "ZOMATO",     "matchType": "CONTAINS", "category": "Food",          "purpose": "Food Delivery" },
+    { "pattern": "DOMINOS",    "matchType": "CONTAINS", "category": "Food",          "purpose": "Food Delivery" },
+    { "pattern": "MCDONALD",   "matchType": "CONTAINS", "category": "Food",          "purpose": "Dining Out" },
+    { "pattern": "UBER",       "matchType": "STARTS_WITH", "category": "Transport",  "purpose": "Cab Ride" },
+    { "pattern": "OLA",        "matchType": "STARTS_WITH", "category": "Transport",  "purpose": "Cab Ride" },
+    { "pattern": "RAPIDO",     "matchType": "CONTAINS", "category": "Transport",     "purpose": "Bike Ride" },
+    { "pattern": "IRCTC",      "matchType": "CONTAINS", "category": "Travel",        "purpose": "Train Ticket" },
+    { "pattern": "MAKEMYTRIP", "matchType": "CONTAINS", "category": "Travel",        "purpose": "Travel Booking" },
+    { "pattern": "AMAZON",     "matchType": "CONTAINS", "category": "Shopping",      "purpose": "Online Shopping" },
+    { "pattern": "FLIPKART",   "matchType": "CONTAINS", "category": "Shopping",      "purpose": "Online Shopping" },
+    { "pattern": "MYNTRA",     "matchType": "CONTAINS", "category": "Shopping",      "purpose": "Fashion Shopping" },
+    { "pattern": "NETFLIX",    "matchType": "CONTAINS", "category": "Entertainment", "purpose": "Subscription" },
+    { "pattern": "SPOTIFY",    "matchType": "CONTAINS", "category": "Entertainment", "purpose": "Subscription" },
+    { "pattern": "HOTSTAR",    "matchType": "CONTAINS", "category": "Entertainment", "purpose": "Subscription" },
+    { "pattern": "YOUTUBE",    "matchType": "CONTAINS", "category": "Entertainment", "purpose": "Subscription" },
+    { "pattern": "AIRTEL",     "matchType": "CONTAINS", "category": "Bills",         "purpose": "Mobile Recharge" },
+    { "pattern": "JIO",        "matchType": "CONTAINS", "category": "Bills",         "purpose": "Mobile Recharge" },
+    { "pattern": "VODAFONE",   "matchType": "CONTAINS", "category": "Bills",         "purpose": "Mobile Recharge" },
+    { "pattern": "ELECTRICITY","matchType": "CONTAINS", "category": "Bills",         "purpose": "Electricity Bill" },
+    { "pattern": "BROADBAND",  "matchType": "CONTAINS", "category": "Bills",         "purpose": "Internet Bill" },
+    { "pattern": "APOLLO",     "matchType": "CONTAINS", "category": "Health",        "purpose": "Medical" },
+    { "pattern": "PHARMEASY",  "matchType": "CONTAINS", "category": "Health",        "purpose": "Medicine" },
+    { "pattern": "1MG",        "matchType": "CONTAINS", "category": "Health",        "purpose": "Medicine" },
+    { "pattern": "ZERODHA",    "matchType": "CONTAINS", "category": "Investment",    "purpose": "Stock Trading" },
+    { "pattern": "GROWW",      "matchType": "CONTAINS", "category": "Investment",    "purpose": "Mutual Fund" },
+    { "pattern": "SALARY",     "matchType": "CONTAINS", "category": "Salary",        "purpose": "Monthly Salary" }
+  ]
+}

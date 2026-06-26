@@ -1,0 +1,277 @@
+:root {
+  /* ── Font Families ─────────────────────────────────────── */
+  --font-display:  'DM Serif Display', Georgia, serif;
+  --font-body:     'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Courier New', monospace;
+
+  /* ── Font Weights ──────────────────────────────────────── */
+  --font-weight-regular:   400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+
+  /* ── Font Sizes ────────────────────────────────────────── */
+  --text-display:      clamp(1.75rem, 4vw, 2rem);   /* 28–32px */
+  --text-heading-lg:   1.5rem;                        /* 24px */
+  --text-heading-md:   1.125rem;                      /* 18px */
+  --text-heading-sm:   1rem;                          /* 16px */
+  --text-body-lg:      1rem;                          /* 16px */
+  --text-body-md:      0.875rem;                      /* 14px */
+  --text-body-sm:      0.75rem;                       /* 12px */
+  --text-mono-xl:      1.5rem;                        /* 24px — hero amounts */
+  --text-mono-lg:      1.125rem;                      /* 18px — card totals */
+  --text-mono-md:      0.875rem;                      /* 14px — table amounts */
+  --text-mono-sm:      0.75rem;                       /* 12px — small amounts */
+
+  /* ── Line Heights ──────────────────────────────────────── */
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+
+  /* ── Letter Spacing ────────────────────────────────────── */
+  --tracking-tight:   -0.025em;
+  --tracking-snug:    -0.015em;
+  --tracking-normal:   0em;
+  --tracking-wide:     0.025em;
+  --tracking-wider:    0.05em;
+  --tracking-widest:   0.1em;
+
+  /* ── Spacing Scale (8-point base) ──────────────────────── */
+  --space-px:   1px;
+  --space-0-5:  2px;
+  --space-1:    4px;
+  --space-1-5:  6px;
+  --space-2:    8px;
+  --space-2-5:  10px;
+  --space-3:    12px;
+  --space-3-5:  14px;
+  --space-4:    16px;
+  --space-5:    20px;
+  --space-6:    24px;
+  --space-7:    28px;
+  --space-8:    32px;
+  --space-9:    36px;
+  --space-10:   40px;
+  --space-12:   48px;
+  --space-14:   56px;
+  --space-16:   64px;
+  --space-20:   80px;
+  --space-24:   96px;
+
+  /* ── Border Radius ─────────────────────────────────────── */
+  --radius-none:   0px;
+  --radius-sm:     4px;
+  --radius-md:     6px;
+  --radius-lg:     8px;
+  --radius-xl:     12px;
+  --radius-2xl:    16px;
+  --radius-3xl:    24px;
+  --radius-full:   9999px;
+
+  /* ── Border Width ──────────────────────────────────────── */
+  --border-thin:     1px;
+  --border-default:  1.5px;
+  --border-thick:    2px;
+
+  /* ── Z-Index Scale ─────────────────────────────────────── */
+  --z-base:      0;
+  --z-raised:    10;
+  --z-dropdown:  20;
+  --z-sticky:    30;
+  --z-overlay:   60;
+  --z-modal:     70;
+  --z-toast:     80;
+  --z-tooltip:   90;
+
+  /* ── Layout ────────────────────────────────────────────── */
+  --layout-sidebar-width:         240px;
+  --layout-sidebar-collapsed:     60px;
+  --layout-topbar-height:         64px;
+  --layout-content-max-width:     1440px;
+  --layout-content-padding-x:     var(--space-8);
+  --layout-content-padding-y:     var(--space-8);
+  --layout-card-gap:              var(--space-6);
+
+  /* ── Motion Durations ──────────────────────────────────── */
+  --duration-instant:    50ms;
+  --duration-fast:       120ms;
+  --duration-normal:     200ms;
+  --duration-slow:       320ms;
+  --duration-deliberate: 500ms;
+
+  /* ── Motion Easings ────────────────────────────────────── */
+  --ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit:      cubic-bezier(0.4, 0, 1, 1);
+
+  /* ── Category Colors — Fixed, same in both themes ──────── */
+  --color-cat-food:          #C2693A;   /* muted orange-brown */
+  --color-cat-transport:     #4A7FA5;   /* muted slate blue */
+  --color-cat-shopping:      #7E6EA8;   /* muted purple */
+  --color-cat-bills:         #A85252;   /* muted red */
+  --color-cat-health:        #4A906A;   /* muted green */
+  --color-cat-entertainment: #A0607A;   /* muted rose */
+  --color-cat-education:     #3D8E8E;   /* muted teal */
+  --color-cat-travel:        #A08040;   /* muted amber */
+  --color-cat-investment:    #5B6EA8;   /* muted indigo */
+  --color-cat-other:         #7A7470;   /* warm grey */
+}
+
+/* =============================================================
+   BLOCK 2 — LIGHT THEME TOKENS
+   ============================================================= */
+:root,
+[data-theme="light"] {
+  /* ── Backgrounds ───────────────────────────────────────── */
+  --color-bg-base:         #F9F8F7;   /* Warm off-white — app background */
+  --color-bg-surface:      #FFFFFF;   /* Pure white — cards, panels */
+  --color-bg-elevated:     #FFFFFF;   /* Same as surface — modals, dropdowns */
+  --color-bg-subtle:       #F2F0EE;   /* Soft warm grey — hover, dividers */
+  --color-bg-muted:        #E8E5E2;   /* Stronger — disabled states, skeletons */
+  --color-bg-inverse:      #1A1917;   /* Near-black — tooltips on light bg */
+  --color-bg-overlay:      rgba(26, 25, 23, 0.45);  /* Modal backdrop */
+
+  /* ── Text ──────────────────────────────────────────────── */
+  --color-text-primary:    #1A1917;   /* Near-black — headings, body */
+  --color-text-secondary:  #534E49;   /* Warm dark grey — labels, subtext */
+  --color-text-muted:      #9A9390;   /* Warm mid-grey — placeholders */
+  --color-text-disabled:   #C5C0BB;   /* Light warm grey — disabled */
+  --color-text-inverse:    #F9F8F7;   /* Off-white — on dark backgrounds */
+  --color-text-link:       #1A5C4A;   /* Dark teal — links */
+
+  /* ── Brand (Primary Interaction) ──────────────────────── */
+  --color-brand:           #1A5C4A;   /* Primary button bg, links */
+  --color-brand-hover:     #154D3E;   /* Hover state */
+  --color-brand-active:    #0F3D30;   /* Active/pressed state */
+  --color-brand-subtle:    #E6F0EE;   /* Very light teal — focus ring, badge bg */
+  --color-brand-muted:     #C5DDD8;   /* Light teal — subtle highlights */
+  --color-brand-text:      #FFFFFF;   /* Text on brand-colored background */
+
+  /* ── Semantic: Income ──────────────────────────────────── */
+  --color-income:          #2A6A45;   /* Muted forest green — positive amounts */
+  --color-income-bg:       #EAF4EE;   /* Light green bg — income badges */
+  --color-income-text:     #1E4D32;   /* Dark green text on income-bg */
+
+  /* ── Semantic: Expense ─────────────────────────────────── */
+  --color-expense:         #8C3030;   /* Muted deep red — negative amounts */
+  --color-expense-bg:      #F5E9E9;   /* Light red bg — expense badges */
+  --color-expense-text:    #6B2222;   /* Dark red text on expense-bg */
+
+  /* ── Semantic: Warning ─────────────────────────────────── */
+  --color-warning:         #8A6020;   /* Muted amber — budget alerts */
+  --color-warning-bg:      #F7F0E0;   /* Light amber bg */
+  --color-warning-text:    #6B4A18;   /* Dark amber text */
+
+  /* ── Semantic: Success ─────────────────────────────────── */
+  --color-success:         #2A6A45;   /* Same as income — success states */
+  --color-success-bg:      #EAF4EE;
+  --color-success-text:    #1E4D32;
+
+  /* ── Semantic: Info ────────────────────────────────────── */
+  --color-info:            #284E7A;   /* Muted navy blue — informational */
+  --color-info-bg:         #E8EFF7;
+  --color-info-text:       #1E3A5C;
+
+  /* ── Semantic: Destructive ─────────────────────────────── */
+  --color-destructive:     #8C3030;   /* Same as expense — delete actions */
+  --color-destructive-bg:  #F5E9E9;
+  --color-destructive-text:#6B2222;
+
+  /* ── Borders ───────────────────────────────────────────── */
+  --color-border:          #E2DFDB;   /* Default border — inputs, cards */
+  --color-border-strong:   #C8C4BF;   /* Stronger border — focused inputs */
+  --color-border-muted:    #EDEBE8;   /* Subtle border — table rows */
+  --color-border-inverse:  #3A3835;   /* Border on dark surfaces */
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px rgba(26, 25, 23, 0.05);
+  --shadow-md:  0 2px 8px rgba(26, 25, 23, 0.07);
+  --shadow-lg:  0 4px 16px rgba(26, 25, 23, 0.09);
+  --shadow-xl:  0 8px 32px rgba(26, 25, 23, 0.11);
+
+  /* ── Focus Ring ─────────────────────────────────────────── */
+  --focus-ring: 0 0 0 3px var(--color-brand-subtle);
+
+  /* ── Scrollbar ──────────────────────────────────────────── */
+  --color-scrollbar-track:  var(--color-bg-subtle);
+  --color-scrollbar-thumb:  var(--color-bg-muted);
+}
+
+/* =============================================================
+   BLOCK 3 — DARK THEME TOKENS
+   ============================================================= */
+[data-theme="dark"] {
+  /* ── Backgrounds ───────────────────────────────────────── */
+  --color-bg-base:         #141312;   /* Near-black — app background */
+  --color-bg-surface:      #1E1D1B;   /* Dark warm grey — cards, panels */
+  --color-bg-elevated:     #262420;   /* Slightly lighter — modals, dropdowns */
+  --color-bg-subtle:       #252320;   /* Hover states, dividers */
+  --color-bg-muted:        #302E2B;   /* Disabled states, skeletons */
+  --color-bg-inverse:      #F0EEEC;   /* Off-white — tooltips on dark bg */
+  --color-bg-overlay:      rgba(0, 0, 0, 0.65);     /* Modal backdrop */
+
+  /* ── Text ──────────────────────────────────────────────── */
+  --color-text-primary:    #EDEAE7;   /* Off-white — headings, body */
+  --color-text-secondary:  #A09A94;   /* Warm grey — labels, subtext */
+  --color-text-muted:      #6B6560;   /* Darker grey — placeholders */
+  --color-text-disabled:   #4A4642;   /* Darker still — disabled */
+  --color-text-inverse:    #141312;   /* Near-black — on light surfaces */
+  --color-text-link:       #6BBAA8;   /* Light teal — links in dark mode */
+
+  /* ── Brand (Primary Interaction) ──────────────────────── */
+  --color-brand:           #4E9E88;   /* Lighter teal — visible on dark bg */
+  --color-brand-hover:     #5CB5A0;
+  --color-brand-active:    #3D8A75;
+  --color-brand-subtle:    #1A3832;   /* Very dark teal — focus ring bg */
+  --color-brand-muted:     #2A5548;   /* Muted teal — subtle highlights */
+  --color-brand-text:      #0C1F1A;   /* Dark text on brand button */
+
+  /* ── Semantic: Income ──────────────────────────────────── */
+  --color-income:          #5AAF7A;   /* Muted light green */
+  --color-income-bg:       #162A1E;   /* Dark green bg */
+  --color-income-text:     #7DC89A;   /* Lighter green text */
+
+  /* ── Semantic: Expense ─────────────────────────────────── */
+  --color-expense:         #C47070;   /* Muted light red */
+  --color-expense-bg:      #2A1818;   /* Dark red bg */
+  --color-expense-text:    #D88F8F;   /* Lighter red text */
+
+  /* ── Semantic: Warning ─────────────────────────────────── */
+  --color-warning:         #C4A050;   /* Muted light amber */
+  --color-warning-bg:      #2A2210;   /* Dark amber bg */
+  --color-warning-text:    #D4B870;
+
+  /* ── Semantic: Success ─────────────────────────────────── */
+  --color-success:         #5AAF7A;
+  --color-success-bg:      #162A1E;
+  --color-success-text:    #7DC89A;
+
+  /* ── Semantic: Info ────────────────────────────────────── */
+  --color-info:            #6A9AC4;   /* Muted light blue */
+  --color-info-bg:         #141E2A;
+  --color-info-text:       #88B4D8;
+
+  /* ── Semantic: Destructive ─────────────────────────────── */
+  --color-destructive:     #C47070;
+  --color-destructive-bg:  #2A1818;
+  --color-destructive-text:#D88F8F;
+
+  /* ── Borders ───────────────────────────────────────────── */
+  --color-border:          #2E2C29;   /* Default border — subtle on dark */
+  --color-border-strong:   #403D39;   /* Stronger border — focused inputs */
+  --color-border-muted:    #242220;   /* Very subtle — table row dividers */
+  --color-border-inverse:  #D4D0CB;   /* Border on light surfaces */
+
+  /* ── Shadows ───────────────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md:  0 3px 10px rgba(0, 0, 0, 0.35);
+  --shadow-lg:  0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-xl:  0 12px 40px rgba(0, 0, 0, 0.55);
+
+  /* ── Focus Ring ─────────────────────────────────────────── */
+  --focus-ring: 0 0 0 3px var(--color-brand-subtle);
+
+  /* ── Scrollbar ──────────────────────────────────────────── */
+  --color-scrollbar-track:  var(--color-bg-surface);
+  --color-scrollbar-thumb:  var(--color-bg-muted);
+}

@@ -1,85 +1,91 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { PublicLayout } from '../../components/layout/PublicLayout';
-import { useToast } from '../../context/ToastContext';
-import { validatePassword, validateEmail } from '../../utils/validation';
-import { VerificationCodeInput } from '../../components/auth/VerificationCodeInput';
-import { ResendLink } from '../../components/auth/ResendLink';
-import api from '../../api/axiosInstance';
+import React, { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { PublicLayout } from "../../components/layout/PublicLayout";
+import { useToast } from "../../context/ToastContext";
+import { validatePassword, validateEmail } from "../../utils/validation";
+import { VerificationCodeInput } from "../../components/auth/VerificationCodeInput";
+import { ResendLink } from "../../components/auth/ResendLink";
+import api from "../../api/axiosInstance";
 
 export const PasswordReset: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const [emailInput, setEmailInput] = useState(searchParams.get('email') || '');
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
+  const [emailInput, setEmailInput] = useState(searchParams.get("email") || "");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [isVerified, setIsVerified] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const [error, setError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleEmailBlur = () => {
     const err = validateEmail(emailInput);
-    setEmailError(err || '');
+    setEmailError(err || "");
   };
 
   const handlePasswordBlur = () => {
     const err = validatePassword(password);
-    setPasswordError(err || '');
+    setPasswordError(err || "");
   };
 
   const handleConfirmPasswordBlur = () => {
     if (confirmPassword && password !== confirmPassword) {
-      setConfirmPasswordError('Passwords do not match');
+      setConfirmPasswordError("Passwords do not match");
     } else if (!confirmPassword) {
-      setConfirmPasswordError('');
+      setConfirmPasswordError("");
     } else {
-      setConfirmPasswordError('');
+      setConfirmPasswordError("");
     }
   };
 
   const handleCodeChange = (value: string) => {
-    setCode(value.replace(/\D/g, '').slice(0, 6));
-    setError('');
+    setCode(value); // Do not strip spaces here so VerificationCodeInput can map indices correctly
+    setError("");
   };
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput.trim()) {
-      setError('Email address is required');
+      setError("Email address is required");
       return;
     }
-    if (code.length !== 6) {
-      setError('Enter the complete 6-digit verification code');
+    const cleanCode = code.replace(/\D/g, "");
+    if (cleanCode.length !== 6) {
+      setError("Enter the complete 6-digit verification code");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
-      await api.post('/auth/reset-password/verify-code', {
+      await api.post("/auth/reset-password/verify-code", {
         email: emailInput.trim(),
-        code
+        code: cleanCode,
       });
       setIsVerified(true);
-      showToast('success', 'Verification code accepted. Please enter your new password.');
+      showToast(
+        "success",
+        "Verification code accepted. Please enter your new password.",
+      );
     } catch (err: unknown) {
       console.error(err);
       const apiError = err as { response?: { data?: { message?: string } } };
-      const message = apiError.response?.data?.message || 'Invalid or expired verification code.';
+      const message =
+        apiError.response?.data?.message ||
+        "Invalid or expired verification code.";
       setError(message);
     } finally {
       setLoading(false);
@@ -88,34 +94,40 @@ export const PasswordReset: React.FC = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!password) {
-      setError('Password is required');
+      setError("Password is required");
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     setLoading(true);
     try {
-      await api.post('/auth/reset-password', {
+      const cleanCode = code.replace(/\D/g, "");
+      await api.post("/auth/reset-password", {
         email: emailInput.trim(),
-        code,
-        password
+        code: cleanCode,
+        password,
       });
-      showToast('success', 'Password reset successfully. Please sign in with your new password.');
-      navigate('/login');
+      showToast(
+        "success",
+        "Password reset successfully. Please sign in with your new password.",
+      );
+      navigate("/login");
     } catch (err: unknown) {
       console.error(err);
       const apiError = err as { response?: { data?: { message?: string } } };
-      const message = apiError.response?.data?.message || 'Failed to reset password. Please try again.';
+      const message =
+        apiError.response?.data?.message ||
+        "Failed to reset password. Please try again.";
       setError(message);
     } finally {
       setLoading(false);
@@ -124,16 +136,16 @@ export const PasswordReset: React.FC = () => {
 
   const handleResend = async () => {
     if (!emailInput.trim()) {
-      showToast('error', 'Email is required to resend reset code.');
+      showToast("error", "Email is required to resend reset code.");
       return;
     }
     setResendLoading(true);
-    setError('');
+    setError("");
     try {
-      await api.post('/auth/forgot-password', {
-        email: emailInput.trim()
+      await api.post("/auth/forgot-password", {
+        email: emailInput.trim(),
       });
-      showToast('success', 'Password reset link and code sent.');
+      showToast("success", "Password reset link and code sent.");
       let seconds = 30;
       setResendCooldown(seconds);
       const interval = window.setInterval(() => {
@@ -144,9 +156,10 @@ export const PasswordReset: React.FC = () => {
     } catch (err: unknown) {
       console.error(err);
       const apiError = err as { response?: { data?: { message?: string } } };
-      const message = apiError.response?.data?.message || 'Failed to resend reset link.';
+      const message =
+        apiError.response?.data?.message || "Failed to resend reset link.";
       setError(message);
-      showToast('error', message);
+      showToast("error", message);
     } finally {
       setResendLoading(false);
     }
@@ -162,18 +175,23 @@ export const PasswordReset: React.FC = () => {
                 Reset Password
               </h1>
               <p className="text-text-secondary text-body-sm leading-relaxed">
-                {isVerified 
-                  ? 'Please set a secure new password for your account.' 
-                  : `Enter the 6-digit verification code sent to your email.`
-                }
+                {isVerified
+                  ? "Please set a secure new password for your account."
+                  : `Enter the 6-digit verification code sent to your email.`}
               </p>
             </div>
           </div>
 
-          <form onSubmit={isVerified ? handleResetPassword : handleVerifyCode} className="space-y-5">
-            {!searchParams.get('email') && !isVerified && (
+          <form
+            onSubmit={isVerified ? handleResetPassword : handleVerifyCode}
+            className="space-y-5"
+          >
+            {!searchParams.get("email") && !isVerified && (
               <div>
-                <label htmlFor="reset-email-address" className="block text-body-sm font-semibold text-text-secondary mb-2">
+                <label
+                  htmlFor="reset-email-address"
+                  className="block text-body-sm font-semibold text-text-secondary mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -187,16 +205,18 @@ export const PasswordReset: React.FC = () => {
                     value={emailInput}
                     onChange={(event) => {
                       setEmailInput(event.target.value);
-                      setEmailError('');
+                      setEmailError("");
                     }}
                     onBlur={handleEmailBlur}
-                    className={`input !pl-10 animate-fade-in ${emailError ? 'input-error' : ''}`}
+                    className={`input pl-10! animate-fade-in ${emailError ? "input-error" : ""}`}
                     disabled={loading}
                     required
                   />
                 </div>
                 {emailError && (
-                  <p className="text-destructive text-body-sm mt-1">{emailError}</p>
+                  <p className="text-destructive text-body-sm mt-1">
+                    {emailError}
+                  </p>
                 )}
               </div>
             )}
@@ -214,7 +234,10 @@ export const PasswordReset: React.FC = () => {
             {isVerified && (
               <div className="space-y-5 animate-fade-in">
                 <div>
-                  <label htmlFor="new-password" className="block text-body-sm font-semibold text-text-secondary mb-2">
+                  <label
+                    htmlFor="new-password"
+                    className="block text-body-sm font-semibold text-text-secondary mb-2"
+                  >
                     New Password
                   </label>
                   <div className="relative">
@@ -223,15 +246,15 @@ export const PasswordReset: React.FC = () => {
                     </div>
                     <input
                       id="new-password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
-                        setPasswordError('');
+                        setPasswordError("");
                       }}
                       onBlur={handlePasswordBlur}
-                      className={`input !pl-10 !pr-10 ${passwordError ? 'input-error' : ''}`}
+                      className={`input pl-10! pr-10! ${passwordError ? "input-error" : ""}`}
                       disabled={loading}
                       required
                       autoFocus
@@ -242,17 +265,26 @@ export const PasswordReset: React.FC = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     )}
                   </div>
                   {passwordError && (
-                    <p className="text-destructive text-body-sm mt-1">{passwordError}</p>
+                    <p className="text-destructive text-body-sm mt-1">
+                      {passwordError}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="confirm-new-password" className="block text-body-sm font-semibold text-text-secondary mb-2">
+                  <label
+                    htmlFor="confirm-new-password"
+                    className="block text-body-sm font-semibold text-text-secondary mb-2"
+                  >
                     Confirm New Password
                   </label>
                   <div className="relative">
@@ -261,37 +293,43 @@ export const PasswordReset: React.FC = () => {
                     </div>
                     <input
                       id="confirm-new-password"
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => {
                         setConfirmPassword(e.target.value);
-                        setConfirmPasswordError('');
+                        setConfirmPasswordError("");
                       }}
                       onBlur={handleConfirmPasswordBlur}
-                      className={`input !pl-10 !pr-10 ${confirmPasswordError ? 'input-error' : ''}`}
+                      className={`input pl-10! pr-10! ${confirmPasswordError ? "input-error" : ""}`}
                       disabled={loading}
                       required
                     />
                     {confirmPassword.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                       >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     )}
                   </div>
                   {confirmPasswordError && (
-                    <p className="text-destructive text-body-sm mt-1">{confirmPasswordError}</p>
+                    <p className="text-destructive text-body-sm mt-1">
+                      {confirmPasswordError}
+                    </p>
                   )}
                 </div>
-                
+
                 {error && (
-                  <p className="text-destructive text-body-sm mt-2">
-                    {error}
-                  </p>
+                  <p className="text-destructive text-body-sm mt-2">{error}</p>
                 )}
               </div>
             )}
@@ -303,10 +341,13 @@ export const PasswordReset: React.FC = () => {
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>
-                {loading 
-                  ? (isVerified ? 'Resetting...' : 'Verifying...') 
-                  : (isVerified ? 'Reset Password' : 'Verify Code')
-                }
+                {loading
+                  ? isVerified
+                    ? "Resetting..."
+                    : "Verifying..."
+                  : isVerified
+                    ? "Reset Password"
+                    : "Verify Code"}
               </span>
             </button>
           </form>

@@ -13,7 +13,42 @@ import {
   EyeOff,
 } from "lucide-react";
 import { PublicLayout } from "../../components/layout/PublicLayout";
-import { validatePassword, validateEmail } from "../../utils/validation";
+import {
+  validatePassword,
+  validateEmail,
+  validateName,
+} from "../../utils/validation";
+
+const PasswordStrengthMeter = ({ password }: { password: string }) => {
+  const requirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { label: "One number", met: /\d/.test(password) },
+    {
+      label: "One special character",
+      met: /[!@#$%^&*(),.?":{}|<>\-_]/.test(password),
+    },
+  ];
+
+  return (
+    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {requirements.map((req, idx) => (
+        <div
+          key={idx}
+          className={`flex items-center gap-2 text-body-sm transition-colors ${req.met ? "text-success" : "text-text-muted"}`}
+        >
+          {req.met ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          ) : (
+            <div className="h-4 w-4 rounded-full border border-current opacity-40 shrink-0" />
+          )}
+          <span className="truncate">{req.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const Login: React.FC = () => {
   const { login, register, forgotPassword } = useAuth();
@@ -158,7 +193,7 @@ export const Login: React.FC = () => {
   return (
     <PublicLayout>
       <div className="grow flex items-center justify-center py-12 md:py-20 px-4">
-        <div className="card w-full max-w-105 p-8 space-y-6">
+        <div className="card w-full max-w-120 p-8 space-y-6">
           <div className="text-center space-y-2">
             <h1 className="font-display text-text-primary text-3xl md:text-4xl leading-tight flex items-center justify-center gap-2">
               BudgetSetu
@@ -210,8 +245,20 @@ export const Login: React.FC = () => {
                       type="text"
                       placeholder="Arjun Sharma"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFullName(val);
+                        const err = validateName(val);
+                        if (err)
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            fullName: err,
+                          }));
+                        else
+                          setFieldErrors((prev) => ({ ...prev, fullName: "" }));
+                      }}
                       autoComplete="name"
+                      maxLength={25}
                       className={`input pl-10! ${fieldErrors.fullName ? "input-error" : ""}`}
                       disabled={loading}
                     />
@@ -237,11 +284,20 @@ export const Login: React.FC = () => {
                     placeholder="arjun@example.com"
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value);
-                      setFieldErrors((prev) => ({ ...prev, email: "" }));
+                      const val = e.target.value;
+                      setEmail(val);
+                      if (val.length > 50) {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          email: "Email cannot exceed 50 characters",
+                        }));
+                      } else {
+                        setFieldErrors((prev) => ({ ...prev, email: "" }));
+                      }
                     }}
                     onBlur={handleEmailBlur}
                     autoComplete="email"
+                    maxLength={50}
                     className={`input pl-10! ${fieldErrors.email ? "input-error" : ""}`}
                     disabled={loading}
                   />
@@ -267,11 +323,26 @@ export const Login: React.FC = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPassword(val);
+                          if (val.length > 25) {
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              password: "Password cannot exceed 25 characters",
+                            }));
+                          } else {
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              password: "",
+                            }));
+                          }
+                        }}
                         onBlur={handlePasswordBlur}
                         autoComplete={
                           isRegistering ? "new-password" : "current-password"
                         }
+                        maxLength={25}
                         className={`input pl-10! pr-10! ${fieldErrors.password ? "input-error" : ""}`}
                         disabled={loading}
                       />
@@ -293,6 +364,9 @@ export const Login: React.FC = () => {
                       <p className="text-destructive text-body-sm mt-1">
                         {fieldErrors.password}
                       </p>
+                    )}
+                    {isRegistering && (
+                      <PasswordStrengthMeter password={password} />
                     )}
                   </div>
 

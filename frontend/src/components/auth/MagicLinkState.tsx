@@ -79,16 +79,16 @@ export const MagicLinkState: React.FC<MagicLinkStateProps> = ({
               {codeDesc}
             </p>
           </div>
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center justify-center rounded-md border border-border bg-bg-surface px-5 py-3 font-mono text-4xl md:text-5xl leading-none font-semibold text-text-primary shadow-sm">
+          <div className="flex flex-col items-center gap-4 w-full">
+            <div className="flex items-center justify-center rounded-md border border-border bg-bg-surface px-5 py-3 font-mono text-3xl md:text-4xl leading-none font-semibold text-text-primary shadow-sm">
               {code}
             </div>
             {onCopy && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+              <div className="w-full flex justify-center mt-2">
                 <button
                   type="button"
                   onClick={onCopy}
-                  className="btn btn-secondary inline-flex items-center justify-center gap-2 px-6 py-2.5 text-base cursor-pointer"
+                  className="btn btn-secondary w-fit inline-flex items-center justify-center gap-2 py-2.5 text-base cursor-pointer px-8"
                   aria-label="Copy code"
                 >
                   {copied ? <Check className="h-5 w-5 text-success" /> : <Copy className="h-5 w-5" />}
@@ -110,25 +110,27 @@ export const MagicLinkState: React.FC<MagicLinkStateProps> = ({
               {expiredDesc || invalidDesc}
             </p>
           </div>
-          {emailForResend && onResend ? (
-            <button
-              type="button"
-              onClick={onResend}
-              disabled={resending}
-              className="btn btn-primary w-full py-3 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {resending && <Loader2 className="h-5 w-5 animate-spin" />}
-              <span>{resending ? 'Resending…' : resendLabel}</span>
-            </button>
-          ) : onGoToFallback ? (
-            <button
-              type="button"
-              onClick={onGoToFallback}
-              className="btn btn-primary w-full py-3 cursor-pointer"
-            >
-              {goToFallbackLabel}
-            </button>
-          ) : null}
+          <div className="w-full flex justify-center">
+            {emailForResend && onResend ? (
+              <button
+                type="button"
+                onClick={onResend}
+                disabled={resending}
+                className="btn btn-primary w-fit inline-flex py-3 px-8 items-center justify-center gap-2 cursor-pointer"
+              >
+                {resending && <Loader2 className="h-5 w-5 animate-spin" />}
+                <span>{resending ? 'Resending…' : resendLabel}</span>
+              </button>
+            ) : onGoToFallback ? (
+              <button
+                type="button"
+                onClick={onGoToFallback}
+                className="btn btn-primary w-fit inline-flex py-3 px-8 items-center justify-center cursor-pointer"
+              >
+                {goToFallbackLabel}
+              </button>
+            ) : null}
+          </div>
         </div>
       )}
 

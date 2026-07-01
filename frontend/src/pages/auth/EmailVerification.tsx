@@ -1,61 +1,64 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Mail } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
-import { PublicLayout } from '../../components/layout/PublicLayout';
-import { VerificationCodeInput } from '../../components/auth/VerificationCodeInput';
-import { ResendLink } from '../../components/auth/ResendLink';
-import api from '../../api/axiosInstance';
-import { validateEmail } from '../../utils/validation';
+import React, { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
+import { useToast } from "../../context/ToastContext";
+import { PublicLayout } from "../../components/layout/PublicLayout";
+import { VerificationCodeInput } from "../../components/auth/VerificationCodeInput";
+import { ResendLink } from "../../components/auth/ResendLink";
+import api from "../../api/axiosInstance";
+import { validateEmail } from "../../utils/validation";
 
 export const EmailVerification: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  
-  const [emailInput, setEmailInput] = useState(searchParams.get('email') || '');
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [emailError, setEmailError] = useState('');
+
+  const [emailInput, setEmailInput] = useState(searchParams.get("email") || "");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleEmailBlur = () => {
     const err = validateEmail(emailInput);
-    setEmailError(err || '');
+    setEmailError(err || "");
   };
 
   const handleCodeChange = (value: string) => {
-    setCode(value.replace(/\D/g, '').slice(0, 6));
-    setError('');
+    setCode(value); // Do not strip spaces here so VerificationCodeInput can map indices correctly
+    setError("");
   };
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!emailInput.trim()) {
-      setError('Email address is required');
+      setError("Email address is required");
       return;
     }
 
-    if (code.length !== 6) {
-      setError('Enter the complete 6-digit verification code');
+    const cleanCode = code.replace(/\D/g, "");
+    if (cleanCode.length !== 6) {
+      setError("Enter the complete 6-digit verification code");
       return;
     }
 
     setLoading(true);
     try {
-      await api.post('/auth/verify-email', {
+      await api.post("/auth/verify-email", {
         email: emailInput.trim(),
-        code
+        code: cleanCode,
       });
-      showToast('success', 'Email verification code accepted.');
-      navigate('/verify-email/confirm');
+      showToast("success", "Email verification code accepted.");
+      navigate("/verify-email/confirm");
     } catch (err: unknown) {
       console.error(err);
       const apiError = err as { response?: { data?: { message?: string } } };
-      const message = apiError.response?.data?.message || 'Invalid or expired verification code.';
+      const message =
+        apiError.response?.data?.message ||
+        "Invalid or expired verification code.";
       setError(message);
     } finally {
       setLoading(false);
@@ -64,15 +67,15 @@ export const EmailVerification: React.FC = () => {
 
   const handleResend = async () => {
     if (!emailInput.trim()) {
-      showToast('error', 'Email is required to resend verification.');
+      showToast("error", "Email is required to resend verification.");
       return;
     }
     setResendLoading(true);
     try {
-      await api.post('/auth/resend-verification', {
-        email: emailInput.trim()
+      await api.post("/auth/resend-verification", {
+        email: emailInput.trim(),
       });
-      showToast('success', 'Verification email resent.');
+      showToast("success", "Verification email resent.");
       let seconds = 30;
       setResendCooldown(seconds);
       const interval = window.setInterval(() => {
@@ -83,8 +86,9 @@ export const EmailVerification: React.FC = () => {
     } catch (err: unknown) {
       console.error(err);
       const apiError = err as { response?: { data?: { message?: string } } };
-      const message = apiError.response?.data?.message || 'Failed to resend verification.';
-      showToast('error', message);
+      const message =
+        apiError.response?.data?.message || "Failed to resend verification.";
+      showToast("error", message);
     } finally {
       setResendLoading(false);
     }
@@ -93,26 +97,29 @@ export const EmailVerification: React.FC = () => {
   return (
     <PublicLayout>
       <div className="grow flex items-center justify-center px-4 py-12 md:py-20">
-        <div className="card w-full max-w-110 p-8 space-y-7">
+        <div className="card w-full max-w-120 p-8 space-y-7">
           <div className="text-center space-y-3">
             <div className="space-y-2">
               <h1 className="font-display text-text-primary text-3xl md:text-4xl leading-tight">
                 Verify Your Email
               </h1>
               <p className="text-text-secondary text-body-sm leading-relaxed">
-                Check your inbox at{' '}
+                Check your inbox at{" "}
                 <span className="font-semibold text-text-primary">
-                  {emailInput || 'your email'}
-                </span>
-                {' '}for the verification code.
+                  {emailInput || "your email"}
+                </span>{" "}
+                for the verification code.
               </p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {!searchParams.get('email') && (
+            {!searchParams.get("email") && (
               <div>
-                <label htmlFor="email-address" className="block text-body-sm font-semibold text-text-secondary mb-2">
+                <label
+                  htmlFor="email-address"
+                  className="block text-body-sm font-semibold text-text-secondary mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -126,16 +133,18 @@ export const EmailVerification: React.FC = () => {
                     value={emailInput}
                     onChange={(event) => {
                       setEmailInput(event.target.value);
-                      setEmailError('');
+                      setEmailError("");
                     }}
                     onBlur={handleEmailBlur}
-                    className={`input !pl-10 animate-fade-in ${emailError ? 'input-error' : ''}`}
+                    className={`input pl-10! animate-fade-in ${emailError ? "input-error" : ""}`}
                     disabled={loading}
                     required
                   />
                 </div>
                 {emailError && (
-                  <p className="text-destructive text-body-sm mt-1">{emailError}</p>
+                  <p className="text-destructive text-body-sm mt-1">
+                    {emailError}
+                  </p>
                 )}
               </div>
             )}
@@ -155,7 +164,7 @@ export const EmailVerification: React.FC = () => {
               className="btn btn-primary w-full py-3"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Verifying...' : 'Verify Email'}
+              {loading ? "Verifying..." : "Verify Email"}
             </button>
           </form>
 

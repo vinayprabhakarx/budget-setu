@@ -6,7 +6,7 @@ export const BudgetPlansSkeleton: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="w-full">
-            <div className="card p-5 border border-border flex flex-col h-full min-h-[140px]">
+            <div className="card p-5 border border-border flex flex-col h-full min-h-[8.75rem]">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="h-5 bg-bg-muted rounded w-32 mb-2"></div>

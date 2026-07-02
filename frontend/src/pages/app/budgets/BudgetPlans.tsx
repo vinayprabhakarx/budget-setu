@@ -172,7 +172,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
             <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-deliberate ease-standard ${getBudgetProgressBgClass(progressPercent)}`} style={{ width: `${Math.min(progressPercent, 100)}%` }} />
             </div>
-            <div className="flex justify-between items-center pt-1 text-[11px]">
+            <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
               <span className={`font-semibold ${progressPercent >= 100 ? 'text-expense' : progressPercent >= 75 ? 'text-warning' : 'text-income'}`}>{progressPercent.toFixed(0)}% Exhausted</span>
               {progressPercent >= 100 && <span className="text-expense font-semibold">Budget Exceeded ⚠️</span>}
             </div>
@@ -191,7 +191,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
                             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: alloc.categoryColor || 'var(--color-border)' }} />
                             <span className="text-text-primary font-medium truncate">{alloc.categoryName}</span>
                           </div>
-                          <div className="flex justify-between text-[11px] mb-1">
+                          <div className="flex justify-between text-[0.6875rem] mb-1">
                             <span className="text-text-secondary">Spent: <b className="num text-text-primary font-medium">{formatCurrency(alloc.spent)}</b></span>
                             <span className="text-text-secondary">Budget: <b className="num text-text-primary font-medium">{formatCurrency(alloc.amount)}</b></span>
                           </div>

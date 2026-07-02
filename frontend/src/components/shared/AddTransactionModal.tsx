@@ -162,7 +162,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen
                     key={type}
                     type="button"
                     onClick={() => setTransactionType(type)}
-                    className={`flex-1 min-w-[70px] px-2 py-2 text-center text-body-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer capitalize ${
+                    className={`flex-1 min-w-[4.375rem] px-2 py-2 text-center text-body-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer capitalize ${
                       transactionType === type
                         ? 'border-primary text-text-primary'
                         : 'border-transparent text-text-muted hover:text-text-primary'

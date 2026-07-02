@@ -133,7 +133,6 @@ export const Login: React.FC = () => {
           <div className="text-center space-y-2">
             <h1 className="font-display text-text-primary text-3xl md:text-4xl leading-tight flex items-center justify-center gap-2">
               BudgetSetu
-              <span className="ml-1 text-2xl font-bold text-brand font-sans" title="Beta">β</span>
             </h1>
             <p className="text-text-secondary text-body-sm">
               {isRecovering

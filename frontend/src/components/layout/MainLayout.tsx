@@ -158,12 +158,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           className="flex items-center gap-2 font-display text-text-primary text-2xl font-medium tracking-tight select-none"
         >
           <span>BudgetSetu</span>
-          <span
-            className="ml-1 text-lg font-bold text-brand font-sans"
-            title="Beta"
-          >
-            β
-          </span>
+          <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -236,12 +231,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           className="flex items-center gap-2 font-display text-text-primary text-2xl lg:text-3xl tracking-tight select-none"
         >
           <span>BudgetSetu</span>
-          <span
-            className="ml-1 text-xl font-bold text-brand font-sans"
-            title="Beta"
-          >
-            β
-          </span>
+          <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
         </Link>
 
         <div className="flex items-center gap-4">

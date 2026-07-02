@@ -51,7 +51,7 @@ export const Contact: React.FC = () => {
     <PublicLayout>
       <div className="relative overflow-hidden">
         {/* Deep modern ambient glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand/5 blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[37.5rem] h-[37.5rem] bg-brand/5 blur-[7.5rem] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 py-20 md:py-28 space-y-20 relative z-10">
           

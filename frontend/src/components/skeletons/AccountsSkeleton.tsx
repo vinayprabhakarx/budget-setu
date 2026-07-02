@@ -5,7 +5,7 @@ export const AccountsSkeleton: React.FC = () => {
     <div className="w-full animate-pulse">
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="card p-6 flex flex-col justify-between space-y-4 min-h-[180px]">
+          <div key={i} className="card p-6 flex flex-col justify-between space-y-4 min-h-[11.25rem]">
             {/* Header */}
             <div className="flex justify-between items-start">
               <div className="space-y-2 w-full">

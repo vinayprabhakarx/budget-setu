@@ -37,7 +37,7 @@ export const AnalyticsChartsSkeleton: React.FC = () => (
       </div>
       {/* Donut placeholder */}
       <div className="flex items-center justify-center py-4">
-        <div className="w-48 h-48 rounded-full border-[20px] border-bg-muted"></div>
+        <div className="w-48 h-48 rounded-full border-[1.25rem] border-bg-muted"></div>
       </div>
       {/* Legend rows */}
       <div className="space-y-3 mt-2">

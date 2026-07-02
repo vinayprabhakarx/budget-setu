@@ -130,7 +130,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                   <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-deliberate ease-standard ${isCompleted ? 'bg-income' : 'bg-brand'}`} style={{ width: `${Math.min(g.percentageComplete, 100)}%` }} />
                   </div>
-                  <div className="flex justify-between items-center pt-1 text-[11px]">
+                  <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
                     <span className={`font-semibold ${isCompleted ? 'text-income' : 'text-brand'}`}>{g.percentageComplete.toFixed(0)}% Achieved</span>
                     {g.daysRemaining !== null && g.daysRemaining > 0 && !isCompleted && <span className="text-text-muted">{g.daysRemaining} days left</span>}
                     {isCompleted && <span className="text-income font-semibold">Goal Complete! 🎉</span>}

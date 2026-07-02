@@ -50,7 +50,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           {/* Logo */}
           <Link to="/" className="font-display text-text-primary text-2xl md:text-3xl tracking-tight hover:opacity-90 transition-opacity flex items-center gap-2">
             <span>BudgetSetu</span>
-            <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
+          <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
           </Link>
 
           {/* Desktop Navigation */}

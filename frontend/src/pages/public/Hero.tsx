@@ -9,8 +9,8 @@ export const Hero: React.FC = () => {
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden py-24 md:py-36 border-b border-border">
         {/* Deep modern ambient glows */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand/10 blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-income/10 blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand/10 blur-[7.5rem] pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-income/10 blur-[7.5rem] pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--color-brand-subtle),transparent_60%)] opacity-60 pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-10 relative z-10">
@@ -57,7 +57,7 @@ export const Hero: React.FC = () => {
               Drag-and-drop bank PDFs/CSVs. BudgetSetu auto-discovers bank details, parses data in seconds, and natively prompts you to unlock password-protected statement PDFs securely.
             </p>
             <div className="pt-2 border-t border-border/50">
-              <p className="text-text-secondary text-[11px] font-medium tracking-wide uppercase">Supported Integrations:</p>
+              <p className="text-text-secondary text-[0.6875rem] font-medium tracking-wide uppercase">Supported Integrations:</p>
               <p className="text-text-secondary text-body-sm mt-1">PhonePe, Google Pay, Paytm, BHIM UPI, HDFC, ICICI, SBI, PNB, BoB, Central Bank, Indian Bank, Jio Payments Bank</p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export const Hero: React.FC = () => {
 
       {/* 3. How It Works Section */}
       <section className="py-24 md:py-32 bg-bg-surface/40 border-b border-border relative overflow-hidden">
-        <div className="absolute top-1/2 right-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand/5 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 right-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand/5 blur-[6.25rem] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4 mb-20">

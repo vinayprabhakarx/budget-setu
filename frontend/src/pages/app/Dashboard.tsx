@@ -519,7 +519,7 @@ export const Dashboard: React.FC = () => {
                             }}
                           />
                         </div>
-                        <div className="flex justify-between items-center pt-1 text-[11px]">
+                        <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
                           <span
                             className={`font-semibold ${progressPercent >= 100 ? "text-expense" : progressPercent >= 75 ? "text-warning" : "text-income"}`}
                           >

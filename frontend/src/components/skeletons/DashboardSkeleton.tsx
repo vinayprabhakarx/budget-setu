@@ -22,7 +22,7 @@ export const DashboardChartsSkeleton: React.FC = () => (
     <div className="card lg:col-span-5 flex flex-col min-h-[22.5rem]">
       <div className="h-5 bg-bg-muted rounded w-40 mb-4"></div>
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-44 h-44 rounded-full border-[16px] border-bg-muted"></div>
+        <div className="w-44 h-44 rounded-full border-[1rem] border-bg-muted"></div>
       </div>
     </div>
 
@@ -40,7 +40,7 @@ export const DashboardActiveBudgetsSkeleton: React.FC = () => (
     <div className="h-5 bg-bg-muted rounded w-40"></div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="card p-5 border border-border flex flex-col h-full min-h-[140px]">
+        <div key={i} className="card p-5 border border-border flex flex-col h-full min-h-[8.75rem]">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 mb-2">

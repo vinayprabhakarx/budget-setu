@@ -155,10 +155,10 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-bg-surface border-b border-border z-50 flex items-center justify-between px-4">
         <Link
           to="/dashboard"
-          className="flex items-center gap-2 font-display text-text-primary text-2xl font-medium tracking-tight select-none"
+          className="flex items-start gap-2 font-display text-text-primary text-2xl font-medium tracking-tight select-none"
         >
           <span>BudgetSetu</span>
-          <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
+          <span className="text-xl font-bold text-brand font-sans" title="Beta">β</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -226,12 +226,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
       {/* Desktop Topbar */}
       <header className="hidden lg:flex items-center justify-between h-16 w-full fixed top-0 left-0 bg-bg-surface border-b border-border px-8 z-40">
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-2 font-display text-text-primary text-2xl lg:text-3xl tracking-tight select-none"
-        >
+        <Link to="/" className="font-display text-text-primary text-xl md:text-2xl tracking-tight flex items-start gap-2">
           <span>BudgetSetu</span>
-          <span className="ml-1 text-xl font-bold text-brand font-sans" title="Beta">β</span>
+          <span className="text-xl font-bold text-brand font-sans" title="Beta">β</span>
         </Link>
 
         <div className="flex items-center gap-4">

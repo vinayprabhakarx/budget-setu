@@ -25,8 +25,9 @@ public class BudgetSetuBackendApplication {
 	public static void loadEnv() {
 		try {
 			String profile = System.getenv("SPRING_PROFILES_ACTIVE");
-			if (profile == null) profile = System.getProperty("spring.profiles.active");
-			
+			if (profile == null)
+				profile = System.getProperty("spring.profiles.active");
+
 			String envFileName = (profile != null && profile.contains("prod")) ? ".env.production" : ".env";
 			java.nio.file.Path envPath = Paths.get(envFileName).toAbsolutePath();
 			System.out.println("BudgetSetu Env Loader: Looking for " + envFileName + " file at: " + envPath);
@@ -50,9 +51,12 @@ public class BudgetSetuBackendApplication {
 						}
 						System.setProperty(key, value);
 						// Map to Spring Boot standard keys
-						if ("POSTGRES_URL".equals(key)) System.setProperty("spring.datasource.url", value);
-						if ("POSTGRES_USER".equals(key)) System.setProperty("spring.datasource.username", value);
-						if ("POSTGRES_PASSWORD".equals(key)) System.setProperty("spring.datasource.password", value);
+						if ("POSTGRES_URL".equals(key))
+							System.setProperty("spring.datasource.url", value);
+						if ("POSTGRES_USER".equals(key))
+							System.setProperty("spring.datasource.username", value);
+						if ("POSTGRES_PASSWORD".equals(key))
+							System.setProperty("spring.datasource.password", value);
 						if ("MONGODB_URI".equals(key)) {
 							System.setProperty("spring.data.mongodb.uri", value);
 							System.setProperty("spring.mongodb.uri", value);
@@ -64,6 +68,10 @@ public class BudgetSetuBackendApplication {
 						if ("REDIS_HOST".equals(key)) {
 							System.setProperty("spring.data.redis.host", value);
 							System.setProperty("spring.redis.host", value);
+						}
+						if ("REDIS_URL".equals(key)) {
+							System.setProperty("spring.data.redis.url", value);
+							System.setProperty("spring.redis.url", value);
 						}
 						if ("REDIS_PORT".equals(key)) {
 							System.setProperty("spring.data.redis.port", value);
@@ -77,10 +85,14 @@ public class BudgetSetuBackendApplication {
 							System.setProperty("spring.data.redis.password", value);
 							System.setProperty("spring.redis.password", value);
 						}
-						if ("MAIL_HOST".equals(key)) System.setProperty("spring.mail.host", value);
-						if ("MAIL_PORT".equals(key)) System.setProperty("spring.mail.port", value);
-						if ("MAIL_USERNAME".equals(key)) System.setProperty("spring.mail.username", value);
-						if ("MAIL_PASSWORD".equals(key)) System.setProperty("spring.mail.password", value);
+						if ("MAIL_HOST".equals(key))
+							System.setProperty("spring.mail.host", value);
+						if ("MAIL_PORT".equals(key))
+							System.setProperty("spring.mail.port", value);
+						if ("MAIL_USERNAME".equals(key))
+							System.setProperty("spring.mail.username", value);
+						if ("MAIL_PASSWORD".equals(key))
+							System.setProperty("spring.mail.password", value);
 						System.out.println("BudgetSetu Env Loader: Set property: " + key);
 					}
 				}
@@ -92,4 +104,3 @@ public class BudgetSetuBackendApplication {
 		}
 	}
 }
-

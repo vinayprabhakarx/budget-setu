@@ -5,7 +5,7 @@
 backend/.env
 backend/.env.production
 scripts/
-internal_docs/
+docs_internal/
 # ─── IDE ──────────────────────────────────────────────
 .idea/
 .vscode/

@@ -19,11 +19,6 @@ Thumbs.db
 .git/
 .gitignore
 
-# Maven
-.mvn/
-mvnw
-mvnw.cmd
-
 # Environment files (secrets should not be in image)
 .env
 .env.production
@@ -36,11 +31,6 @@ docs/
 
 # GitHub workflows (not needed in image)
 .github/
-
-# Source code (not needed after build)
-src/
-pom.xml
-pom.xml.releaseBackup
 
 # Logs
 *.log

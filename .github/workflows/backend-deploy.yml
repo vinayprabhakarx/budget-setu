@@ -8,7 +8,6 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-deploy.yml'
-      - 'docker-compose.yml'
   pull_request:
     branches:
       - main
@@ -21,34 +20,7 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/budgetsetu-backend
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    name: Build Application
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 25
-        uses: actions/setup-java@v4
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Build JAR (skip tests)
-        working-directory: ./backend
-        run: ./mvnw clean package -DskipTests
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/backend-*.jar
-          retention-days: 5
-
   docker-build:
-    needs: build
     runs-on: ubuntu-latest
     name: Build & Push Docker Image
     permissions:
@@ -100,19 +72,20 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'backend'
+          scan-type: 'image'
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           format: 'sarif'
           output: 'trivy-results.sarif'
+        env:
+          TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -123,9 +96,6 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment..."
@@ -138,9 +108,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to Oracle Cloud Instance
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
@@ -154,20 +121,85 @@ jobs:
           echo "$ORACLE_SSH_KEY" > private_key
           chmod 600 private_key
           
-          # Execute deployment commands directly on the server
-          ssh -i private_key -o StrictHostKeyChecking=no "$ORACLE_USER@$ORACLE_HOST" "
-            echo '$REGISTRY_PASSWORD' | docker login -u '$REGISTRY_USERNAME' --password-stdin
+          # Write the Docker Hub password to a temp file (avoids bash history leak)
+          echo "$REGISTRY_PASSWORD" > docker_token.txt
+          
+          # Copy the token file to the server securely
+          scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
+          
+          # Execute deployment commands on the server
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
+            set -e
+            
+            # Login to Docker Hub securely (token from file, not command line)
+            cat /tmp/docker_token.txt | docker login -u "$REGISTRY_USERNAME" --password-stdin
+            rm -f /tmp/docker_token.txt
+            
+            # Pull the latest image
             docker pull $DOCKER_IMAGE
+            
+            # Stop and remove the old container
             docker stop budgetsetu-backend || true
             docker rm budgetsetu-backend || true
-            docker run -d --name budgetsetu-backend --restart unless-stopped -p 8080:8080 --env-file /home/ubuntu/.env.production -v /var/log/budgetsetu:/app/logs -u vinay $DOCKER_IMAGE
-          "
+            
+            # Start the new container
+            docker run -d \
+              --name budgetsetu-backend \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              --env-file /home/ubuntu/.env.production \
+              -v /var/log/budgetsetu:/app/logs \
+              $DOCKER_IMAGE
+            
+            # Cleanup old unused images to save disk space
+            docker image prune -f
+          DEPLOY_EOF
           
-          # Clean up local key
-          rm private_key
+          # Clean up local files
+          rm -f private_key docker_token.txt
+
+      - name: Verify deployment health
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ubuntu
+          ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
+        run: |
+          echo "$ORACLE_SSH_KEY" > private_key
+          chmod 600 private_key
+          
+          echo "Waiting 20s for application to start..."
+          sleep 20
+          
+          # Check if the container is running and healthy
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
+            set -e
+            
+            # Check container status
+            CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' budgetsetu-backend 2>/dev/null || echo "not_found")
+            echo "Container status: $CONTAINER_STATUS"
+            
+            if [ "$CONTAINER_STATUS" != "running" ]; then
+              echo "ERROR: Container is not running!"
+              docker logs --tail 50 budgetsetu-backend 2>&1 || true
+              exit 1
+            fi
+            
+            # Check health endpoint
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/health || echo "000")
+            echo "Health endpoint returned: $HTTP_STATUS"
+            
+            if [ "$HTTP_STATUS" != "200" ]; then
+              echo "WARNING: Health check returned non-200. Container logs:"
+              docker logs --tail 30 budgetsetu-backend 2>&1 || true
+            else
+              echo "Deployment verified successfully!"
+            fi
+          HEALTH_EOF
+          
+          rm -f private_key
 
   notify:
-    needs: [build, docker-build, security-scan]
+    needs: [docker-build, security-scan]
     runs-on: ubuntu-latest
     name: Notify Status
     if: always()
@@ -175,7 +207,7 @@ jobs:
     steps:
       - name: Determine status
         run: |
-          if [ "${{ needs.build.result }}" == "failure" ] || [ "${{ needs.docker-build.result }}" == "failure" ]; then
+          if [ "${{ needs.docker-build.result }}" == "failure" ]; then
             echo "Pipeline failed!"
             exit 1
           fi

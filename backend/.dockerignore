@@ -1,0 +1,47 @@
+# Maven build files and directories
+target/
+*.jar
+*.war
+
+# IDE and editor files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Environment files (secrets should not be in image)
+.env
+.env.production
+.env.local
+*.env
+
+# Documentation
+README.md
+docs/
+
+# GitHub workflows (not needed in image)
+.github/
+
+# Source code (not needed after build)
+src/
+pom.xml
+pom.xml.releaseBackup
+
+# Logs
+*.log
+logs/

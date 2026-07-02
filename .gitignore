@@ -4,7 +4,8 @@
 *.env.local
 backend/.env
 backend/.env.production
-
+scripts/
+internal_docs/
 # ─── IDE ──────────────────────────────────────────────
 .idea/
 .vscode/
@@ -35,6 +36,10 @@ frontend/coverage/
 .codex/
 scratch/
 git_tracked_files.txt
-internal_docs/
 bank_statements/
 uploads/
+
+# ─── Deployment Scripts ────────────────────────────────
+scripts/*.pem
+scripts/*.key
+scripts/oracle-key*

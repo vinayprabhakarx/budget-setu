@@ -406,7 +406,7 @@ export const AdminOverview: React.FC = () => {
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', borderRadius: '0.5rem' }}
                   labelFormatter={(val) => new Date(val).toLocaleDateString()}
-                  formatter={(value: number) => typeof value === 'number' ? value.toFixed(2) : value}
+                  formatter={(value: any) => typeof value === 'number' ? value.toFixed(2) : value}
                 />
                 
                 <Area yAxisId="left" type="monotone" name="CPU Usage (%)" dataKey="avgCpu" stroke="var(--color-info)" strokeWidth={3} fillOpacity={1} fill="url(#colorCpu)" />

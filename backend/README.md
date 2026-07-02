@@ -42,8 +42,8 @@ JWT_EXPIRATION_MS=900000
 # Mail Server Configurations
 MAIL_HOST=smtp.mailgun.org
 MAIL_PORT=587
-MAIL_USERNAME=<mailgun_username>
-MAIL_PASSWORD=<mailgun_password>
+MAIL_USERNAME=""
+MAIL_PASSWORD=""
 MAIL_FROM_EMAIL=no-reply@budgetsetu.app
 ```
 

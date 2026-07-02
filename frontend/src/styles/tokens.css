@@ -104,6 +104,12 @@
   --ease-enter:     cubic-bezier(0, 0, 0.2, 1);
   --ease-exit:      cubic-bezier(0.4, 0, 1, 1);
 
+  /* ── Ambient Glow ──────────────────────────────────────── */
+  --glow-ambient-rgb:      46 196 182;
+  --glow-ambient-opacity:  0.06;
+  --glow-ambient-stop:     75%;
+  --glow-ambient-height:   32rem;
+
   /* ── Category Colors — Fixed, same in both themes ──────── */
   --color-cat-food:          #C2693A;   /* muted orange-brown */
   --color-cat-transport:     #4A7FA5;   /* muted slate blue */

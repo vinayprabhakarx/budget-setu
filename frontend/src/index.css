@@ -487,6 +487,20 @@ input[type="number"] {
   to   { background-position: -200% 0; }
 }
 @layer utilities {
+  .ambient-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--glow-ambient-height);
+    background: radial-gradient(
+      ellipse at top,
+      rgb(var(--glow-ambient-rgb) / var(--glow-ambient-opacity)),
+      transparent var(--glow-ambient-stop)
+    );
+    pointer-events: none;
+  }
+
   .bg-income { background-color: var(--color-income); }
   .bg-success { background-color: var(--color-success); }
   .bg-warning { background-color: var(--color-warning); }

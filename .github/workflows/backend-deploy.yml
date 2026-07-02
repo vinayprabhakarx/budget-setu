@@ -6,14 +6,14 @@ on:
       - main
       - develop
     paths:
-      - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
+      - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'backend/**'
+      - "backend/**"
 
 env:
   REGISTRY: docker.io
@@ -70,24 +70,27 @@ jobs:
     runs-on: ubuntu-latest
     name: Security Scan
     if: github.event_name == 'push'
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'image'
+          scan-type: "image"
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
         env:
           TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   deploy-staging:
     needs: docker-build
@@ -120,13 +123,13 @@ jobs:
           # Save the private key to a file
           echo "$ORACLE_SSH_KEY" > private_key
           chmod 600 private_key
-          
+
           # Write the Docker Hub password to a temp file (avoids bash history leak)
           echo "$REGISTRY_PASSWORD" > docker_token.txt
-          
+
           # Copy the token file to the server securely
           scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
-          
+
           # Execute deployment commands on the server
           ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
             set -e
@@ -154,7 +157,7 @@ jobs:
             # Cleanup old unused images to save disk space
             docker image prune -f
           DEPLOY_EOF
-          
+
           # Clean up local files
           rm -f private_key docker_token.txt
 
@@ -166,10 +169,10 @@ jobs:
         run: |
           echo "$ORACLE_SSH_KEY" > private_key
           chmod 600 private_key
-          
+
           echo "Waiting 20s for application to start..."
           sleep 20
-          
+
           # Check if the container is running and healthy
           ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
             set -e
@@ -195,7 +198,7 @@ jobs:
               echo "Deployment verified successfully!"
             fi
           HEALTH_EOF
-          
+
           rm -f private_key
 
   notify:

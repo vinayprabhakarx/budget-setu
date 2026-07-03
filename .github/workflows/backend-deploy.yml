@@ -65,18 +65,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-staging:
-    needs: docker-build
-    runs-on: ubuntu-latest
-    name: Deploy to Staging
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-
-    steps:
-      - name: Deploy to staging
-        run: |
-          echo "Deploying to staging environment..."
-          echo "Staging deployment placeholder"
-
   deploy-oracle-production:
     needs: docker-build
     runs-on: ubuntu-latest

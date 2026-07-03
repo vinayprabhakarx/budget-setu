@@ -92,7 +92,7 @@ jobs:
           scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
 
           # Execute deployment commands on the server
-          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
             set -e
             
             # Stop and remove the old container first to free up memory on 1GB RAM Oracle Free Tier
@@ -105,9 +105,9 @@ jobs:
             cat /tmp/docker_token.txt | docker login -u "$REGISTRY_USERNAME" --password-stdin
             rm -f /tmp/docker_token.txt
             
-            # Pull the latest image with maximum free memory
+            # Pull the latest image in quiet mode to prevent terminal I/O flood and CPU spikes
             echo "Pulling latest image..."
-            docker pull $DOCKER_IMAGE
+            docker pull -q $DOCKER_IMAGE
             
             # Start the new container
             docker run -d \
@@ -138,7 +138,7 @@ jobs:
           sleep 20
 
           # Check if the container is running and healthy
-          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
             set -e
             
             # Check container status

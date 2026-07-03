@@ -2,7 +2,6 @@ package com.budgetsetu.config;
 
 import com.budgetsetu.model.sql.User;
 import com.budgetsetu.repository.sql.UserRepository;
-import com.budgetsetu.service.MailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +17,6 @@ public class AdminInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired(required = false)
-    private MailService mailService;
 
     @Autowired(required = false)
     private StringRedisTemplate redisTemplate;

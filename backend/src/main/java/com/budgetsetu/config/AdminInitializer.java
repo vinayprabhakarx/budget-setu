@@ -3,10 +3,8 @@ package com.budgetsetu.config;
 import com.budgetsetu.model.sql.User;
 import com.budgetsetu.repository.sql.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,9 +15,6 @@ public class AdminInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired(required = false)
-    private StringRedisTemplate redisTemplate;
 
     @Value("${app.admin.email:try.vinayprabhakar@gmail.com}")
     private String adminEmail;

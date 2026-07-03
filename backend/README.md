@@ -11,7 +11,7 @@ The BudgetSetu backend is a robust personal finance management application built
 - **Document Store:** MongoDB 7 (for append-only Audit Trails and Import logs)
 - **Cache / Session Store:** Redis 7
 - **Authentication:** JWT (Stateless Bearer Tokens)
-- **Notification Services:** JavaMailSender (integrated with Mailgun SMTP)
+- **Notification Services:** Resend REST API (HTTP API)
 
 ---
 
@@ -19,32 +19,31 @@ The BudgetSetu backend is a robust personal finance management application built
 The server loads environment variables from a `.env` file located in the root of the `backend` directory. Configure these variables for proper operation:
 
 ```env
-# Relational Database (PostgreSQL)
-POSTGRES_URL=jdbc:postgresql://<host>:<port>/<db_name>?sslmode=require
-POSTGRES_USER=<user>
-POSTGRES_PASSWORD=<password>
-POSTGRES_DB=<db_name>
+# Spring Profile
+SPRING_PROFILES_ACTIVE=dev
+
+# Relational Database (PostgreSQL / Supabase)
+# Paste a single connection URI (e.g., postgresql://user:pass@host:port/dbname?sslmode=require)
+POSTGRES_URL=jdbc:postgresql://<host>:5432/<db_name>?sslmode=require
 
 # Document Database (MongoDB Atlas)
-MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/
-MONGODB_DATABASE=budgetsetu
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<db_name>?appName=<app_name>
 
-# Cache & Rate Limiting (Redis)
-REDIS_HOST=<redis_host>
-REDIS_PORT=6379
-REDIS_USERNAME=default
-REDIS_PASSWORD=<redis_password>
+# Cache & Rate Limiting (Redis / Upstash)
+REDIS_URL=rediss://default:<password>@<redis_host>:6379
 
 # JWT Security Configurations
 JWT_SECRET=<at_least_64_char_HS512_secret_key>
 JWT_EXPIRATION_MS=900000
 
-# Mail Server Configurations
-MAIL_HOST=smtp.mailgun.org
-MAIL_PORT=587
-MAIL_USERNAME=""
-MAIL_PASSWORD=""
-MAIL_FROM_EMAIL=no-reply@budgetsetu.app
+# Email Notification Service (Resend REST API)
+RESEND_API_KEY=""
+RESEND_FROM_EMAIL=onboarding@resend.dev
+
+# Admin Account Initialization
+# Seeds an administrator account automatically on first startup
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=<your_secure_admin_password>
 ```
 
 ---

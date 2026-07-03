@@ -7,69 +7,65 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${app.resend.api-key:}")
+    private String resendApiKey;
 
-    @Value("${app.mailgun.api-key}")
-    private String apiKey;
-
-    @Value("${app.mailgun.domain}")
-    private String domain;
-
-    @Value("${app.mailgun.from-email}")
+    @Value("${app.resend.from-email:onboarding@resend.dev}")
     private String fromEmail;
 
-    public void sendEmail(String to, String subject, String body) {
-        if (apiKey == null || apiKey.trim().isEmpty() || domain == null || domain.trim().isEmpty()) {
-            log.warn("Mailgun API key or domain is not configured. Falling back to SMTP.");
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(fromEmail);
-                message.setTo(to);
-                message.setSubject(subject);
-                message.setText(body);
-                mailSender.send(message);
-                log.info("Email sent successfully via SMTP to {} with subject: {}", to, subject);
-            } catch (Exception e) {
-                log.error("Failed to send email via SMTP to {} with subject: {}", to, subject, e);
-            }
-            return;
+    public boolean isConfigured() {
+        return resendApiKey != null && !resendApiKey.trim().isEmpty();
+    }
+
+    public boolean sendEmail(String to, String subject, String body) {
+        if (!isConfigured()) {
+            log.warn("Resend API key (RESEND_API_KEY) is not configured. Email to {} with subject '{}' was suppressed.", to, subject);
+            return false;
         }
 
         try {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.setBasicAuth("api", apiKey);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String cleanApiKey = resendApiKey.replace("\"", "").replace("'", "").trim();
+            headers.setBearerAuth(cleanApiKey);
+            headers.set("User-Agent", "BudgetSetu/1.0 (Java/Spring Boot)");
 
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("from", fromEmail);
-            map.add("to", to);
-            map.add("subject", subject);
-            map.add("text", body);
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", fromEmail);
+            payload.put("to", Collections.singletonList(to));
+            payload.put("subject", subject);
+            payload.put("text", body);
+            payload.put("html", "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">" + 
+                    body.replace("\n", "<br/>") + "</div>");
 
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-            String url = "https://api.mailgun.net/v3/" + domain + "/messages";
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            String url = "https://api.resend.com/emails";
 
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Email sent successfully via Mailgun API to {} with subject: {}", to, subject);
+                log.info("Email sent successfully via Resend API to {} with subject: {}", to, subject);
+                return true;
             } else {
-                log.error("Failed to send email via Mailgun API to {} with subject: {}. Response: {}", to, subject, response.getBody());
+                log.error("Failed to send email via Resend API to {} with subject: {}. Response: {}", to, subject, response.getBody());
+                return false;
             }
         } catch (Exception e) {
-            log.error("Failed to send email via Mailgun API to {} with subject: {}", to, subject, e);
+            log.error("Failed to send email via Resend API to {} with subject: {}", to, subject, e);
+            return false;
         }
     }
 }
+

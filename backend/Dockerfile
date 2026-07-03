@@ -1,21 +1,4 @@
-# Multi-stage build for Spring Boot backend
-
-# Stage 1: Build stage
-FROM maven:3.9-eclipse-temurin-25 AS builder
-
-WORKDIR /app
-
-# Copy pom.xml and download dependencies (layer caching)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source code
-COPY src ./src
-
-# Build the application
-RUN mvn clean package -DskipTests
-
-# Stage 2: Runtime stage
+# Simple single-stage runtime Dockerfile for Spring Boot backend
 FROM eclipse-temurin:25-jre-noble
 
 WORKDIR /app
@@ -23,8 +6,8 @@ WORKDIR /app
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
-# Copy JAR from builder stage
-COPY --from=builder /app/target/*.jar app.jar
+# Copy pre-compiled JAR from target directory
+COPY target/*.jar app.jar
 
 # Create logs directory
 RUN mkdir -p /app/logs

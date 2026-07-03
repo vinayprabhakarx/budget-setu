@@ -4,9 +4,9 @@ spring:
 
   # ── PostgreSQL ──────────────────────────────────────────
   datasource:
-    url: ${POSTGRES_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: ${POSTGRES_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/budgetsetu}}
+    username: ${POSTGRES_USER:}
+    password: ${POSTGRES_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -28,16 +28,11 @@ spring:
 
   # ── MongoDB ─────────────────────────────────────────────
   mongodb:
-    uri: ${MONGODB_URI}
-    database: ${MONGODB_DATABASE}
+    uri: ${spring.data.mongodb.uri:${MONGODB_URI:mongodb://localhost:27017/budgetsetu_docs}}
 
   # ── Redis ───────────────────────────────────────────────
   redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    username: ${REDIS_USERNAME}
-    password: ${REDIS_PASSWORD}
-
+    url: ${spring.data.redis.url:${REDIS_URL:redis://localhost:6379}}
 
   # ── Flyway ──────────────────────────────────────────────
   flyway:
@@ -52,19 +47,6 @@ spring:
       max-file-size: 20MB
       max-request-size: 25MB
 
-  # ── Mailgun SMTP ────────────────────────────────────────
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
 
 # ── Server ──────────────────────────────────────────────
 server:
@@ -87,13 +69,9 @@ app:
     access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS}
     refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS}
 
-
-
-  mailgun:
-    api-key: ${MAILGUN_API_KEY}
-    sending-key: ${MAILGUN_SENDING_KEY}
-    domain: ${MAILGUN_DOMAIN}
-    from-email: ${MAIL_FROM_EMAIL}
+  resend:
+    api-key: ${RESEND_API_KEY:}
+    from-email: ${RESEND_FROM_EMAIL:${MAIL_FROM_EMAIL:onboarding@resend.dev}}
 
   statement:
     storage-prefix: statements/

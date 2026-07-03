@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.beans.factory.annotation.Value;
+import com.budgetsetu.service.MailService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,20 +37,15 @@ public class HealthController {
     private StringRedisTemplate redisTemplate;
 
     @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private MailService mailService;
+
+    @Value("${app.admin.email:test.vinayprabhakar@gmail.com}")
+    private String adminEmail;
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
-        return ResponseEntity.ok(Map.of(
-                "status", "UP",
-                "service", "budgetsetu-backend",
-                "timestamp", Instant.now().toString()
-        ));
-    }
-
-    @GetMapping("/health/diagnostics")
-    public ResponseEntity<Map<String, Object>> diagnostics(@RequestParam(value = "email", required = false) String emailToTest) {
         Map<String, Object> results = new LinkedHashMap<>();
+        results.put("service", "budget-setu");
         results.put("timestamp", Instant.now().toString());
 
         // 1. Test PostgreSQL (Supabase)
@@ -65,7 +60,7 @@ public class HealthController {
             results.put("postgresql", Map.of("status", "FAILED", "error", e.getMessage()));
         }
 
-        // 2. Test MongoDB (Atlas)
+        // 2. Test MongoDB (MongoDB Atlas)
         try {
             if (mongoTemplate != null) {
                 org.bson.Document pingResult = mongoTemplate.getDb().runCommand(new org.bson.Document("ping", 1));
@@ -92,26 +87,15 @@ public class HealthController {
             results.put("redis", Map.of("status", "FAILED", "error", e.getMessage()));
         }
 
-        // 4. Test Mail (Mailgun SMTP)
+        // 4. Test Mail (Resend API configuration check without sending emails)
         try {
-            if (mailSender != null) {
-                if (emailToTest != null && !emailToTest.trim().isEmpty()) {
-                    SimpleMailMessage message = new SimpleMailMessage();
-                    message.setFrom("no-reply@vinayprabhakar.dev");
-                    message.setTo(emailToTest);
-                    message.setSubject("BudgetSetu Connection Test");
-                    message.setText("Congratulations! Your Mailgun SMTP email integration works perfectly with Spring Boot.");
-                    mailSender.send(message);
-                    results.put("mail", Map.of("status", "CONNECTED", "real_test_email_sent_to", emailToTest));
-                } else {
-                    // Just verify we can instantiate and ping configuration
-                    results.put("mail", Map.of("status", "CONFIGURED", "note", "Provide 'email' query parameter to send a real test mail."));
-                }
+            if (mailService != null && mailService.isConfigured()) {
+                results.put("mail", Map.of("status", "CONNECTED", "provider", "Resend API"));
             } else {
-                results.put("mail", Map.of("status", "NOT_CONFIGURED"));
+                results.put("mail", Map.of("status", "NOT_CONFIGURED", "provider", "Resend API"));
             }
         } catch (Exception e) {
-            results.put("mail", Map.of("status", "FAILED", "error", e.getMessage()));
+            results.put("mail", Map.of("status", "FAILED", "provider", "Resend API", "error", e.getMessage()));
         }
 
         boolean allOk = results.values().stream()
@@ -119,6 +103,7 @@ public class HealthController {
                 .map(val -> (Map<?, ?>) val)
                 .noneMatch(map -> "FAILED".equals(map.get("status")));
 
+        results.put("status", allOk ? "UP" : "DEGRADED");
         results.put("overall_status", allOk ? "ALL_OK" : "DEGRADED");
 
         return ResponseEntity.ok(results);

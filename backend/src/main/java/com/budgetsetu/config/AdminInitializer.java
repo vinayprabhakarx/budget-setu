@@ -12,8 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
-
 @Component
 @Slf4j
 public class AdminInitializer implements CommandLineRunner {

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.budgetsetu.service.MailService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -23,7 +22,8 @@ import java.util.Map;
 @RequestMapping("/api")
 /**
  * REST Controller for application health monitoring.
- * Provides basic liveness checks and deep diagnostic checks across all integrated services (DB, Redis, Email).
+ * Provides basic liveness checks and deep diagnostic checks across all
+ * integrated services (DB, Redis, Email).
  */
 public class HealthController {
 
@@ -79,7 +79,8 @@ public class HealthController {
                 redisTemplate.opsForValue().set(testKey, "working");
                 String val = redisTemplate.opsForValue().get(testKey);
                 redisTemplate.delete(testKey);
-                results.put("redis", Map.of("status", "CONNECTED", "read_write_check", "working".equals(val) ? "OK" : "FAILED"));
+                results.put("redis",
+                        Map.of("status", "CONNECTED", "read_write_check", "working".equals(val) ? "OK" : "FAILED"));
             } else {
                 results.put("redis", Map.of("status", "NOT_CONFIGURED"));
             }
@@ -109,4 +110,3 @@ public class HealthController {
         return ResponseEntity.ok(results);
     }
 }
-

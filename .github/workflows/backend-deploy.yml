@@ -107,16 +107,19 @@ jobs:
           ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
             set -e
             
+            # Stop and remove the old container first to free up memory on 1GB RAM Oracle Free Tier
+            echo "Stopping old container to free RAM before image pull..."
+            docker stop budgetsetu-backend || true
+            docker rm budgetsetu-backend || true
+            docker system prune -af || true
+            
             # Login to Docker Hub securely (token from file, not command line)
             cat /tmp/docker_token.txt | docker login -u "$REGISTRY_USERNAME" --password-stdin
             rm -f /tmp/docker_token.txt
             
-            # Pull the latest image
+            # Pull the latest image with maximum free memory
+            echo "Pulling latest image..."
             docker pull $DOCKER_IMAGE
-            
-            # Stop and remove the old container
-            docker stop budgetsetu-backend || true
-            docker rm budgetsetu-backend || true
             
             # Start the new container
             docker run -d \

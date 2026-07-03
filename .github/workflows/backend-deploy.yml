@@ -17,7 +17,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/budgetsetu-backend
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/budget-setu
 
 jobs:
   docker-build:
@@ -30,6 +30,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -59,6 +62,7 @@ jobs:
         with:
           context: ./backend
           file: ./backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -122,8 +126,8 @@ jobs:
               --name budget-setu \
               --restart unless-stopped \
               -p 8080:8080 \
-              --env-file /home/ubuntu/.env.production \
-              -v /var/log/budgetsetu:/app/logs \
+              --env-file /home/ubuntu/budget-setu/.env.production \
+              -v /home/ubuntu/budget-setu/logs:/app/logs \
               $DOCKER_IMAGE
             
             # Cleanup old unused images to save disk space

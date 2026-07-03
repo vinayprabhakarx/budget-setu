@@ -89,7 +89,7 @@ jobs:
           echo "$REGISTRY_PASSWORD" > docker_token.txt
 
           # Copy the token file to the server securely
-          scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
+          scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
 
           # Execute deployment commands on the server
           ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
@@ -97,9 +97,17 @@ jobs:
             
             # Stop and remove the old container first to free up memory on 1GB RAM Oracle Free Tier
             echo "Stopping old container to free RAM before image pull..."
-            docker stop budgetsetu-backend || true
-            docker rm budgetsetu-backend || true
+            docker stop budget-setu budgetsetu-backend || true
+            docker rm budget-setu budgetsetu-backend || true
             docker system prune -af || true
+            
+            # Configure Docker daemon for 1GB RAM Oracle Free Tier (limit concurrent layer downloads to 1 to prevent OOM / CPU freeze)
+            if [ ! -f /etc/docker/daemon.json ] || ! grep -q "max-concurrent-downloads" /etc/docker/daemon.json 2>/dev/null; then
+              echo "Configuring Docker daemon max-concurrent-downloads=1 to prevent OOM/CPU freeze..."
+              sudo mkdir -p /etc/docker
+              echo '{"max-concurrent-downloads": 1, "max-concurrent-uploads": 1}' | sudo tee /etc/docker/daemon.json > /dev/null
+              sudo systemctl reload docker || sudo systemctl restart docker
+            fi
             
             # Login to Docker Hub securely (token from file, not command line)
             cat /tmp/docker_token.txt | docker login -u "$REGISTRY_USERNAME" --password-stdin
@@ -111,7 +119,7 @@ jobs:
             
             # Start the new container
             docker run -d \
-              --name budgetsetu-backend \
+              --name budget-setu \
               --restart unless-stopped \
               -p 8080:8080 \
               --env-file /home/ubuntu/.env.production \
@@ -142,12 +150,12 @@ jobs:
             set -e
             
             # Check container status
-            CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' budgetsetu-backend 2>/dev/null || echo "not_found")
+            CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' budget-setu 2>/dev/null || echo "not_found")
             echo "Container status: $CONTAINER_STATUS"
             
             if [ "$CONTAINER_STATUS" != "running" ]; then
               echo "ERROR: Container is not running!"
-              docker logs --tail 50 budgetsetu-backend 2>&1 || true
+              docker logs --tail 50 budget-setu 2>&1 || true
               exit 1
             fi
             
@@ -157,7 +165,7 @@ jobs:
             
             if [ "$HTTP_STATUS" != "200" ]; then
               echo "WARNING: Health check returned non-200. Container logs:"
-              docker logs --tail 30 budgetsetu-backend 2>&1 || true
+              docker logs --tail 30 budget-setu 2>&1 || true
             else
               echo "Deployment verified successfully!"
             fi

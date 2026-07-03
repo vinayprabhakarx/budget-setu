@@ -1,16 +1,17 @@
-# Simple single-stage runtime Dockerfile for Spring Boot backend
-FROM eclipse-temurin:25-jre-noble
+# Single-stage build and runtime Dockerfile for Spring Boot backend
+FROM maven:3.9-eclipse-temurin-25
 
 WORKDIR /app
 
-# Install curl for healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+# Copy pom.xml and download dependencies for caching
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# Copy pre-compiled JAR from target directory
-COPY target/*.jar app.jar
-
-# Create logs directory
-RUN mkdir -p /app/logs
+# Copy source code and compile inside container (no local JAR needed)
+COPY src ./src
+RUN mvn clean package -DskipTests && \
+    cp target/*.jar app.jar && \
+    mkdir -p /app/logs
 
 # Set environment variables
 ENV SPRING_PROFILES_ACTIVE=prod \

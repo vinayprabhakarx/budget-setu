@@ -1,0 +1,80 @@
+merchant_keyword,category_name
+swiggy,Food
+zomato,Food
+dominos,Food
+mcdonald,Food
+kfc,Food
+burger king,Food
+starbucks,Food
+barista,Food
+ccd,Food
+cafe coffee day,Food
+uber,Transport
+ola,Transport
+rapido,Transport
+irctc,Transport
+indian railway,Transport
+redbus,Transport
+petrol,Transport
+fuel,Transport
+hpcl,Transport
+bpcl,Transport
+indian oil,Transport
+amazon,Shopping
+flipkart,Shopping
+myntra,Shopping
+ajio,Shopping
+meesho,Shopping
+nykaa,Shopping
+netflix,Entertainment
+prime video,Entertainment
+hotstar,Entertainment
+spotify,Entertainment
+youtube premium,Entertainment
+airtel,Bills
+jio,Bills
+vodafone,Bills
+vi,Bills
+bsnl,Bills
+electricity board,Bills
+mseb,Bills
+bescom,Bills
+water board,Bills
+rent,Rent
+landlord,Rent
+paytm rent,Rent
+apollo pharmacy,Health
+pharmeasy,Health
+1mg,Health
+practo,Health
+hospital,Health
+clinic,Health
+zerodha,Investment
+groww,Investment
+upstox,Investment
+mutual fund,Investment
+sip,Investment
+lic,Investment
+policybazaar,Investment
+insurance,Investment
+byjus,Education
+udemy,Education
+coursera,Education
+unacademy,Education
+college fee,Education
+university,Education
+gym,Health
+cult fit,Health
+decathlon,Shopping
+bigbasket,Groceries
+blinkit,Groceries
+zepto,Groceries
+dmart,Groceries
+grofers,Groceries
+reliance fresh,Groceries
+atm,Other
+cash withdrawal,Other
+salary,Salary
+credited salary,Salary
+refund,Other
+cashback,Other

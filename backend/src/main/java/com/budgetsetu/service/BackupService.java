@@ -48,7 +48,8 @@ public class BackupService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
     private void verifyPassword(UUID userId, String password) {
         User user = userRepository.findById(userId)
@@ -97,7 +98,9 @@ public class BackupService {
             zipParameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
         }
 
-        try (ZipFile zipFile = (zipPassword != null && !zipPassword.isEmpty()) ? new ZipFile(zipFilePath.toFile(), zipPassword.toCharArray()) : new ZipFile(zipFilePath.toFile())) {
+        try (ZipFile zipFile = (zipPassword != null && !zipPassword.isEmpty())
+                ? new ZipFile(zipFilePath.toFile(), zipPassword.toCharArray())
+                : new ZipFile(zipFilePath.toFile())) {
             zipFile.addFile(accountsFile, zipParameters);
             zipFile.addFile(transactionsFile, zipParameters);
             zipFile.addFile(categoriesFile, zipParameters);
@@ -124,17 +127,18 @@ public class BackupService {
     }
 
     @Transactional
-    public RestoreSummary restoreWorkspace(UUID userId, MultipartFile file, String accountPassword, String zipPassword) throws IOException {
+    public RestoreSummary restoreWorkspace(UUID userId, MultipartFile file, String accountPassword, String zipPassword)
+            throws IOException {
         verifyPassword(userId, accountPassword);
 
         Path tempDir = Files.createTempDirectory("budgetsetu-restore");
         Path zipFilePath = tempDir.resolve("uploaded.zip");
         file.transferTo(zipFilePath.toFile());
 
-        try (ZipFile zipFile = (zipPassword != null && !zipPassword.isEmpty()) 
-                ? new ZipFile(zipFilePath.toFile(), zipPassword.toCharArray()) 
+        try (ZipFile zipFile = (zipPassword != null && !zipPassword.isEmpty())
+                ? new ZipFile(zipFilePath.toFile(), zipPassword.toCharArray())
                 : new ZipFile(zipFilePath.toFile())) {
-            
+
             if (!zipFile.isValidZipFile()) {
                 throw new RuntimeException("Invalid backup file format");
             }
@@ -147,12 +151,13 @@ public class BackupService {
                 zipFile.extractAll(tempDir.toString());
             }
         } catch (Exception e) {
-            if ("ZIP_PASSWORD_REQUIRED".equals(e.getMessage())) throw e;
+            if ("ZIP_PASSWORD_REQUIRED".equals(e.getMessage()))
+                throw e;
             throw new RuntimeException("Failed to extract backup file. Incorrect zip password?");
         }
 
         RestoreSummary summary = new RestoreSummary();
-        
+
         Map<UUID, UUID> accountIdMap = new HashMap<>();
         Map<UUID, UUID> categoryIdMap = new HashMap<>();
         Map<UUID, UUID> budgetPlanIdMap = new HashMap<>();
@@ -160,7 +165,8 @@ public class BackupService {
         // Parse and restore
         File accountsFile = new File(tempDir.toFile(), "accounts.json");
         if (accountsFile.exists()) {
-            List<Account> accounts = objectMapper.readValue(accountsFile, new TypeReference<List<Account>>() {});
+            List<Account> accounts = objectMapper.readValue(accountsFile, new TypeReference<List<Account>>() {
+            });
             for (Account acc : accounts) {
                 UUID oldId = acc.getId();
                 acc.setUserId(userId);
@@ -180,7 +186,8 @@ public class BackupService {
 
         File categoriesFile = new File(tempDir.toFile(), "categories.json");
         if (categoriesFile.exists()) {
-            List<Category> categories = objectMapper.readValue(categoriesFile, new TypeReference<List<Category>>() {});
+            List<Category> categories = objectMapper.readValue(categoriesFile, new TypeReference<List<Category>>() {
+            });
             for (Category cat : categories) {
                 UUID oldId = cat.getId();
                 if (cat.getUserId() != null) {
@@ -201,7 +208,9 @@ public class BackupService {
 
         File budgetPlansFile = new File(tempDir.toFile(), "budget_plans.json");
         if (budgetPlansFile.exists()) {
-            List<BudgetPlan> budgetPlans = objectMapper.readValue(budgetPlansFile, new TypeReference<List<BudgetPlan>>() {});
+            List<BudgetPlan> budgetPlans = objectMapper.readValue(budgetPlansFile,
+                    new TypeReference<List<BudgetPlan>>() {
+                    });
             for (BudgetPlan bp : budgetPlans) {
                 UUID oldId = bp.getId();
                 bp.setUserId(userId);
@@ -211,7 +220,7 @@ public class BackupService {
                         alloc.setCategoryId(categoryIdMap.getOrDefault(alloc.getCategoryId(), alloc.getCategoryId()));
                     }
                 }
-                
+
                 if (budgetPlanRepository.existsById(oldId)) {
                     BudgetPlan existing = budgetPlanRepository.findById(oldId).get();
                     // Custom copy logic because of nested collections
@@ -220,8 +229,8 @@ public class BackupService {
                     existing.setStartDate(bp.getStartDate());
                     existing.setEndDate(bp.getEndDate());
                     existing.setTotalAmount(bp.getTotalAmount());
-                    
-                    // Note: merging nested collections properly requires more logic, 
+
+                    // Note: merging nested collections properly requires more logic,
                     // for a fresh start/restore we will clear and add
                     existing.getAllocations().clear();
                     if (bp.getAllocations() != null) {
@@ -233,9 +242,10 @@ public class BackupService {
                     budgetPlanIdMap.put(oldId, oldId);
                 } else {
                     bp.setId(null);
-                    // Clear recursive parent from allocations to avoid detached entity passed to persist
+                    // Clear recursive parent from allocations to avoid detached entity passed to
+                    // persist
                     if (bp.getAllocations() != null) {
-                        for(BudgetAllocation alloc : bp.getAllocations()) {
+                        for (BudgetAllocation alloc : bp.getAllocations()) {
                             alloc.setId(null);
                             alloc.setBudgetPlan(bp);
                         }
@@ -250,7 +260,9 @@ public class BackupService {
 
         File recurringExpensesFile = new File(tempDir.toFile(), "recurring_expenses.json");
         if (recurringExpensesFile.exists()) {
-            List<RecurringExpense> recurringExpenses = objectMapper.readValue(recurringExpensesFile, new TypeReference<List<RecurringExpense>>() {});
+            List<RecurringExpense> recurringExpenses = objectMapper.readValue(recurringExpensesFile,
+                    new TypeReference<List<RecurringExpense>>() {
+                    });
             for (RecurringExpense re : recurringExpenses) {
                 re.setUserId(userId);
                 if (re.getCategoryId() != null) {
@@ -270,7 +282,8 @@ public class BackupService {
 
         File goalsFile = new File(tempDir.toFile(), "goals.json");
         if (goalsFile.exists()) {
-            List<Goal> goals = objectMapper.readValue(goalsFile, new TypeReference<List<Goal>>() {});
+            List<Goal> goals = objectMapper.readValue(goalsFile, new TypeReference<List<Goal>>() {
+            });
             for (Goal g : goals) {
                 g.setUserId(userId);
                 if (goalRepository.existsById(g.getId())) {
@@ -287,7 +300,9 @@ public class BackupService {
 
         File transactionsFile = new File(tempDir.toFile(), "transactions.json");
         if (transactionsFile.exists()) {
-            List<Transaction> transactions = objectMapper.readValue(transactionsFile, new TypeReference<List<Transaction>>() {});
+            List<Transaction> transactions = objectMapper.readValue(transactionsFile,
+                    new TypeReference<List<Transaction>>() {
+                    });
             for (Transaction t : transactions) {
                 t.setUserId(userId);
                 if (t.getAccountId() != null) {
@@ -310,7 +325,8 @@ public class BackupService {
 
         File rulesFile = new File(tempDir.toFile(), "rules.json");
         if (rulesFile.exists()) {
-            List<MerchantRule> rules = objectMapper.readValue(rulesFile, new TypeReference<List<MerchantRule>>() {});
+            List<MerchantRule> rules = objectMapper.readValue(rulesFile, new TypeReference<List<MerchantRule>>() {
+            });
             for (MerchantRule r : rules) {
                 r.setUserId(userId.toString());
                 merchantRuleRepository.save(r);

@@ -134,7 +134,8 @@ public class UserService {
             log.warn("Failed to delete rate limit keys for deleted user", e);
         }
 
-        // 3. Delete the user from the SQL database (cascade triggers database deletes for transactions, budgets, goals, refresh tokens, etc.)
+        // 3. Delete the user from the SQL database (cascade triggers database deletes
+        // for transactions, budgets, goals, refresh tokens, etc.)
         userRepository.deleteById(user.getId());
     }
 

@@ -12,11 +12,13 @@ import java.time.Instant;
 /**
  * Merchant-to-category mapping rule.
  * userId = null → system-wide rule applied to all users.
- * userId = set  → user-specific correction.
+ * userId = set → user-specific correction.
  */
 @Document(collection = "merchant_rules")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class MerchantRule {
 
@@ -27,10 +29,10 @@ public class MerchantRule {
     private String userId;
 
     private String merchantPattern;
-    private String matchType;       // EXACT, CONTAINS, STARTS_WITH
+    private String matchType; // EXACT, CONTAINS, STARTS_WITH
     private String categoryId;
     private String purposeSuggestion;
-    private String source;          // SYSTEM, USER
+    private String source; // SYSTEM, USER
 
     @CreatedDate
     private Instant createdAt;

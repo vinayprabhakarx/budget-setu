@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -52,12 +51,13 @@ public class ImportProcessingService {
     private final StatementParserService statementParserService;
     private final AuditService auditService;
     private final ImportProgressTracker progressTracker;
+    private final com.budgetsetu.security.AesUtil aesUtil;
 
     @Async
     public void processImportAsync(UUID importId, UUID userId, String password, byte[] key, byte[] iv) {
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
-                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userId, null, java.util.List.of())
-        );
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userId, null,
+                        java.util.List.of()));
         try {
             StatementImport statementImport = statementImportRepository.findById(importId).orElse(null);
             if (statementImport == null) {
@@ -74,7 +74,7 @@ public class ImportProcessingService {
                         .orElseThrow(() -> new IllegalStateException("This account could not be found."));
 
                 Path filePath = Path.of(statementImport.getFileUrl());
-                
+
                 javax.crypto.SecretKey secretKey = new javax.crypto.spec.SecretKeySpec(key, "AES");
                 javax.crypto.spec.IvParameterSpec ivSpec = new javax.crypto.spec.IvParameterSpec(iv);
                 javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -82,15 +82,15 @@ public class ImportProcessingService {
 
                 List<Map<String, String>> rawRows;
                 try (java.io.InputStream is = Files.newInputStream(filePath);
-                     javax.crypto.CipherInputStream cis = new javax.crypto.CipherInputStream(is, cipher)) {
-                     rawRows = statementParserService.parse(
+                        javax.crypto.CipherInputStream cis = new javax.crypto.CipherInputStream(is, cipher)) {
+                    rawRows = statementParserService.parse(
                             cis,
                             statementImport.getFileName(),
                             statementImport.getSource(),
                             password,
                             statementImport.getBankKey());
                 }
-                
+
                 progressTracker.updateProgress(importId, 50);
 
                 Category uncategorized = getUncategorizedCategory(statementImport.getUserId());
@@ -110,12 +110,15 @@ public class ImportProcessingService {
                     candidateFingerprints.add(parsed.fingerprint());
                     processed++;
                     if (processed % 50 == 0) {
-                        progressTracker.updateProgress(importId, 50 + (int) ((processed / (double) total) * 20)); // 50 to 70%
+                        progressTracker.updateProgress(importId, 50 + (int) ((processed / (double) total) * 20)); // 50
+                                                                                                                  // to
+                                                                                                                  // 70%
                     }
                 }
                 progressTracker.updateProgress(importId, 70);
 
-                existingFingerprints.addAll(transactionRepository.findByUserIdAndFingerprintIn(statementImport.getUserId(), candidateFingerprints)
+                existingFingerprints.addAll(transactionRepository
+                        .findByUserIdAndFingerprintIn(statementImport.getUserId(), candidateFingerprints)
                         .stream()
                         .map(t -> t.getFingerprint())
                         .collect(Collectors.toSet()));
@@ -130,14 +133,16 @@ public class ImportProcessingService {
                 for (ParsedRow parsed : parsedRows) {
                     savedRows++;
                     if (savedRows % 50 == 0) {
-                        progressTracker.updateProgress(importId, 70 + (int) ((savedRows / (double) total) * 30)); // 70 to 100%
+                        progressTracker.updateProgress(importId, 70 + (int) ((savedRows / (double) total) * 30)); // 70
+                                                                                                                  // to
+                                                                                                                  // 100%
                     }
 
                     if (parsed.error() != null) {
                         events.add(ImportLog.ImportEvent.builder()
                                 .timestamp(Instant.now())
                                 .type("ERROR")
-                                .rawRow(parsed.rawRow())
+                                .rawRow(aesUtil.encrypt(parsed.rawRow()))
                                 .reason(parsed.error())
                                 .build());
                         continue;
@@ -148,7 +153,7 @@ public class ImportProcessingService {
                         events.add(ImportLog.ImportEvent.builder()
                                 .timestamp(Instant.now())
                                 .type("SKIPPED")
-                                .rawRow(parsed.rawRow())
+                                .rawRow(aesUtil.encrypt(parsed.rawRow()))
                                 .fingerprint(parsed.fingerprint())
                                 .reason("DUPLICATE")
                                 .build());
@@ -157,12 +162,22 @@ public class ImportProcessingService {
 
                     seenFingerprints.add(parsed.fingerprint());
 
+                    String finalType = parsed.transactionType();
+                    if (parsed.categoryId() != null) {
+                        for (Category c : availableCategories) {
+                            if (c.getId().equals(parsed.categoryId())) {
+                                finalType = c.getType().toUpperCase();
+                                break;
+                            }
+                        }
+                    }
+
                     Transaction transaction = Transaction.builder()
                             .userId(statementImport.getUserId())
                             .accountId(account.getId())
                             .categoryId(parsed.categoryId())
                             .amount(parsed.amount())
-                            .transactionType(parsed.transactionType())
+                            .transactionType(finalType)
                             .transactionDate(parsed.transactionDate())
                             .payee(parsed.payee())
                             .paymentMode(parsed.paymentMode())
@@ -187,7 +202,7 @@ public class ImportProcessingService {
                     events.add(ImportLog.ImportEvent.builder()
                             .timestamp(Instant.now())
                             .type("IMPORTED")
-                            .rawRow(parsed.rawRow())
+                            .rawRow(aesUtil.encrypt(parsed.rawRow()))
                             .fingerprint(parsed.fingerprint())
                             .build());
                 }
@@ -264,20 +279,23 @@ public class ImportProcessingService {
             String rawRow = row.getOrDefault("raw_row", row.toString());
             LocalDate transactionDate = parseDate(row);
             AmountInfo amountInfo = parseAmount(row);
-            
+
             String explicitType = firstNonBlank(row, "transaction_type", "type", "dr_cr", "drcr", "pay_collect");
             String transactionType = resolveTransactionType(explicitType, amountInfo);
             BigDecimal amount = amountInfo.amount().abs().setScale(2, RoundingMode.HALF_UP);
 
-            String runningBalanceText = firstNonBlank(row, "balance", "calculated_balance", "running_balance", "closing_balance", "available_balance");
+            String runningBalanceText = firstNonBlank(row, "balance", "calculated_balance", "running_balance",
+                    "closing_balance", "available_balance");
             BigDecimal runningBalance = null;
             if (runningBalanceText != null && !runningBalanceText.isBlank()) {
                 try {
                     runningBalance = parseMoney(runningBalanceText);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
 
-            String payeeFromRow = firstNonBlank(row, "payee", "merchant_name", "merchant", "counterparty", "payee_name");
+            String payeeFromRow = firstNonBlank(row, "payee", "merchant_name", "merchant", "counterparty",
+                    "payee_name");
             String rawParticulars = firstNonBlank(row,
                     "narration",
                     "description",
@@ -326,13 +344,18 @@ public class ImportProcessingService {
                 referenceNumber = referenceNumber.substring(0, 255);
             }
 
-            String description = firstNonBlank(row, "note", "description", "remarks", "personal_remark", "bank_remark", "other_remark", "narration", "details", "particulars", "transaction_details");
+            String description = firstNonBlank(row, "note", "description", "remarks", "personal_remark", "bank_remark",
+                    "other_remark", "narration", "details", "particulars", "transaction_details");
             if (description == null || description.isBlank() || description.equalsIgnoreCase(rawParticulars)) {
                 description = details.description() != null ? details.description() : rawParticulars;
             }
 
-            Category matchedCategory = matchCategory(payeeNormalized, merchantRules, categories, uncategorized);
-            
+            String searchTarget = (payeeNormalized + " "
+                    + (description != null ? description.toLowerCase(Locale.ROOT) : "") + " "
+                    + (rawParticulars != null ? rawParticulars.toLowerCase(Locale.ROOT) : "") + " "
+                    + (referenceNumber != null ? referenceNumber.toLowerCase(Locale.ROOT) : "")).trim();
+            Category matchedCategory = matchCategory(searchTarget, merchantRules, categories, uncategorized);
+
             if (matchedCategory.getId().equals(uncategorized.getId())) {
                 String suggestedCatName = row.get("suggested_category");
                 if (suggestedCatName != null) {
@@ -426,7 +449,17 @@ public class ImportProcessingService {
                 .orElseGet(() -> categoryRepository.findAllForUser(userId).stream()
                         .filter(category -> "Uncategorized".equalsIgnoreCase(category.getName()))
                         .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("Uncategorized category is missing.")));
+                        .orElseGet(() -> {
+                            Category created = Category.builder()
+                                    .userId(userId)
+                                    .name("Uncategorized")
+                                    .icon("❓")
+                                    .color("#A8A29E")
+                                    .type("EXPENSE")
+                                    .isDefault(false)
+                                    .build();
+                            return categoryRepository.save(created);
+                        }));
     }
 
     private LocalDate parseDate(Map<String, String> row) {
@@ -444,12 +477,12 @@ public class ImportProcessingService {
                 DateTimeFormatter.ofPattern("dd-MM-yyyy"),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy"),
                 DateTimeFormatter.ofPattern("d/M/uuuu"),
-                DateTimeFormatter.ofPattern("d-M-uuuu")
-        );
+                DateTimeFormatter.ofPattern("d-M-uuuu"));
         for (DateTimeFormatter formatter : formatters) {
             try {
                 return LocalDate.parse(cleanedDate, formatter);
-            } catch (DateTimeParseException ignored) {}
+            } catch (DateTimeParseException ignored) {
+            }
         }
 
         // 2. Try monthly names with year formatters (case-insensitive)
@@ -459,8 +492,7 @@ public class ImportProcessingService {
                 "dd MMM yyyy",
                 "d MMM yyyy",
                 "dd-MMM-yyyy",
-                "d-MMM-yyyy"
-        );
+                "d-MMM-yyyy");
         for (String pattern : monthYearPatterns) {
             try {
                 DateTimeFormatter fmt = new java.time.format.DateTimeFormatterBuilder()
@@ -468,16 +500,17 @@ public class ImportProcessingService {
                         .appendPattern(pattern)
                         .toFormatter(Locale.ENGLISH);
                 return LocalDate.parse(cleanedDate, fmt);
-            } catch (DateTimeParseException ignored) {}
+            } catch (DateTimeParseException ignored) {
+            }
         }
 
-        // 3. Try monthly names without year formatters (case-insensitive), defaulting to current year (2026)
+        // 3. Try monthly names without year formatters (case-insensitive), defaulting
+        // to current year (2026)
         List<String> monthOnlyPatterns = List.of(
                 "dd MMM",
                 "d MMM",
                 "dd-MMM",
-                "d-MMM"
-        );
+                "d-MMM");
         int defaultYear = LocalDate.now().getYear();
         for (String pattern : monthOnlyPatterns) {
             try {
@@ -487,14 +520,16 @@ public class ImportProcessingService {
                         .parseDefaulting(java.time.temporal.ChronoField.YEAR, defaultYear)
                         .toFormatter(Locale.ENGLISH);
                 return LocalDate.parse(cleanedDate, fmt);
-            } catch (DateTimeParseException ignored) {}
+            } catch (DateTimeParseException ignored) {
+            }
         }
 
         throw new IllegalArgumentException("Invalid transaction date: " + rawDate);
     }
 
     private AmountInfo parseAmount(Map<String, String> row) {
-        String debitText = firstNonBlank(row, "debit", "debits", "withdrawal", "withdrawals", "expense", "expenses", "withdrawal_amount", "payment", "payments");
+        String debitText = firstNonBlank(row, "debit", "debits", "withdrawal", "withdrawals", "expense", "expenses",
+                "withdrawal_amount", "payment", "payments");
         String creditText = firstNonBlank(row, "credit", "credits", "deposit", "deposits", "income", "received");
         String amountText = firstNonBlank(row, "amount", "amount_in_rs", "transaction_amount", "value");
 
@@ -502,14 +537,16 @@ public class ImportProcessingService {
         if (creditText != null) {
             try {
                 creditVal = parseMoney(creditText);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         BigDecimal debitVal = null;
         if (debitText != null) {
             try {
                 debitVal = parseMoney(debitText);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         if (creditVal != null && creditVal.compareTo(BigDecimal.ZERO) > 0) {
@@ -570,7 +607,9 @@ public class ImportProcessingService {
             return null;
         }
         String normalized = value.toLowerCase(Locale.ROOT)
-                .replaceAll("(?i)\\b(upi|imps|neft|rtgs|dr|cr|debit|credit|payment|from|to|note|tag|transaction|ref|reference|id)\\b", " ")
+                .replaceAll(
+                        "(?i)\\b(upi|imps|neft|rtgs|dr|cr|debit|credit|payment|from|to|note|tag|transaction|ref|reference|id)\\b",
+                        " ")
                 .replaceAll("[^a-z0-9]+", " ")
                 .replaceAll("\\s+", " ")
                 .trim();
@@ -617,7 +656,8 @@ public class ImportProcessingService {
         String note = null;
 
         // 1. Check if it's standard UPI/IMPS/NEFT with slash separators
-        if (raw.toUpperCase(Locale.ROOT).startsWith("UPI/") || raw.toUpperCase(Locale.ROOT).startsWith("IMPS/") || raw.toUpperCase(Locale.ROOT).startsWith("NEFT/")) {
+        if (raw.toUpperCase(Locale.ROOT).startsWith("UPI/") || raw.toUpperCase(Locale.ROOT).startsWith("IMPS/")
+                || raw.toUpperCase(Locale.ROOT).startsWith("NEFT/")) {
             String[] parts = raw.split("/");
             if (parts.length >= 3) {
                 refNum = parts[1].trim();
@@ -663,7 +703,8 @@ public class ImportProcessingService {
         else {
             String upper = raw.toUpperCase(Locale.ROOT);
             if (upper.contains("UPI REF NO") || upper.contains("UPI REF")) {
-                java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?:UPI\\s+REF\\s+(?:NO\\s+)?)(\\d+)").matcher(upper);
+                java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?:UPI\\s+REF\\s+(?:NO\\s+)?)(\\d+)")
+                        .matcher(upper);
                 if (m.find()) {
                     refNum = m.group(1);
                 }
@@ -687,15 +728,20 @@ public class ImportProcessingService {
 
         // 4. Standardize Interest, Charges, GST, etc.
         String upperMerchant = merchant.toUpperCase(Locale.ROOT);
-        if (upperMerchant.contains("INTEREST PAID") || upperMerchant.contains("INTEREST CR") || upperMerchant.contains("INT CR.") || upperMerchant.contains("INT.CR") || upperMerchant.contains("INT CR") || upperMerchant.contains("INT. PAID")) {
+        if (upperMerchant.contains("INTEREST PAID") || upperMerchant.contains("INTEREST CR")
+                || upperMerchant.contains("INT CR.") || upperMerchant.contains("INT.CR")
+                || upperMerchant.contains("INT CR") || upperMerchant.contains("INT. PAID")) {
             merchant = "Interest Paid";
-        } else if (upperMerchant.contains("INTEREST CHARGED") || upperMerchant.contains("INTEREST DR") || upperMerchant.contains("INT DR.") || upperMerchant.contains("INT.DR") || upperMerchant.contains("INT DR") || upperMerchant.contains("INT. CHARGED")) {
+        } else if (upperMerchant.contains("INTEREST CHARGED") || upperMerchant.contains("INTEREST DR")
+                || upperMerchant.contains("INT DR.") || upperMerchant.contains("INT.DR")
+                || upperMerchant.contains("INT DR") || upperMerchant.contains("INT. CHARGED")) {
             merchant = "Interest Charged";
         } else if (upperMerchant.contains("ANNUAL MAINTENANCE CHARGE") || upperMerchant.contains("AMC")) {
             merchant = "Annual Maintenance Charges";
         } else if (upperMerchant.contains("GST")) {
             merchant = "GST Charges";
-        } else if (upperMerchant.contains("CHARGES") || upperMerchant.contains("CHARGE") || upperMerchant.contains("CHG")) {
+        } else if (upperMerchant.contains("CHARGES") || upperMerchant.contains("CHARGE")
+                || upperMerchant.contains("CHG")) {
             merchant = "Bank Charges";
         }
 
@@ -718,7 +764,8 @@ public class ImportProcessingService {
     }
 
     String cleanMerchantName(String name) {
-        if (name == null) return null;
+        if (name == null)
+            return null;
         String cleaned = name.replaceAll("(?i)^\\s*(mr\\.?|ms\\.?|mrs\\.?|dr\\.?|upi-)\\s+", "").trim();
         cleaned = cleaned.replaceAll("\\s+\\d{4,}\\s*$", "").trim();
         if (cleaned.contains("/")) {

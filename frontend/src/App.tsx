@@ -26,6 +26,8 @@ import { DeleteAccount } from './pages/settings/DeleteAccount';
 import { AdminOverview } from './pages/admin/AdminOverview';
 import { AdminUserManagement } from './pages/admin/AdminUserManagement';
 import { AdminSystemLogs } from './pages/admin/AdminSystemLogs';
+import { AdminContactSubmissions } from './pages/admin/AdminContactSubmissions';
+import { AdminMerchantRules } from './pages/admin/AdminMerchantRules';
 
 // Pages - Public & Legal
 import { Hero } from './pages/public/Hero';
@@ -217,7 +219,9 @@ function App() {
               {/* Admin Routes */}
               <Route element={<AdminRoute />}>
                 <Route path="/users" element={<AdminUserManagement />} />
+                <Route path="/contact-submissions" element={<AdminContactSubmissions />} />
                 <Route path="/logs" element={<AdminSystemLogs />} />
+                <Route path="/admin/merchant-rules" element={<AdminMerchantRules />} />
               </Route>
 
               {/* Catch all redirecting */}

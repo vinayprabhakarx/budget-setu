@@ -11,6 +11,8 @@ import {
   Pin,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
+  Tag,
 } from "lucide-react";
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
@@ -31,6 +33,8 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
   const menuItems = [
     { name: "Overview", path: "/dashboard", icon: LayoutDashboard },
     { name: "User Management", path: "/users", icon: Users },
+    { name: "Contact Forms", path: "/contact-submissions", icon: MessageSquare },
+    { name: "Merchant Rules", path: "/admin/merchant-rules", icon: Tag },
     { name: "System Logs", path: "/logs", icon: Activity },
   ];
 

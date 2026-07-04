@@ -45,6 +45,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/health", "/api/health/**").permitAll()
+                .requestMatchers("/api/contact", "/api/contact/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Everything else requires authentication
                 .anyRequest().authenticated()

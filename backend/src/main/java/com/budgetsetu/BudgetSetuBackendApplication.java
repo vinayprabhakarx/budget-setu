@@ -39,7 +39,17 @@ public class BudgetSetuBackendApplication {
 			if (profile == null)
 				profile = System.getProperty("spring-boot.run.profiles");
 
-			String envFileName = (profile != null && profile.contains("prod")) ? ".env.production" : ".env";
+			boolean isTest = (profile != null && profile.contains("test")) ||
+					System.getProperty("java.class.path", "").contains("test-classes") ||
+					System.getProperty("sun.java.command", "").contains("surefire") ||
+					System.getProperty("sun.java.command", "").contains("junit");
+
+			String envFileName = ".env";
+			if (isTest) {
+				envFileName = ".env.test";
+			} else if (profile != null && profile.contains("prod")) {
+				envFileName = ".env.production";
+			}
 			java.nio.file.Path envPath = Paths.get(envFileName).toAbsolutePath();
 			if (!Files.exists(envPath) && Files.exists(Paths.get("..", envFileName))) {
 				envPath = Paths.get("..", envFileName).toAbsolutePath();

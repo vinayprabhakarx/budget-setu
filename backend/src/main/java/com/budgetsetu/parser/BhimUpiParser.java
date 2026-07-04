@@ -75,7 +75,7 @@ public class BhimUpiParser extends BaseBankParser {
     }
 
     private String extractName(String cellText) {
-        // e.g. xxxxx08917@upi(VINAY KUMAR)
+        // e.g. xxxxx00000@upi(JOHN DOE)
         Matcher m = Pattern.compile("\\((.*?)\\)").matcher(cellText);
         if (m.find()) {
             return m.group(1).trim();

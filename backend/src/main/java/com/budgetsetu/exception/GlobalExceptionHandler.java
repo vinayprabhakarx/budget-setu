@@ -102,6 +102,17 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ApiErrorResponse.builder()
+                .status(429)
+                .error("TOO_MANY_REQUESTS")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .requestId(generateRequestId())
+                .build());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneral(Exception ex) {
         // Log internally but never expose to user

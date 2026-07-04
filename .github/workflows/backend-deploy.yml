@@ -83,59 +83,61 @@ jobs:
           ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
           DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
+          set -e
           # Save the private key to a file
           echo "$ORACLE_SSH_KEY" > private_key
           chmod 600 private_key
 
-          # Write the Docker Hub password to a temp file (avoids bash history leak)
-          echo "$REGISTRY_PASSWORD" > docker_token.txt
+          # 1. Securely log in to Docker Hub over SSH without saving credentials to disk
+          echo "Logging into private Docker Hub registry on remote server..."
+          echo "$REGISTRY_TOKEN" | ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 "$ORACLE_USER@$ORACLE_HOST" "docker login -u '$REGISTRY_USERNAME' --password-stdin"
 
-          # Copy the token file to the server securely
-          scp -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 docker_token.txt "$ORACLE_USER@$ORACLE_HOST:/tmp/docker_token.txt"
-
-          # Execute deployment commands on the server
-          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "$ORACLE_USER@$ORACLE_HOST" << DEPLOY_EOF
+          # 2. Execute deployment logic on remote server
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 "$ORACLE_USER@$ORACLE_HOST" "DOCKER_IMAGE='$DOCKER_IMAGE' bash -s" << 'DEPLOY_EOF'
             set -e
+            echo "--- Starting BudgetSetu Deployment on Oracle Cloud ---"
             
-            # Stop and remove the old container first to free up memory on 1GB RAM Oracle Free Tier
-            echo "Stopping old container to free RAM before image pull..."
+            # Validate required environment secrets file
+            if [ ! -f /home/ubuntu/budget-setu/.env.production ]; then
+              echo "❌ ERROR: /home/ubuntu/budget-setu/.env.production is missing on server! Cannot launch container securely."
+              exit 1
+            fi
+            
+            # Stop and remove old container
+            echo "Stopping old container before image pull..."
             docker stop budget-setu budgetsetu-backend || true
             docker rm budget-setu budgetsetu-backend || true
             docker system prune -af || true
             
-            # Configure Docker daemon for 1GB RAM Oracle Free Tier (limit concurrent layer downloads to 1 to prevent OOM / CPU freeze)
+            # Configure Docker daemon for 1GB RAM Oracle Free Tier
             if [ ! -f /etc/docker/daemon.json ] || ! grep -q "max-concurrent-downloads" /etc/docker/daemon.json 2>/dev/null; then
-              echo "Configuring Docker daemon max-concurrent-downloads=1 to prevent OOM/CPU freeze..."
               sudo mkdir -p /etc/docker
               echo '{"max-concurrent-downloads": 1, "max-concurrent-uploads": 1}' | sudo tee /etc/docker/daemon.json > /dev/null
               sudo systemctl reload docker || sudo systemctl restart docker
             fi
             
-            # Login to Docker Hub securely (token from file, not command line)
-            cat /tmp/docker_token.txt | docker login -u "$REGISTRY_USERNAME" --password-stdin
-            rm -f /tmp/docker_token.txt
-            
-            # Pull the latest image in quiet mode to prevent terminal I/O flood and CPU spikes
+            # Pull latest image
             echo "Pulling latest image..."
-            docker pull -q $DOCKER_IMAGE
+            docker pull -q "$DOCKER_IMAGE"
             
-            # Start the new container
+            # Start new container
+            echo "Starting new container..."
             docker run -d \
               --name budget-setu \
               --restart unless-stopped \
               -p 8080:8080 \
               --env-file /home/ubuntu/budget-setu/.env.production \
               -v /home/ubuntu/budget-setu/logs:/app/logs \
-              $DOCKER_IMAGE
+              "$DOCKER_IMAGE"
             
-            # Cleanup old unused images to save disk space
+            # Cleanup old unused images
             docker image prune -f
           DEPLOY_EOF
 
-          # Clean up local files
-          rm -f private_key docker_token.txt
+          # Clean up local sensitive files
+          rm -f private_key
 
       - name: Verify deployment health
         env:
@@ -146,33 +148,23 @@ jobs:
           echo "$ORACLE_SSH_KEY" > private_key
           chmod 600 private_key
 
-          echo "Waiting 20s for application to start..."
-          sleep 20
-
-          # Check if the container is running and healthy
-          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
+          echo "--- Checking Live Health Endpoint with Retry Loop ---"
+          ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
             set -e
-            
-            # Check container status
-            CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' budget-setu 2>/dev/null || echo "not_found")
-            echo "Container status: $CONTAINER_STATUS"
-            
-            if [ "$CONTAINER_STATUS" != "running" ]; then
-              echo "ERROR: Container is not running!"
-              docker logs --tail 50 budget-setu 2>&1 || true
-              exit 1
-            fi
-            
-            # Check health endpoint
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/health || echo "000")
-            echo "Health endpoint returned: $HTTP_STATUS"
-            
-            if [ "$HTTP_STATUS" != "200" ]; then
-              echo "WARNING: Health check returned non-200. Container logs:"
-              docker logs --tail 30 budget-setu 2>&1 || true
-            else
-              echo "Deployment verified successfully!"
-            fi
+            for i in {1..15}; do
+              if curl -s -f http://localhost:8080/api/health > /dev/null; then
+                echo "✅ Health check passed on attempt $i!"
+                curl -i http://localhost:8080/api/health
+                break
+              fi
+              echo "Attempt $i failed (application starting up...), retrying in 3 seconds..."
+              sleep 3
+              if [ $i -eq 15 ]; then
+                echo "❌ Health check failed after 15 attempts! Showing container logs:"
+                docker logs --tail 50 budget-setu 2>&1 || true
+                exit 1
+              fi
+            done
           HEALTH_EOF
 
           rm -f private_key

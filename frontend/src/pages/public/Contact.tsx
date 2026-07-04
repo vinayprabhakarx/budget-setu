@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { PublicLayout } from "../../components/layout/PublicLayout";
-import { Mail, CheckCircle2, Globe, ArrowRight } from "lucide-react";
+import { CheckCircle2, Globe, ArrowRight } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
 import { GithubIcon, LinkedinIcon } from "../../components/shared/Icons";
 import { Select } from "../../components/shared/Select";
+import api from "../../api/axiosInstance";
 
 export const Contact: React.FC = () => {
   const { showToast } = useToast();
@@ -35,16 +36,27 @@ export const Contact: React.FC = () => {
     if (!validate()) return;
 
     setLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await api.post("/contact", {
+        fullName,
+        email,
+        topic,
+        message,
+      });
       setSuccess(true);
       showToast("success", "Message submitted successfully.");
       setFullName("");
       setEmail("");
       setTopic("general");
       setMessage("");
-    }, 1200);
+    } catch (error: any) {
+      showToast(
+        "error",
+        error.response?.data?.message || "Failed to send message. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,16 +92,7 @@ export const Contact: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-4 pt-2 justify-center md:justify-start">
-                {/* Channel 1: Email */}
-                <a
-                  href="mailto:support@vinayprabhakar.dev"
-                  className="h-11 w-11 rounded-md border border-border/60 hover:border-brand/40 bg-bg-surface/30 hover:bg-brand-subtle/10 text-text-secondary hover:text-brand flex items-center justify-center transition-all duration-300 group"
-                  title="Email Support"
-                >
-                  <Mail className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </a>
-
-                {/* Channel 2: GitHub Profile */}
+                {/* GitHub Profile */}
                 <a
                   href="https://github.com/vinayprabhakarx"
                   target="_blank"
@@ -100,7 +103,7 @@ export const Contact: React.FC = () => {
                   <GithubIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
                 </a>
 
-                {/* Channel 3: Website */}
+                {/* Website */}
                 <a
                   href="https://vinayprabhakar.dev"
                   target="_blank"
@@ -111,7 +114,7 @@ export const Contact: React.FC = () => {
                   <Globe className="h-5 w-5 transition-transform group-hover:scale-110" />
                 </a>
 
-                {/* Channel 4: LinkedIn */}
+                {/* LinkedIn */}
                 <a
                   href="https://linkedin.com/in/vinayprabhakarx"
                   target="_blank"

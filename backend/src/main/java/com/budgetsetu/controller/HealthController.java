@@ -39,9 +39,6 @@ public class HealthController {
     @Autowired(required = false)
     private MailService mailService;
 
-    @Value("${app.admin.email:test.vinayprabhakar@gmail.com}")
-    private String adminEmail;
-
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> results = new LinkedHashMap<>();

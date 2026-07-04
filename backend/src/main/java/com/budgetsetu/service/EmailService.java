@@ -13,6 +13,9 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    @Value("${app.admin.email:}")
+    private String adminEmail;
+
     public void sendVerificationEmail(String email, String token) {
         String magicLink = frontendUrl + "/magic-link?token=" + token;
         String subject = "Verify your BudgetSetu Email";
@@ -36,5 +39,30 @@ public class EmailService {
                 "Best regards,\nThe BudgetSetu Team";
 
         mailService.sendEmail(email, subject, body);
+    }
+
+    public void sendContactConfirmationEmail(String email, String fullName, String topic) {
+        String subject = "We received your message - BudgetSetu";
+        String body = "Hello " + fullName + ",\n\n" +
+                "Thank you for reaching out to BudgetSetu! We have received your message regarding \"" + topic + "\".\n\n" +
+                "Our team will review your inquiry and get back to you shortly at this email address.\n\n" +
+                "Best regards,\nThe BudgetSetu Team";
+
+        mailService.sendEmail(email, subject, body);
+    }
+
+    public void sendContactAdminNotification(String fullName, String email, String topic, String message) {
+        if (adminEmail == null || adminEmail.trim().isEmpty()) {
+            return;
+        }
+        String subject = "[Contact Form] New submission: " + topic + " from " + fullName;
+        String body = "New contact form submission received on BudgetSetu:\n\n" +
+                "Name: " + fullName + "\n" +
+                "Email: " + email + "\n" +
+                "Topic: " + topic + "\n\n" +
+                "Message:\n" + message + "\n\n" +
+                "--- BudgetSetu System ---";
+
+        mailService.sendEmail(adminEmail, subject, body);
     }
 }

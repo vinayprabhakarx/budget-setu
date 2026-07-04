@@ -16,7 +16,7 @@ public class AdminInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.admin.email:try.vinayprabhakar@gmail.com}")
+    @Value("${app.admin.email:}")
     private String adminEmail;
 
     @Value("${app.admin.password:}")
@@ -34,7 +34,7 @@ public class AdminInitializer implements CommandLineRunner {
                 User admin = User.builder()
                         .email(adminEmail)
                         .passwordHash(passwordEncoder.encode(adminPassword))
-                        .fullName("Vinay Prabhakar")
+                        .fullName("Admin User")
                         .role("ADMIN")
                         .emailVerified(true)
                         .build();

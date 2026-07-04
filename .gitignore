@@ -1,9 +1,13 @@
 # ─── Environment ──────────────────────────────────────
 .env
 .env.production
+.env.test
 *.env.local
 backend/.env
 backend/.env.production
+backend/.env.test
+backend/src/test/
+backend_test_backup/
 scripts/
 docs_internal/
 # ─── IDE ──────────────────────────────────────────────

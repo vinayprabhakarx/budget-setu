@@ -27,6 +27,13 @@ interface Account {
   balance: number | null;
 }
 
+const getAccountDisplayName = (acc: Account) => {
+  if (!acc.bankName && !acc.accountNumber) return "Account";
+  const bank = acc.bankName || acc.accountType || "Account";
+  const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+  return num ? `${bank} - ${num}` : bank;
+};
+
 interface Category {
   id: string;
   name: string;
@@ -61,7 +68,7 @@ interface AuditLog {
 
 /**
  * Transactions Page Component
- * 
+ *
  * A comprehensive view of all user transactions.
  * Allows filtering, sorting, searching, editing, and deleting of individual transactions across all accounts.
  */
@@ -298,7 +305,9 @@ export const Transactions: React.FC = () => {
             categoryId: editCategory,
             matchType: "CONTAINS",
           });
-          const newRuleId = (ruleRes as { data?: { id?: string }; id?: string }).data?.id || (ruleRes as { id?: string }).id;
+          const newRuleId =
+            (ruleRes as { data?: { id?: string }; id?: string }).data?.id ||
+            (ruleRes as { id?: string }).id;
 
           if (contributeGlobally && newRuleId) {
             try {
@@ -312,16 +321,35 @@ export const Transactions: React.FC = () => {
             merchantPattern: editPayee.trim(),
             categoryId: editCategory,
           });
-          const count = (recatRes as { data?: { updated?: number; updatedCount?: number }; updated?: number }).data?.updated ?? (recatRes as { data?: { updatedCount?: number } }).data?.updatedCount ?? (recatRes as { updated?: number }).updated ?? 0;
+          const count =
+            (
+              recatRes as {
+                data?: { updated?: number; updatedCount?: number };
+                updated?: number;
+              }
+            ).data?.updated ??
+            (recatRes as { data?: { updatedCount?: number } }).data
+              ?.updatedCount ??
+            (recatRes as { updated?: number }).updated ??
+            0;
 
           if (count > 0) {
-            showToast("success", `Updated transaction & ${count} other matching transactions.`);
+            showToast(
+              "success",
+              `Updated transaction & ${count} other matching transactions.`,
+            );
           } else {
-            showToast("success", "Transaction updated & merchant rule saved for future.");
+            showToast(
+              "success",
+              "Transaction updated & merchant rule saved for future.",
+            );
           }
         } catch (err) {
           console.error("Failed to apply merchant rule:", err);
-          showToast("success", "Transaction updated (note: rule creation had an issue).");
+          showToast(
+            "success",
+            "Transaction updated (note: rule creation had an issue).",
+          );
         }
       } else {
         showToast("success", "Transaction details updated.");
@@ -411,14 +439,20 @@ export const Transactions: React.FC = () => {
         isRefreshing={loading}
       >
         <button
-          onClick={() => accounts.length > 0 ? setIsAddModalOpen(true) : navigate('/accounts#new')}
+          onClick={() =>
+            accounts.length > 0
+              ? setIsAddModalOpen(true)
+              : navigate("/accounts#new")
+          }
           className="btn btn-primary btn-sm flex items-center justify-center gap-2"
         >
           <Plus className="h-4 w-4" />
-          <span>{accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}</span>
+          <span>
+            {accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}
+          </span>
         </button>
       </PageHeader>
-      
+
       {/* 1. Filter Controls */}
       <FilterSection
         isOpen={showFilters}
@@ -426,7 +460,9 @@ export const Transactions: React.FC = () => {
         onSearchChange={setSearch}
         searchPlaceholder="Search merchant, purpose, or note..."
         onSearchSubmit={handleSearchSubmit}
-        hasActiveFilters={Boolean(search || startDate || endDate || categoryId || accountId || type)}
+        hasActiveFilters={Boolean(
+          search || startDate || endDate || categoryId || accountId || type,
+        )}
         onReset={resetFilters}
         layout="stack"
       >
@@ -500,7 +536,9 @@ export const Transactions: React.FC = () => {
                 { value: "ALL", label: "All Accounts" },
                 ...accounts.map((acc) => {
                   const bank = acc.bankName || acc.accountType || "Account";
-                  const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+                  const num = acc.accountNumber
+                    ? acc.accountNumber.slice(-4)
+                    : "";
                   const displayName = num ? `${bank} - ${num}` : bank;
                   return { value: acc.id, label: displayName };
                 }),
@@ -554,7 +592,13 @@ export const Transactions: React.FC = () => {
       </section>
 
       {/* 3. Transaction List Table */}
-      <section className={transactions.length === 0 && !loading ? "" : "card p-0 overflow-hidden"}>
+      <section
+        className={
+          transactions.length === 0 && !loading
+            ? ""
+            : "card p-0 overflow-hidden"
+        }
+      >
         {loading ? (
           <TransactionsSkeleton />
         ) : transactions.length === 0 ? (
@@ -562,17 +606,24 @@ export const Transactions: React.FC = () => {
             type="empty"
             title="No transactions found"
             description={
-              (search || startDate || endDate || categoryId || accountId || type) 
-                ? "No transactions match your current filters." 
+              search || startDate || endDate || categoryId || accountId || type
+                ? "No transactions match your current filters."
                 : "You don't have any transactions yet."
             }
             className="py-16"
-            action={(search || startDate || endDate || categoryId || accountId || type)
-              ? { label: "Clear Filters", onClick: resetFilters }
-              : { 
-                  label: accounts.length > 0 ? "Add Transaction" : "Add Bank Account", 
-                  onClick: () => accounts.length > 0 ? setIsAddModalOpen(true) : navigate('/accounts#new') 
-                }
+            action={
+              search || startDate || endDate || categoryId || accountId || type
+                ? { label: "Clear Filters", onClick: resetFilters }
+                : {
+                    label:
+                      accounts.length > 0
+                        ? "Add Transaction"
+                        : "Add Bank Account",
+                    onClick: () =>
+                      accounts.length > 0
+                        ? setIsAddModalOpen(true)
+                        : navigate("/accounts#new"),
+                  }
             }
           />
         ) : (
@@ -594,7 +645,8 @@ export const Transactions: React.FC = () => {
                   tx.transactionType,
                 );
                 const isExpanded = expandedRows.has(tx.id);
-                const catObj = tx.category || categories.find((c) => c.id === tx.categoryId);
+                const catObj =
+                  tx.category || categories.find((c) => c.id === tx.categoryId);
                 return (
                   <TableRow
                     key={tx.id}
@@ -621,11 +673,14 @@ export const Transactions: React.FC = () => {
                     </TableCell>
                     <TableCell className="text-text-secondary">
                       {(() => {
-                        const acc = accounts.find(a => a.id === tx.accountId);
+                        const acc = accounts.find((a) => a.id === tx.accountId);
                         let accountName = "";
                         if (acc) {
-                          const bank = acc.bankName || acc.accountType || "Account";
-                          const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+                          const bank =
+                            acc.bankName || acc.accountType || "Account";
+                          const num = acc.accountNumber
+                            ? acc.accountNumber.slice(-4)
+                            : "";
                           accountName = num ? `${bank} - ${num}` : bank;
                         }
                         return accountName ? (
@@ -812,11 +867,16 @@ export const Transactions: React.FC = () => {
                         onChange={(e) => setApplyMerchantRule(e.target.checked)}
                         className="mt-0.5 rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
                       />
-                      <label htmlFor="applyMerchantRule" className="text-xs text-text-secondary leading-tight cursor-pointer flex-1">
+                      <label
+                        htmlFor="applyMerchantRule"
+                        className="text-xs text-text-secondary leading-tight cursor-pointer flex-1"
+                      >
                         <span className="font-semibold text-text-primary block mb-0.5 text-body-sm">
-                          Always categorize "{editPayee.trim()}" as this category?
+                          Always categorize "{editPayee.trim()}" as this
+                          category?
                         </span>
-                        Automatically saves a rule for future imports and recategorizes all past matching transactions.
+                        Automatically saves a rule for future imports and
+                        recategorizes all past matching transactions.
                       </label>
                     </div>
 
@@ -826,14 +886,20 @@ export const Transactions: React.FC = () => {
                           type="checkbox"
                           id="contributeGlobally"
                           checked={contributeGlobally}
-                          onChange={(e) => setContributeGlobally(e.target.checked)}
+                          onChange={(e) =>
+                            setContributeGlobally(e.target.checked)
+                          }
                           className="mt-0.5 rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
                         />
-                        <label htmlFor="contributeGlobally" className="text-xs text-text-secondary leading-tight cursor-pointer flex-1">
+                        <label
+                          htmlFor="contributeGlobally"
+                          className="text-xs text-text-secondary leading-tight cursor-pointer flex-1"
+                        >
                           <span className="font-semibold text-primary block mb-0.5 text-body-sm">
                             Contribute this merchant mapping globally
                           </span>
-                          Help improve BudgetSetu by sharing this payee-to-category mapping with the community database.
+                          Help improve BudgetSetu by sharing this
+                          payee-to-category mapping with the community database.
                         </label>
                       </div>
                     )}
@@ -899,8 +965,12 @@ export const Transactions: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-text-muted group-open:hidden">View edits</span>
-                      <span className="text-xs text-text-muted hidden group-open:inline">Hide edits</span>
+                      <span className="text-xs text-text-muted group-open:hidden">
+                        View edits
+                      </span>
+                      <span className="text-xs text-text-muted hidden group-open:inline">
+                        Hide edits
+                      </span>
                     </summary>
 
                     <div className="mt-3 bg-bg-subtle/50 rounded-xl p-4 max-h-52 overflow-y-auto border border-border-muted">
@@ -935,12 +1005,15 @@ export const Transactions: React.FC = () => {
                               </p>
                               <p className="text-[0.625rem] text-text-muted">
                                 by {log.actor} on{" "}
-                                {new Date(log.timestamp).toLocaleString("en-IN", {
-                                  day: "numeric",
-                                  month: "short",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {new Date(log.timestamp).toLocaleString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )}
                               </p>
                             </div>
                           ))}
@@ -1017,7 +1090,7 @@ export const Transactions: React.FC = () => {
                       { value: "", label: "Select Account" },
                       ...accounts.map((acc) => ({
                         value: acc.id,
-                        label: acc.name,
+                        label: getAccountDisplayName(acc),
                       })),
                     ]}
                   />

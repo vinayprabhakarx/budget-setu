@@ -25,6 +25,7 @@ interface RecurringExpenseData {
   amount: number;
   status: string;
   nextDueDate: string;
+  frequency?: string;
   categoryName?: string;
   categoryIcon?: string;
 }
@@ -36,6 +37,10 @@ interface GoalData {
   currentAmount: number;
   targetDate: string;
   completed: boolean;
+  priority?: string;
+  description?: string | null;
+  percentageComplete?: number;
+  daysRemaining?: number;
 }
 
 import { StateDisplay } from "../../components/shared/StateDisplay";
@@ -176,7 +181,7 @@ const CustomBarTooltip = ({
 
 /**
  * Dashboard Page Component
- * 
+ *
  * The main landing page for the app, providing a high-level summary of the user's financial health.
  * Displays key metrics (net worth, income, expenses), recent transactions, active budgets, and quick insights.
  */
@@ -224,28 +229,53 @@ export const Dashboard: React.FC = () => {
         const planEnd = new Date(p.endDate);
         return planStart <= filterMonthEnd && planEnd >= filterMonthStart;
       });
-      const periodPriority: Record<string, number> = { WEEKLY: 1, MONTHLY: 2, QUARTERLY: 3, YEARLY: 4 };
+      const periodPriority: Record<string, number> = {
+        WEEKLY: 1,
+        MONTHLY: 2,
+        QUARTERLY: 3,
+        YEARLY: 4,
+      };
+      const goalPriority: Record<string, number> = {
+        HIGH: 1,
+        MEDIUM: 2,
+        LOW: 3,
+      };
       const sortedPlans = [...filteredPlans].sort((a, b) => {
         const pA = periodPriority[a.periodType?.toUpperCase()] || 99;
         const pB = periodPriority[b.periodType?.toUpperCase()] || 99;
         if (pA !== pB) return pA - pB;
-        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+        return (
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
       });
       setBudgetPlans(sortedPlans);
 
-      const activeRecurring = (recurringRes.data || []).filter((r: RecurringExpenseData) => r.status === 'ACTIVE');
-      const sortedRecurring = [...activeRecurring].sort((a: RecurringExpenseData, b: RecurringExpenseData) => {
-        if (!a.nextDueDate) return 1;
-        if (!b.nextDueDate) return -1;
-        return new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime();
-      });
+      const activeRecurring = (recurringRes.data || []).filter(
+        (r: RecurringExpenseData) => r.status === "ACTIVE",
+      );
+      const sortedRecurring = [...activeRecurring].sort(
+        (a: RecurringExpenseData, b: RecurringExpenseData) => {
+          if (!a.nextDueDate) return 1;
+          if (!b.nextDueDate) return -1;
+          return (
+            new Date(a.nextDueDate).getTime() -
+            new Date(b.nextDueDate).getTime()
+          );
+        },
+      );
       setRecurringExpenses(sortedRecurring);
 
-      const activeGoals = (goalsRes.data || []).filter((g: GoalData) => !g.completed);
+      const activeGoals = (goalsRes.data || []).filter(
+        (g: GoalData) => !g.completed,
+      );
       // Sort goals by progress percentage (highest first)
       const sortedGoals = [...activeGoals].sort((a: GoalData, b: GoalData) => {
-        const pA = goalPriority[a.priority?.toUpperCase()] || 99;
-        const pB = goalPriority[b.priority?.toUpperCase()] || 99;
+        const aPriority = (a.priority?.toUpperCase() ??
+          "MEDIUM") as keyof typeof goalPriority;
+        const bPriority = (b.priority?.toUpperCase() ??
+          "MEDIUM") as keyof typeof goalPriority;
+        const pA = goalPriority[aPriority] ?? 99;
+        const pB = goalPriority[bPriority] ?? 99;
         if (pA !== pB) return pA - pB;
         return (b.percentageComplete || 0) - (a.percentageComplete || 0);
       });
@@ -382,16 +412,19 @@ export const Dashboard: React.FC = () => {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Spending by Category (Donut) */}
           <div className="card lg:col-span-5 flex flex-col min-h-96">
-            <h3 className="font-semibold text-text-primary text-heading-sm mb-4">
-              Spending by Category
-            </h3>
-            <div className="flex-1 relative flex items-center justify-center min-h-[260px] w-full">
+            <h3 className="font-semibold text-text-primary text-heading-sm mb-4"></h3>
+            <div className="flex-1 relative flex items-center justify-center min-h-65 w-full">
               {categoryBreakdown.length === 0 ? (
                 <p className="text-text-muted text-body-md py-20">
                   No spending data available
                 </p>
               ) : isMounted ? (
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  minWidth={1}
+                  minHeight={1}
+                >
                   <PieChart>
                     <Pie
                       data={categoryBreakdown}
@@ -422,7 +455,7 @@ export const Dashboard: React.FC = () => {
             <h3 className="font-semibold text-text-primary text-heading-sm mb-4">
               Monthly Trend
             </h3>
-            <div className="flex-1 min-h-[260px] w-full">
+            <div className="flex-1 min-h-65 w-full">
               {monthlyTrend.length === 0 ? (
                 <StateDisplay
                   type="empty"
@@ -431,7 +464,12 @@ export const Dashboard: React.FC = () => {
                   action={{ label: "Upload Statement", href: "/import" }}
                 />
               ) : isMounted ? (
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  minWidth={1}
+                  minHeight={1}
+                >
                   <BarChart
                     data={monthlyTrend}
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -509,16 +547,19 @@ export const Dashboard: React.FC = () => {
                 {budgetPlans.length > 0 ? (
                   <div className="space-y-3">
                     {budgetPlans.map(
-                      (plan: {
-                        id: string;
-                        name: string;
-                        startDate: string;
-                        endDate: string;
-                        periodType: string;
-                        totalAmount: number;
-                        totalSpent?: number;
-                        allocations: { spent?: number }[];
-                      }, idx: number) => {
+                      (
+                        plan: {
+                          id: string;
+                          name: string;
+                          startDate: string;
+                          endDate: string;
+                          periodType: string;
+                          totalAmount: number;
+                          totalSpent?: number;
+                          allocations: { spent?: number }[];
+                        },
+                        idx: number,
+                      ) => {
                         const totalSpent =
                           plan.totalSpent ??
                           plan.allocations.reduce(
@@ -534,7 +575,7 @@ export const Dashboard: React.FC = () => {
                           <div
                             key={plan.id}
                             onClick={() => navigate("/budgets")}
-                            className={`card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between space-y-4 relative group hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
+                            className={`card p-5 sm:p-6 min-h-56 flex flex-col justify-between space-y-4 relative group hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
                           >
                             <div className="flex items-start justify-between mb-4">
                               <div>
@@ -550,7 +591,9 @@ export const Dashboard: React.FC = () => {
                                   <div className="flex items-center gap-1.5 text-body-sm text-text-secondary whitespace-nowrap">
                                     <Calendar className="h-3.5 w-3.5 shrink-0" />
                                     <span>
-                                      {plan.startDate ? `${plan.startDate} to ${plan.endDate || "N/A"}` : "Dates: N/A"}
+                                      {plan.startDate
+                                        ? `${plan.startDate} to ${plan.endDate || "N/A"}`
+                                        : "Dates: N/A"}
                                     </span>
                                   </div>
                                 </div>
@@ -562,13 +605,19 @@ export const Dashboard: React.FC = () => {
                                 <span className="text-text-secondary whitespace-nowrap">
                                   Spent:{" "}
                                   <b className="num text-text-primary font-medium">
-                                    {totalSpent !== null && totalSpent !== undefined ? formatCurrency(totalSpent) : "N/A"}
+                                    {totalSpent !== null &&
+                                    totalSpent !== undefined
+                                      ? formatCurrency(totalSpent)
+                                      : "N/A"}
                                   </b>
                                 </span>
                                 <span className="text-text-secondary whitespace-nowrap">
                                   Budget:{" "}
                                   <b className="num text-text-primary font-medium">
-                                    {plan.totalAmount !== null && plan.totalAmount !== undefined ? formatCurrency(plan.totalAmount) : "N/A"}
+                                    {plan.totalAmount !== null &&
+                                    plan.totalAmount !== undefined
+                                      ? formatCurrency(plan.totalAmount)
+                                      : "N/A"}
                                   </b>
                                 </span>
                               </div>
@@ -601,7 +650,7 @@ export const Dashboard: React.FC = () => {
                 ) : (
                   <div
                     onClick={() => navigate("/budgets")}
-                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-[8rem]"
+                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-32"
                   >
                     + Add budget plan
                   </div>
@@ -615,58 +664,79 @@ export const Dashboard: React.FC = () => {
                 </h3>
                 {recurringExpenses.length > 0 ? (
                   <div className="space-y-3">
-                    {recurringExpenses.map((exp: RecurringExpenseData, idx: number) => (
-                      <div
-                        key={exp.id}
-                        onClick={() => navigate("/budgets/recurring")}
-                        className={`card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between space-y-4 hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
-                      >
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                              <h3 className="font-semibold text-text-primary text-body-lg leading-tight truncate max-w-full">
-                                {exp.name || "N/A"}
-                              </h3>
-                              <span className="text-[0.65rem] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
-                                {exp.frequency || "N/A"}
+                    {recurringExpenses.map(
+                      (exp: RecurringExpenseData, idx: number) => (
+                        <div
+                          key={exp.id}
+                          onClick={() => navigate("/budgets/recurring")}
+                          className={`card p-5 sm:p-6 min-h-56 flex flex-col justify-between space-y-4 hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
+                        >
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                <h3 className="font-semibold text-text-primary text-body-lg leading-tight truncate max-w-full">
+                                  {exp.name || "N/A"}
+                                </h3>
+                                <span className="text-[0.65rem] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
+                                  {exp.frequency || "N/A"}
+                                </span>
+                              </div>
+                              <p className="text-body-sm text-text-secondary truncate">
+                                {exp.categoryName
+                                  ? `Category: ${exp.categoryName}`
+                                  : "Category: N/A"}
+                              </p>
+                            </div>
+                            <span
+                              className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}
+                            >
+                              {exp.status || "N/A"}
+                            </span>
+                          </div>
+                          <div className="mt-auto pt-4 border-t border-border space-y-2">
+                            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-body-sm">
+                              <span className="text-text-secondary whitespace-nowrap">
+                                Next Due:{" "}
+                                <b className="text-text-primary font-medium">
+                                  {exp.nextDueDate || "N/A"}
+                                </b>
+                              </span>
+                              <span className="text-text-secondary whitespace-nowrap">
+                                Amount:{" "}
+                                <b className="num text-text-primary font-bold">
+                                  {exp.amount !== null &&
+                                  exp.amount !== undefined
+                                    ? formatCurrency(exp.amount)
+                                    : "N/A"}
+                                </b>
                               </span>
                             </div>
-                            <p className="text-body-sm text-text-secondary truncate">
-                              {exp.categoryName ? `Category: ${exp.categoryName}` : "Category: N/A"}
-                            </p>
-                          </div>
-                          <span className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}>
-                            {exp.status || "N/A"}
-                          </span>
-                        </div>
-                        <div className="mt-auto pt-4 border-t border-border space-y-2">
-                          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-body-sm">
-                            <span className="text-text-secondary whitespace-nowrap">
-                              Next Due: <b className="text-text-primary font-medium">{exp.nextDueDate || "N/A"}</b>
-                            </span>
-                            <span className="text-text-secondary whitespace-nowrap">
-                              Amount: <b className="num text-text-primary font-bold">{exp.amount !== null && exp.amount !== undefined ? formatCurrency(exp.amount) : "N/A"}</b>
-                            </span>
-                          </div>
-                          <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-deliberate ease-standard ${exp.status === "ACTIVE" ? "bg-income w-full" : "bg-warning w-1/2"}`}
-                            />
-                          </div>
-                          <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
-                            <span className={`font-semibold ${exp.status === "ACTIVE" ? "text-income" : "text-warning"}`}>
-                              {exp.status === "ACTIVE" ? "Active Schedule" : "Paused Schedule"}
-                            </span>
-                            <span className="text-text-muted">Auto-recurring</span>
+                            <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-deliberate ease-standard ${exp.status === "ACTIVE" ? "bg-income w-full" : "bg-warning w-1/2"}`}
+                              />
+                            </div>
+                            <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                              <span
+                                className={`font-semibold ${exp.status === "ACTIVE" ? "text-income" : "text-warning"}`}
+                              >
+                                {exp.status === "ACTIVE"
+                                  ? "Active Schedule"
+                                  : "Paused Schedule"}
+                              </span>
+                              <span className="text-text-muted">
+                                Auto-recurring
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
                   <div
                     onClick={() => navigate("/budgets/recurring")}
-                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-[8rem]"
+                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-32"
                   >
                     + Add recurring payment
                   </div>
@@ -686,13 +756,15 @@ export const Dashboard: React.FC = () => {
                         <div
                           key={g.id}
                           onClick={() => navigate("/budgets/goals")}
-                          className={`card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between space-y-4 hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
+                          className={`card p-5 sm:p-6 min-h-56 flex flex-col justify-between space-y-4 hover:border-primary/50 transition-all duration-200 shadow-xs hover:shadow-md bg-bg-surface/95 cursor-pointer ${idx > 0 ? "lg:hidden" : ""}`}
                         >
                           <div className="flex justify-between items-start gap-3">
                             <div className="space-y-1 flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-1.5">
                                 <h4 className="font-semibold text-text-primary text-body-lg leading-tight flex items-center gap-1.5 truncate max-w-full">
-                                  <span className="truncate">{g.name || "N/A"}</span>
+                                  <span className="truncate">
+                                    {g.name || "N/A"}
+                                  </span>
                                   {isCompleted && (
                                     <Trophy className="h-4 w-4 text-income shrink-0" />
                                   )}
@@ -713,13 +785,19 @@ export const Dashboard: React.FC = () => {
                               <span className="text-text-secondary whitespace-nowrap">
                                 Saved:{" "}
                                 <b className="num text-text-primary font-medium">
-                                  {g.currentAmount !== null && g.currentAmount !== undefined ? formatCurrency(g.currentAmount) : "N/A"}
+                                  {g.currentAmount !== null &&
+                                  g.currentAmount !== undefined
+                                    ? formatCurrency(g.currentAmount)
+                                    : "N/A"}
                                 </b>
                               </span>
                               <span className="text-text-secondary whitespace-nowrap">
                                 Target:{" "}
                                 <b className="num text-text-primary font-medium">
-                                  {g.targetAmount !== null && g.targetAmount !== undefined ? formatCurrency(g.targetAmount) : "N/A"}
+                                  {g.targetAmount !== null &&
+                                  g.targetAmount !== undefined
+                                    ? formatCurrency(g.targetAmount)
+                                    : "N/A"}
                                 </b>
                               </span>
                             </div>
@@ -735,9 +813,11 @@ export const Dashboard: React.FC = () => {
                               <span
                                 className={`font-semibold ${isCompleted ? "text-income" : "text-brand"}`}
                               >
-                                {(g.percentageComplete || 0).toFixed(0)}% Achieved
+                                {(g.percentageComplete || 0).toFixed(0)}%
+                                Achieved
                               </span>
                               {g.daysRemaining !== null &&
+                                g.daysRemaining !== undefined &&
                                 g.daysRemaining > 0 &&
                                 !isCompleted && (
                                   <span className="text-text-muted">
@@ -753,7 +833,7 @@ export const Dashboard: React.FC = () => {
                 ) : (
                   <div
                     onClick={() => navigate("/budgets/goals")}
-                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-[8rem]"
+                    className="card p-5 text-center text-text-muted text-body-sm hover:border-primary/50 transition-colors cursor-pointer border-dashed flex items-center justify-center min-h-32"
                   >
                     + Add savings goal
                   </div>
@@ -821,7 +901,18 @@ export const Dashboard: React.FC = () => {
                     tx.transactionType,
                   );
                   const isExpanded = expandedRows.has(tx.id);
-                  const catObj = tx.category || categoryBreakdown.find((cb: { categoryId?: string; categoryName?: string; color?: string }) => cb.categoryId === (tx as unknown as { categoryId?: string }).categoryId) || null;
+                  const catObj =
+                    tx.category ||
+                    categoryBreakdown.find(
+                      (cb: {
+                        categoryId?: string;
+                        categoryName?: string;
+                        color?: string;
+                      }) =>
+                        cb.categoryId ===
+                        (tx as unknown as { categoryId?: string }).categoryId,
+                    ) ||
+                    null;
                   return (
                     <TableRow
                       key={tx.id}
@@ -862,11 +953,14 @@ export const Dashboard: React.FC = () => {
                           <span
                             className={`badge badge-neutral max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
                             style={{
-                              backgroundColor: `${catObj.color || '#888888'}15`,
-                              color: catObj.color || '#888888',
+                              backgroundColor: `${catObj.color}15`,
+                              color: catObj.color,
                             }}
                           >
-                            {catObj.name || (catObj as { categoryName?: string }).categoryName || 'Category'}
+                            {catObj.name ||
+                              (catObj as { categoryName?: string })
+                                .categoryName ||
+                              "Category"}
                           </span>
                         ) : (
                           <span
@@ -897,7 +991,7 @@ export const Dashboard: React.FC = () => {
                           isNegative ? "num-negative" : "num-positive"
                         }`}
                       >
-                        {isNegative ? "−" : "+"}
+                        {isNegative ? "-" : "+"}
                         {formatCurrency(tx.amount)}
                       </TableCell>
                     </TableRow>

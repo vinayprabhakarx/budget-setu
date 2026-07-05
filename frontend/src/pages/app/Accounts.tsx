@@ -49,7 +49,7 @@ const getErrorMessage = (error: unknown): string | null => {
 
 /**
  * Accounts Page Component
- * 
+ *
  * Displays and manages all user financial accounts including banks, credit cards, and cash.
  * Allows users to add, edit, or delete accounts, and view the current balance of each.
  */
@@ -60,10 +60,13 @@ export const Accounts: React.FC = () => {
   const { showToast } = useToast();
 
   // Tab is driven entirely by the URL path
-  const activeTab: 'accounts' | 'upload' = location.pathname === '/accounts/import' ? 'upload' : 'accounts';
+  const activeTab: "accounts" | "upload" =
+    location.pathname === "/accounts/import" ? "upload" : "accounts";
 
-  const setActiveTab = (tab: 'accounts' | 'upload') => {
-    navigate(tab === 'upload' ? '/accounts/import' : '/accounts', { replace: false });
+  const setActiveTab = (tab: "accounts" | "upload") => {
+    navigate(tab === "upload" ? "/accounts/import" : "/accounts", {
+      replace: false,
+    });
   };
 
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -137,7 +140,7 @@ export const Accounts: React.FC = () => {
   }, [showToast]);
 
   useEffect(() => {
-    if (location.hash === '#new' && !isModalOpen) {
+    if (location.hash === "#new" && !isModalOpen) {
       setTimeout(() => {
         setActiveAccount(null);
         setAccountHolderName(user?.fullName || "");
@@ -150,7 +153,14 @@ export const Accounts: React.FC = () => {
         navigate(location.pathname, { replace: true, state: location.state });
       }, 0);
     }
-  }, [location.hash, location.pathname, location.state, isModalOpen, navigate, user?.fullName]);
+  }, [
+    location.hash,
+    location.pathname,
+    location.state,
+    isModalOpen,
+    navigate,
+    user?.fullName,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -282,7 +292,7 @@ export const Accounts: React.FC = () => {
     const destAcc = accounts.find((a) => a.id === mergeDestId);
     if (!sourceAcc || !destAcc)
       return showToast("error", "Selected accounts are invalid.");
-    
+
     const sourceDisplayName = getAccountDisplayName(sourceAcc);
     const destDisplayName = getAccountDisplayName(destAcc);
     const confirmMsg = `Are you sure you want to merge "${sourceDisplayName}" into "${destDisplayName}"?\n\nThis will transfer all transactions and statement imports to "${destDisplayName}", and then permanently delete "${sourceDisplayName}".\n\nThis action cannot be undone.`;
@@ -356,8 +366,8 @@ export const Accounts: React.FC = () => {
         onFilterClick={() => setShowFilters(!showFilters)}
         onRefreshClick={() => {
           fetchAccounts();
-          if (activeTab === 'upload') {
-            window.dispatchEvent(new CustomEvent('import-history-updated'));
+          if (activeTab === "upload") {
+            window.dispatchEvent(new CustomEvent("import-history-updated"));
           }
         }}
         isRefreshing={loading}
@@ -391,7 +401,9 @@ export const Accounts: React.FC = () => {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search accounts by name, bank..."
-          hasActiveFilters={Boolean(searchQuery || typeFilter !== "ALL" || statusFilter !== "ALL")}
+          hasActiveFilters={Boolean(
+            searchQuery || typeFilter !== "ALL" || statusFilter !== "ALL",
+          )}
           onReset={() => {
             setSearchQuery("");
             setTypeFilter("ALL");
@@ -427,7 +439,11 @@ export const Accounts: React.FC = () => {
           searchQuery={historySearchQuery}
           onSearchChange={setHistorySearchQuery}
           searchPlaceholder="Search filename or parser source..."
-          hasActiveFilters={Boolean(historySearchQuery || historySourceFilter !== "ALL" || historyStatusFilter !== "ALL")}
+          hasActiveFilters={Boolean(
+            historySearchQuery ||
+            historySourceFilter !== "ALL" ||
+            historyStatusFilter !== "ALL",
+          )}
           onReset={() => {
             setHistorySearchQuery("");
             setHistorySourceFilter("ALL");
@@ -484,8 +500,6 @@ export const Accounts: React.FC = () => {
 
       {activeTab === "accounts" ? (
         <>
-
-          
           {/* Accounts grid */}
           {loading ? (
             <AccountsSkeleton />
@@ -523,7 +537,9 @@ export const Accounts: React.FC = () => {
           ) : (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredAccounts.map((acc) => {
-                const isUpi = acc.accountType === "UPI" || acc.bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i);
+                const isUpi =
+                  acc.accountType === "UPI" ||
+                  acc.bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i);
 
                 return (
                   <div
@@ -537,10 +553,15 @@ export const Accounts: React.FC = () => {
                           {acc.accountType || "N/A"}
                         </span>
                         <p className="text-body-xs text-text-muted mt-1 uppercase tracking-wider font-semibold">
-                          {acc.accountHolderName || user?.fullName || "Account Holder"}
+                          {acc.accountHolderName ||
+                            user?.fullName ||
+                            "Account Holder"}
                         </p>
                         <h4 className="font-semibold text-text-primary text-body-lg leading-tight line-clamp-2 mt-1">
-                          {acc.bankName || "Account"} {isUpi ? "· Mob:" : "·"} <span className="font-mono text-body-md tracking-tight">•••• {acc.accountNumber?.slice(-4) || "XXXX"}</span>
+                          {acc.bankName || "Account"} {isUpi ? "· Mob:" : "·"}{" "}
+                          <span className="font-mono text-body-md tracking-tight">
+                            •••• {acc.accountNumber?.slice(-4) || "XXXX"}
+                          </span>
                         </h4>
                       </div>
 
@@ -559,7 +580,9 @@ export const Accounts: React.FC = () => {
                         Current Balance
                       </span>
                       <p className="num text-mono-xl font-bold text-text-primary">
-                        {acc.balance !== null && acc.balance !== undefined ? formatCurrency(acc.balance) : "N/A"}
+                        {acc.balance !== null && acc.balance !== undefined
+                          ? formatCurrency(acc.balance)
+                          : "N/A"}
                       </p>
                     </div>
 
@@ -631,7 +654,8 @@ export const Accounts: React.FC = () => {
                     {/* Account Number / Mobile Number (last 4 digits only) */}
                     <div>
                       <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        {accountType === "UPI" || bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i)
+                        {accountType === "UPI" ||
+                        bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i)
                           ? "Mobile Number (Last 4 digits preferred)"
                           : "Account Number (Last 4 digits preferred)"}
                       </label>
@@ -662,7 +686,6 @@ export const Accounts: React.FC = () => {
                         ]}
                       />
                     </div>
-
 
                     {/* Manual Balance Initializer (mostly for UPI/CASH, but support for all) */}
                     <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
@@ -772,7 +795,7 @@ export const Accounts: React.FC = () => {
                           { value: "", label: "Select Source Account" },
                           ...accounts.map((acc) => ({
                             value: acc.id,
-                            label: `${acc.name}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
+                            label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
                           })),
                         ]}
                       />
@@ -792,7 +815,7 @@ export const Accounts: React.FC = () => {
                             .filter((acc) => acc.id !== mergeSourceId)
                             .map((acc) => ({
                               value: acc.id,
-                              label: `${acc.name}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
+                              label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
                             })),
                         ]}
                       />
@@ -896,7 +919,6 @@ export const Accounts: React.FC = () => {
                             ]}
                           />
                         </div>
-
 
                         {/* Balance */}
                         <div>

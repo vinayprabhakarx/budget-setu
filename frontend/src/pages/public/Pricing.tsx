@@ -76,7 +76,7 @@ export const Pricing: React.FC = () => {
                 <span>No credit card required. Private data.</span>
               </div>
               <Link
-                to="/login"
+                to="/register"
                 className="btn btn-primary btn-md w-full sm:w-auto transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
               >
                 Create Free Account

@@ -21,9 +21,7 @@ export const Contact: React.FC = () => {
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!fullName.trim()) errs.fullName = "Name is required";
-    if (!email.trim()) {
-      errs.email = "Email address is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
       errs.email = "Email format is invalid";
     }
     if (!message.trim()) errs.message = "Message cannot be empty";
@@ -53,7 +51,8 @@ export const Contact: React.FC = () => {
       console.error("Failed to submit contact form:", error);
       showToast(
         "error",
-        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to send message. Please try again later."
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to send message. Please try again later.",
       );
     } finally {
       setLoading(false);
@@ -177,7 +176,7 @@ export const Contact: React.FC = () => {
                     {/* Email Address */}
                     <div className="space-y-1">
                       <label className="block text-body-sm font-semibold text-text-secondary">
-                        Email Address
+                        Email Address (optional)
                       </label>
                       <input
                         type="email"

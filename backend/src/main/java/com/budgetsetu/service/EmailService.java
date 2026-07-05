@@ -43,11 +43,15 @@ public class EmailService {
     }
 
     public void sendContactConfirmationEmail(String email, String fullName, String topic) {
+        String contactEmail = (adminEmail == null || adminEmail.trim().isEmpty()) ? "" : adminEmail.trim();
         String subject = "We received your message - BudgetSetu";
         String body = "Hello " + fullName + ",\n\n" +
                 "Thank you for reaching out to BudgetSetu! We have received your message regarding \"" + topic
                 + "\".\n\n" +
-                "Our team will review your inquiry and get back to you shortly at this email address.\n\n" +
+                (contactEmail.isEmpty() ? "Our team will review your inquiry and get back to you shortly.\n\n"
+                        : "If you need to follow up, you can reply directly to this email or contact us at "
+                                + contactEmail + ".\n\n")
+                +
                 "Best regards,\nThe BudgetSetu Team";
 
         mailService.sendEmail(email, subject, body);

@@ -29,29 +29,36 @@ export const About: React.FC = () => {
             </h2>
             <div className="text-text-secondary text-body-md space-y-5 leading-relaxed">
               <p>
-                BudgetSetu was created out of simple frustration. Most modern
-                personal finance tools are cluttered with ad banners, aggressive
-                credit card offers, and complex onboarding screens designed to
-                lock users into commercial ecosystems. Worse, they demand access
-                to live bank accounts, mining sensitive transaction data to sell
-                targeted advertisements.
+                BudgetSetu was created to solve a very specific modern
+                frustration: financial fragmentation. Today, an average person
+                juggles multiple bank accounts and bounces between various UPI
+                apps like PhonePe, Google Pay, and Paytm just to get through the
+                day.
               </p>
               <p>
-                We believed there was a better way: a tool that is fast, looks
-                beautiful, runs completely on your own terms, and requires no
-                permanent linking to live banking APIs.
+                When you pay for groceries from one account, subscriptions from
+                another, and split bills on a third, tracking your expenses
+                manually becomes incredibly tedious. Manual transaction entry
+                almost always leads to forgotten expenses and inaccurate
+                budgets.
               </p>
               <p>
-                BudgetSetu offers cashflow clarity via secure, asynchronous
-                statement imports. You drag and drop your standard bank PDF,
-                CSV, XLS, or HTML statement, and the system extracts,
-                deduplicates, and files the transactions in seconds. By
-                supporting physical transaction tracking with an
-                auto-initialized <strong>Cash Wallet</strong>, allowing secure
+                Instead of demanding live access to your banking APIs and mining
+                your sensitive data to sell targeted advertisements—like most
+                commercial finance tools do—we built BudgetSetu. It unifies your
+                cashflow simply through secure, asynchronous statement imports.
+                You just drag and drop your standard bank PDF or CSV, and the
+                system extracts, deduplicates, and files your transactions
+                across all your accounts in seconds.
+              </p>
+              <p>
+                With support for physical transaction tracking via an
+                auto-initialized <strong>Cash Wallet</strong>, secure
                 synchronous decryption of{" "}
-                <strong>password-protected statements</strong>, and calculating{" "}
-                <strong>multi-priority balances</strong>, BudgetSetu provides a
-                complete, modern ledger you own completely.
+                <strong>password-protected statements</strong>, and{" "}
+                <strong>multi-priority balance</strong> calculations, BudgetSetu
+                provides a complete, modern ledger that tames the chaos of
+                multiple accounts.
               </p>
             </div>
           </section>
@@ -82,14 +89,17 @@ export const About: React.FC = () => {
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <h3 className="font-display text-text-primary text-heading-lg">
-                  Strict Isolation & E2E Encryption
+                  Security, Privacy & Deletion
                 </h3>
                 <p className="text-text-secondary text-body-sm leading-relaxed">
-                  Your data is strictly yours. Behind the UI, PostgreSQL
-                  Row-Level Security (RLS) policies safeguard every query. When
-                  you upload a statement, it is secured with ephemeral AES-256
-                  end-to-end encryption (meaning even we cannot read your files)
-                  and auto-deleted within 10 minutes.
+                  Your data is strictly yours. Behind the UI, strict
+                  authenticated, token-based access controls at the application
+                  layer safeguard every request. When you upload a statement, it
+                  is encrypted immediately upon receipt using a key that is not
+                  accessible to our system administrators (meaning even we
+                  cannot read your files), and it is auto-deleted within 24
+                  hours. Furthermore, you maintain complete control with a
+                  1-click option to permanently wipe all your data.
                 </p>
               </div>
 

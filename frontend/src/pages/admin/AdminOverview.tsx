@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Users,
   CreditCard,
@@ -94,15 +95,15 @@ export const AdminOverview: React.FC = () => {
       const res = await api.get("/admin/metrics");
       setMetrics(res.data);
     } catch (err) {
-      const error = err as
-        | Error
-        | { response?: { data?: { message?: string } } };
-      // @ts-expect-error - response type is not fully defined
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load metrics",
-      );
+      let message = "Failed to load metrics";
+
+      if (axios.isAxiosError(err)) {
+        message = err.response?.data?.message || err.message || message;
+      } else if (err instanceof Error) {
+        message = err.message || message;
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }

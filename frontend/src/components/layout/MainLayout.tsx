@@ -226,7 +226,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
       {/* Desktop Topbar */}
       <header className="hidden lg:flex items-center justify-between h-16 w-full fixed top-0 left-0 bg-bg-surface border-b border-border px-8 z-40">
-        <Link to="/" className="font-display text-text-primary text-xl md:text-2xl tracking-tight flex items-start gap-2">
+        <Link to="/dashboard" className="font-display text-text-primary text-xl md:text-2xl tracking-tight flex items-start gap-2">
           <span>BudgetSetu</span>
           <span className="text-xl font-bold text-brand font-sans" title="Beta">β</span>
         </Link>
@@ -289,15 +289,17 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           })}
         </nav>
 
-        {/* Floating Add Transaction Button — all devices */}
+        {/* Floating Add Transaction Button — dashboard and transactions only */}
         <GlobalImportIndicator />
-        <button
-          onClick={() => setIsAddTxnOpen(true)}
-          className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
-          title="Add Transaction"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
+        {(location.pathname === "/dashboard" || location.pathname === "/transactions" || location.pathname === "/") && (
+          <button
+            onClick={() => setIsAddTxnOpen(true)}
+            className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
+            title="Add Transaction"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Global Add Transaction Dialog */}

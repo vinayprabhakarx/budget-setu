@@ -4,6 +4,8 @@ import { StateDisplay } from '../../components/shared/StateDisplay';
 import { formatCurrency } from '../../utils/currency';
 import api from '../../api/axiosInstance';
 import { useToast } from '../../context/ToastContext';
+import { PageHeader } from '../../components/shared/PageHeader';
+import { FilterSection } from '../../components/shared/FilterSection';
 import {
   ResponsiveContainer,
   PieChart,
@@ -17,7 +19,7 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Minus, Receipt, Filter } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowUpRight, ArrowDownRight, Minus, Receipt } from 'lucide-react';
 import { Select } from '../../components/shared/Select';
 
 interface AnalyticsData {
@@ -270,26 +272,23 @@ export const Analytics: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full gap-6 max-w-7xl mx-auto w-full pb-24">
-      <div className="flex items-center justify-between">
-        <h1 className="text-heading-2 font-display text-text-primary">Analytics</h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`p-2 rounded-lg border transition-colors flex items-center justify-center ${
-            showFilters
-              ? "bg-primary-50 text-primary-600 border-primary-200"
-              : "bg-bg-surface text-text-secondary border-border hover:bg-bg-muted"
-          }`}
-          title="Toggle Filters"
-        >
-          <Filter className="h-5 w-5" />
-        </button>
-      </div>
+      <PageHeader
+        title="Analytics"
+        subtitle="Insights and financial breakdowns across your accounts."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
+        onRefreshClick={fetchAnalytics}
+        isRefreshing={loading}
+      />
 
       {/* Controls Bar */}
-      <div className={`card p-4 gap-4 xl:items-center justify-between sticky top-0 z-10 ${showFilters ? 'flex flex-col xl:flex-row' : 'hidden'}`}>
-        
-        {/* Presets */}
-        <div className="flex flex-wrap gap-2">
+      <FilterSection
+        isOpen={showFilters}
+        hasActiveFilters={activePreset !== 'thisMonth' || groupBy !== 'week'}
+        onReset={() => handlePresetChange('thisMonth')}
+        className="sticky top-0 z-10"
+      >
+        <div className="flex flex-wrap gap-2 items-center">
           {presetRanges.map(preset => (
             <button
               key={preset.type}
@@ -305,20 +304,20 @@ export const Analytics: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-3 ml-auto flex-wrap">
+          <div className="flex items-center gap-2">
             <input
               type="date"
               value={fromDate}
               onChange={(e) => handleCustomDateChange(e, 'from')}
-              className="bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-2 text-body-sm w-full sm:w-auto focus:ring-2 focus:ring-primary/50 outline-none"
+              className="bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-1.5 text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
             />
             <span className="text-text-tertiary">to</span>
             <input
               type="date"
               value={toDate}
               onChange={(e) => handleCustomDateChange(e, 'to')}
-              className="bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-2 text-body-sm w-full sm:w-auto focus:ring-2 focus:ring-primary/50 outline-none"
+              className="bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-1.5 text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
             />
           </div>
           <Select
@@ -329,9 +328,10 @@ export const Analytics: React.FC = () => {
               { value: 'week', label: 'By Week' },
               { value: 'month', label: 'By Month' }
             ]}
+            size="sm"
           />
         </div>
-      </div>
+      </FilterSection>
 
       {/* Summary Cards */}
       {isLoading ? <AnalyticsSummarySkeleton /> : (

@@ -3,6 +3,7 @@ import { Plus, Trash2, X, ChevronDown, ChevronRight, Calendar, Edit2 } from 'luc
 import { Select } from '../../../components/shared/Select';
 import { BudgetPlansSkeleton } from "../../../components/skeletons/BudgetPlansSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
+import { CurrencyInput } from '../../../components/shared/CurrencyInput';
 import { formatCurrency } from '../../../utils/currency';
 import { getBudgetProgressBgClass } from '../../../utils/budgetColor';
 import type { BudgetPlan, ProcessedPlan, Category, BudgetAllocation } from './types';
@@ -134,28 +135,28 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
     
     return (
       <div key={plan.id} className={level === 0 ? '' : 'mt-4'}>
-        <div className={`card p-5 hover:border-primary/50 transition-colors flex flex-col relative group ${level > 0 ? 'ml-6 border-l-4 border-l-primary/30' : 'h-full'}`}>
-          <div className="flex items-start justify-between mb-4">
-            <div>
+        <div className={`card p-5 sm:p-6 min-h-[14rem] transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 flex flex-col justify-between space-y-4 relative group ${level > 0 ? 'ml-6 border-l-4 border-l-primary/30 mt-4' : 'h-full'}`}>
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex-1 min-w-0">
               <div className={`flex items-center gap-2 ${hasExpandableContent ? 'cursor-pointer' : ''}`} onClick={() => hasExpandableContent && toggleExpand(plan.id)}>
                 {hasExpandableContent && (
                   <button className="text-text-muted hover:text-text-primary transition-colors shrink-0">
                     {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                   </button>
                 )}
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <h3 className="text-body-md font-semibold text-text-primary leading-tight truncate">{plan.name}</h3>
-                  <span className="text-xs font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">{plan.periodType}</span>
+                <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
+                  <h3 className="font-semibold text-text-primary text-body-lg leading-tight truncate max-w-full">{plan.name || "N/A"}</h3>
+                  <span className="text-[0.65rem] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">{plan.periodType || "N/A"}</span>
                 </div>
               </div>
               <div className={`mt-1.5 flex flex-wrap items-center gap-2 ${hasExpandableContent ? 'ml-7' : ''}`}>
                 <div className="flex items-center gap-1.5 text-body-sm text-text-secondary whitespace-nowrap">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
-                  <span>{plan.startDate} to {plan.endDate}</span>
+                  <span>{plan.startDate ? `${plan.startDate} to ${plan.endDate || 'N/A'}` : "Dates: N/A"}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0 ml-1">
               <button title="Edit Budget" onClick={e => { e.stopPropagation(); openEdit(plan); }} className="text-text-muted hover:text-primary p-1.5 transition-colors bg-background-alt/50 rounded-md">
                 <Edit2 className="h-4 w-4" />
               </button>
@@ -165,9 +166,9 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
             </div>
           </div>
           <div className="mt-auto pt-4 border-t border-border space-y-2">
-            <div className="flex justify-between text-body-sm">
-              <span className="text-text-secondary">Spent: <b className="num text-text-primary font-medium">{formatCurrency(totalSpent)}</b></span>
-              <span className="text-text-secondary">Budget: <b className="num text-text-primary font-medium">{formatCurrency(plan.totalAmount)}</b></span>
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-body-sm">
+              <span className="text-text-secondary whitespace-nowrap">Spent: <b className="num text-text-primary font-medium">{totalSpent !== null && totalSpent !== undefined ? formatCurrency(totalSpent) : "N/A"}</b></span>
+              <span className="text-text-secondary whitespace-nowrap">Budget: <b className="num text-text-primary font-medium">{plan.totalAmount !== null && plan.totalAmount !== undefined ? formatCurrency(plan.totalAmount) : "N/A"}</b></span>
             </div>
             <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-deliberate ease-standard ${getBudgetProgressBgClass(progressPercent)}`} style={{ width: `${Math.min(progressPercent, 100)}%` }} />
@@ -217,7 +218,10 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-body-sm text-text-secondary font-medium">
+          {processedPlans.length} budget {processedPlans.length === 1 ? 'plan' : 'plans'} configured
+        </div>
         <button onClick={openCreate} className="btn btn-primary flex items-center gap-2">
           <Plus className="h-4.5 w-4.5" /><span>New Plan</span>
         </button>
@@ -228,7 +232,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
       ) : processedPlans.length === 0 ? (
         <StateDisplay type="empty" title="No budget plans created yet" className="py-12" action={{ label: "New Plan", onClick: openCreate }} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-start">
           {processedPlans.map(plan => <div key={plan.id} className="w-full">{renderTree(plan)}</div>)}
         </div>
       )}
@@ -264,7 +268,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
                 </div>
                 <div>
                   <label className="block text-body-sm text-text-secondary mb-1">Total Amount</label>
-                  <input required type="number" min="0" step="0.01" className="input" value={planForm.totalAmount || ''} onChange={e => setPlanForm({ ...planForm, totalAmount: Number(e.target.value) })} />
+                  <CurrencyInput required value={planForm.totalAmount || ''} onChange={e => setPlanForm({ ...planForm, totalAmount: Number(e.target.value) })} />
                 </div>
                 <div className="pt-4 border-t border-border mt-4">
                   <div className="flex justify-between items-center mb-3">
@@ -274,7 +278,9 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
                   {planAllocations.map((alloc, idx) => (
                     <div key={idx} className="flex gap-2 mb-2">
                       <Select className="flex-1" value={alloc.categoryId} onChange={val => { const a = [...planAllocations]; a[idx].categoryId = val; setPlanAllocations(a); }} options={categories.map(c => ({ value: c.id, label: c.name }))} />
-                      <input type="number" min="0" step="0.01" className="input w-24! sm:w-32!" placeholder="Amount" value={alloc.amount || ''} onChange={e => { const a = [...planAllocations]; a[idx].amount = Number(e.target.value); setPlanAllocations(a); }} />
+                      <div className="w-36! sm:w-44! shrink-0">
+                        <CurrencyInput placeholder="Amount" value={alloc.amount || ''} onChange={e => { const a = [...planAllocations]; a[idx].amount = Number(e.target.value); setPlanAllocations(a); }} />
+                      </div>
                       <button type="button" onClick={() => setPlanAllocations(planAllocations.filter((_, i) => i !== idx))} className="text-expense p-2 shrink-0 hover:text-expense"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   ))}

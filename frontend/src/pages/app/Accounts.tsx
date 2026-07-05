@@ -3,6 +3,7 @@ import axios from "axios";
 
 import api from "../../api/axiosInstance";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Import } from "./Import";
 import { formatCurrency } from "../../utils/currency";
@@ -11,19 +12,28 @@ import { AccountsSkeleton } from "../../components/skeletons/AccountsSkeleton";
 import { Select } from "../../components/shared/Select";
 import { UploadStatementModal } from "../../components/shared/UploadStatementModal";
 import { StateDisplay } from "../../components/shared/StateDisplay";
+import { CurrencyInput } from "../../components/shared/CurrencyInput";
+import { PageHeader } from "../../components/shared/PageHeader";
+import { FilterSection } from "../../components/shared/FilterSection";
 
 interface Account {
   id: string;
-  name: string;
   bankName: string;
+  accountHolderName?: string;
   accountNumber: string;
   accountType: string;
   balance: number | null;
-  currency: string;
   isActive: boolean;
   manualBalance?: number | null;
   manualBalanceDate?: string | null;
 }
+
+const getAccountDisplayName = (acc: Account) => {
+  if (!acc.bankName && !acc.accountNumber) return "Account";
+  const bank = acc.bankName || acc.accountType || "Account";
+  const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+  return num ? `${bank} - ${num}` : bank;
+};
 
 const getErrorMessage = (error: unknown): string | null => {
   if (axios.isAxiosError(error)) {
@@ -44,10 +54,10 @@ const getErrorMessage = (error: unknown): string | null => {
  * Allows users to add, edit, or delete accounts, and view the current balance of each.
  */
 export const Accounts: React.FC = () => {
-  const { showToast } = useToast();
-
-  const location = useLocation();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { showToast } = useToast();
 
   // Tab is driven entirely by the URL path
   const activeTab: 'accounts' | 'upload' = location.pathname === '/accounts/import' ? 'upload' : 'accounts';
@@ -58,15 +68,44 @@ export const Accounts: React.FC = () => {
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // History tab filters
+  const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [historySourceFilter, setHistorySourceFilter] = useState("ALL");
+  const [historyStatusFilter, setHistoryStatusFilter] = useState("ALL");
+
+  const filteredAccounts = accounts.filter((acc) => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const displayName = getAccountDisplayName(acc).toLowerCase();
+      const matchName = displayName.includes(q);
+      const matchBank = acc.bankName?.toLowerCase().includes(q);
+      const matchNumber = acc.accountNumber?.toLowerCase().includes(q);
+      if (!matchName && !matchBank && !matchNumber) return false;
+    }
+    if (typeFilter !== "ALL" && acc.accountType !== typeFilter) {
+      return false;
+    }
+    if (statusFilter === "ACTIVE" && !acc.isActive) {
+      return false;
+    }
+    if (statusFilter === "INACTIVE" && acc.isActive) {
+      return false;
+    }
+    return true;
+  });
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeAccount, setActiveAccount] = useState<Account | null>(null); // null -> Create, set -> Edit
-  const [name, setName] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountType, setAccountType] = useState("SAVINGS");
-  const [currency, setCurrency] = useState("INR");
   const [manualBalance, setManualBalance] = useState("");
   const [manualBalanceDate, setManualBalanceDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -81,7 +120,6 @@ export const Accounts: React.FC = () => {
   const [mergeCustomAccountNumber, setMergeCustomAccountNumber] = useState("");
   const [mergeCustomAccountType, setMergeCustomAccountType] =
     useState("SAVINGS");
-  const [mergeCustomCurrency, setMergeCustomCurrency] = useState("INR");
   const [mergeCustomBalance, setMergeCustomBalance] = useState("");
   const [mergeSubmitting, setMergeSubmitting] = useState(false);
 
@@ -121,11 +159,10 @@ export const Accounts: React.FC = () => {
 
   const openCreateModal = () => {
     setActiveAccount(null);
-    setName("");
+    setAccountHolderName(user?.fullName || "");
     setBankName("");
     setAccountNumber("");
     setAccountType("SAVINGS");
-    setCurrency("INR");
     setManualBalance("");
     setManualBalanceDate("");
     setIsModalOpen(true);
@@ -133,11 +170,10 @@ export const Accounts: React.FC = () => {
 
   const openEditModal = (acc: Account) => {
     setActiveAccount(acc);
-    setName(acc.name);
+    setAccountHolderName(acc.accountHolderName || "");
     setBankName(acc.bankName || "");
     setAccountNumber(acc.accountNumber || "");
     setAccountType(acc.accountType);
-    setCurrency(acc.currency || "INR");
     setManualBalance(
       acc.manualBalance !== undefined && acc.manualBalance !== null
         ? acc.manualBalance.toString()
@@ -149,17 +185,15 @@ export const Accounts: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return showToast("warning", "Profile name is required.");
     if (!accountType) return showToast("warning", "Account type is required.");
 
     setSubmitting(true);
     try {
       const payload = {
-        name: name.trim(),
+        accountHolderName: accountHolderName.trim() || undefined,
         bankName: bankName.trim() || undefined,
         accountNumber: accountNumber.trim() || undefined,
         accountType,
-        currency,
         manualBalance: manualBalance ? parseFloat(manualBalance) : null,
         manualBalanceDate: manualBalanceDate || null,
       };
@@ -183,7 +217,8 @@ export const Accounts: React.FC = () => {
 
   const handleDeleteAccount = async () => {
     if (!activeAccount) return;
-    const confirmMessage = `Are you sure you want to delete the account "${activeAccount.name}"?\n\nThis will permanently delete the account, all of its uploaded statement history, and all associated transactions. This action cannot be undone.`;
+    const displayName = getAccountDisplayName(activeAccount);
+    const confirmMessage = `Are you sure you want to delete the account "${displayName}"?\n\nThis will permanently delete the account, all of its uploaded statement history, and all associated transactions. This action cannot be undone.`;
     if (!window.confirm(confirmMessage)) return;
 
     setSubmitting(true);
@@ -211,7 +246,6 @@ export const Accounts: React.FC = () => {
     setMergeCustomBankName("");
     setMergeCustomAccountNumber("");
     setMergeCustomAccountType("SAVINGS");
-    setMergeCustomCurrency("INR");
     setMergeCustomBalance("");
     setIsMergeModalOpen(true);
   };
@@ -232,8 +266,10 @@ export const Accounts: React.FC = () => {
     const destAcc = accounts.find((a) => a.id === mergeDestId);
     if (!sourceAcc || !destAcc)
       return showToast("error", "Selected accounts are invalid.");
-
-    const confirmMsg = `Are you sure you want to merge "${sourceAcc.name}" into "${destAcc.name}"?\n\nThis will transfer all transactions and statement imports to "${destAcc.name}", and then permanently delete "${sourceAcc.name}".\n\nThis action cannot be undone.`;
+    
+    const sourceDisplayName = getAccountDisplayName(sourceAcc);
+    const destDisplayName = getAccountDisplayName(destAcc);
+    const confirmMsg = `Are you sure you want to merge "${sourceDisplayName}" into "${destDisplayName}"?\n\nThis will transfer all transactions and statement imports to "${destDisplayName}", and then permanently delete "${sourceDisplayName}".\n\nThis action cannot be undone.`;
     if (!window.confirm(confirmMsg)) return;
 
     setMergeSubmitting(true);
@@ -246,7 +282,6 @@ export const Accounts: React.FC = () => {
         customBankName?: string;
         customAccountNumber?: string;
         customAccountType?: string;
-        customCurrency?: string;
         customBalance?: number;
       } = {
         sourceAccountId: mergeSourceId,
@@ -270,7 +305,6 @@ export const Accounts: React.FC = () => {
         payload.customAccountNumber =
           mergeCustomAccountNumber.trim() || undefined;
         payload.customAccountType = mergeCustomAccountType;
-        payload.customCurrency = mergeCustomCurrency;
         payload.customBalance = mergeCustomBalance
           ? parseFloat(mergeCustomBalance)
           : undefined;
@@ -300,7 +334,99 @@ export const Accounts: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16">
-      <h2 className="text-xl lg:text-3xl font-semibold text-text-primary">Bank Accounts</h2>
+      <PageHeader
+        title="Bank Accounts"
+        subtitle="Manage bank accounts, view balances, and import transaction statements."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        onRefreshClick={() => {
+          fetchAccounts();
+          if (activeTab === 'upload') {
+            window.dispatchEvent(new CustomEvent('import-history-updated'));
+          }
+        }}
+        isRefreshing={loading}
+      />
+
+      {/* Filter Controls */}
+      {activeTab === "accounts" ? (
+        <FilterSection
+          isOpen={showFilters}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search accounts by name, bank..."
+          hasActiveFilters={Boolean(searchQuery || typeFilter !== "ALL" || statusFilter !== "ALL")}
+          onReset={() => {
+            setSearchQuery("");
+            setTypeFilter("ALL");
+            setStatusFilter("ALL");
+          }}
+        >
+          <Select
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={[
+              { value: "ALL", label: "All Account Types" },
+              { value: "SAVINGS", label: "Savings Account" },
+              { value: "CURRENT", label: "Current Account" },
+              { value: "CREDIT_CARD", label: "Credit Card" },
+              { value: "WALLET", label: "Wallet" },
+            ]}
+            size="sm"
+          />
+          <Select
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { value: "ALL", label: "All Status" },
+              { value: "ACTIVE", label: "Active Only" },
+              { value: "INACTIVE", label: "Inactive Only" },
+            ]}
+            size="sm"
+          />
+        </FilterSection>
+      ) : (
+        <FilterSection
+          isOpen={showFilters}
+          searchQuery={historySearchQuery}
+          onSearchChange={setHistorySearchQuery}
+          searchPlaceholder="Search filename or parser source..."
+          hasActiveFilters={Boolean(historySearchQuery || historySourceFilter !== "ALL" || historyStatusFilter !== "ALL")}
+          onReset={() => {
+            setHistorySearchQuery("");
+            setHistorySourceFilter("ALL");
+            setHistoryStatusFilter("ALL");
+          }}
+        >
+          <Select
+            value={historySourceFilter}
+            onChange={setHistorySourceFilter}
+            options={[
+              { value: "ALL", label: "All Sources" },
+              { value: "AUTO", label: "Auto-Detected" },
+              { value: "HDFC", label: "HDFC Bank" },
+              { value: "ICICI", label: "ICICI Bank" },
+              { value: "SBI", label: "SBI" },
+              { value: "PHONEPE", label: "PhonePe" },
+              { value: "PAYTM", label: "Paytm" },
+              { value: "GPAY", label: "Google Pay" },
+              { value: "BOB", label: "Bank of Baroda" },
+              { value: "PNB", label: "PNB" },
+            ]}
+            size="sm"
+          />
+          <Select
+            value={historyStatusFilter}
+            onChange={setHistoryStatusFilter}
+            options={[
+              { value: "ALL", label: "All Status" },
+              { value: "DONE", label: "Completed" },
+              { value: "FAILED", label: "Failed" },
+              { value: "PROCESSING", label: "Processing" },
+            ]}
+            size="sm"
+          />
+        </FilterSection>
+      )}
       {/* Top section */}
       <section className="flex border-b border-border-muted pb-4 w-full">
         <div className="flex gap-4 overflow-x-auto hide-scrollbar">
@@ -358,45 +484,44 @@ export const Accounts: React.FC = () => {
                 }
               />
             </section>
+          ) : filteredAccounts.length === 0 ? (
+            <section className="max-w-xl mx-auto mt-10">
+              <StateDisplay
+                type="empty"
+                title="No accounts found"
+                description="Try adjusting your search or filter criteria."
+                action={{
+                  label: "Reset Filters",
+                  onClick: () => {
+                    setSearchQuery("");
+                    setTypeFilter("ALL");
+                    setStatusFilter("ALL");
+                  },
+                }}
+              />
+            </section>
           ) : (
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {accounts.map((acc) => {
-                const last4 = acc.accountNumber
-                  ? acc.accountNumber.length > 4
-                    ? acc.accountNumber.slice(-4)
-                    : acc.accountNumber
-                  : "N/A";
-
-                const isBankNameRedundant = acc.bankName && acc.name.toLowerCase().includes(acc.bankName.toLowerCase());
-                const isAccNumberRedundant = acc.accountNumber && acc.name.includes(last4);
-                const showBankDetails = acc.bankName && !(isBankNameRedundant && isAccNumberRedundant);
-
-                // Remove the account type in brackets if it exists (e.g. " (SAVINGS)")
-                const typePattern = new RegExp(`\\s*\\(${acc.accountType}\\)`, "i");
-                const displayName = acc.name.replace(typePattern, "").trim();
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+              {filteredAccounts.map((acc) => {
+                const isUpi = acc.accountType === "UPI" || acc.bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i);
 
                 return (
                   <div
                     key={acc.id}
-                    className="card p-6 flex flex-col justify-between space-y-4"
+                    className="card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group"
                   >
                     {/* Header */}
                     <div className="flex justify-between items-start">
                       <div className="space-y-1 flex-1 pr-3">
                         <span className="badge badge-brand font-semibold">
-                          {acc.accountType}
+                          {acc.accountType || "N/A"}
                         </span>
-                        <h4 className="font-semibold text-text-primary text-body-lg line-clamp-2">
-                          {displayName}
+                        <p className="text-body-xs text-text-muted mt-1 uppercase tracking-wider font-semibold">
+                          {acc.accountHolderName || user?.fullName || "Account Holder"}
+                        </p>
+                        <h4 className="font-semibold text-text-primary text-body-lg leading-tight line-clamp-2 mt-1">
+                          {acc.bankName || "Account"} {isUpi ? "· Mob:" : "·"} <span className="font-mono text-body-md tracking-tight">•••• {acc.accountNumber?.slice(-4) || "XXXX"}</span>
                         </h4>
-                        {showBankDetails && (
-                          <p className="text-body-sm text-text-secondary">
-                            {acc.bankName} ·{" "}
-                            <span className="font-mono text-body-xs">
-                              •••• {last4}
-                            </span>
-                          </p>
-                        )}
                       </div>
 
                       <button
@@ -409,16 +534,14 @@ export const Accounts: React.FC = () => {
                     </div>
 
                     {/* Balance display */}
-                    {acc.balance !== null && acc.balance !== undefined && (
-                      <div className="space-y-1">
-                        <span className="text-text-secondary text-[0.6875rem] font-semibold uppercase tracking-wider">
-                          Current Balance
-                        </span>
-                        <p className="num text-mono-xl font-bold text-text-primary">
-                          {formatCurrency(acc.balance)}
-                        </p>
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      <span className="text-text-secondary text-[0.6875rem] font-semibold uppercase tracking-wider">
+                        Current Balance
+                      </span>
+                      <p className="num text-mono-xl font-bold text-text-primary">
+                        {acc.balance !== null && acc.balance !== undefined ? formatCurrency(acc.balance) : "N/A"}
+                      </p>
+                    </div>
 
                     {/* Footer buttons */}
                     <div className="pt-2 border-t border-border-muted flex gap-2">
@@ -457,18 +580,17 @@ export const Accounts: React.FC = () => {
 
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body space-y-4">
-                    {/* Account Profile Name */}
+                    {/* Account Holder Name */}
                     <div>
                       <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Profile Name *
+                        Account Holder Name
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. My Savings Card, Office Account"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. John Doe"
+                        value={accountHolderName}
+                        onChange={(e) => setAccountHolderName(e.target.value)}
                         className="input"
-                        required
                       />
                     </div>
 
@@ -486,10 +608,12 @@ export const Accounts: React.FC = () => {
                       />
                     </div>
 
-                    {/* Account Number (last 4 digits only) */}
+                    {/* Account Number / Mobile Number (last 4 digits only) */}
                     <div>
                       <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Account Number (Last 4 digits preferred)
+                        {accountType === "UPI" || bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i)
+                          ? "Mobile Number (Last 4 digits preferred)"
+                          : "Account Number (Last 4 digits preferred)"}
                       </label>
                       <input
                         type="text"
@@ -519,21 +643,6 @@ export const Accounts: React.FC = () => {
                       />
                     </div>
 
-                    {/* Currency select */}
-                    <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Base Currency
-                      </label>
-                      <Select
-                        value={currency}
-                        onChange={setCurrency}
-                        options={[
-                          { value: "INR", label: "INR (₹)" },
-                          { value: "USD", label: "USD ($)" },
-                          { value: "EUR", label: "EUR (€)" },
-                        ]}
-                      />
-                    </div>
 
                     {/* Manual Balance Initializer (mostly for UPI/CASH, but support for all) */}
                     <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
@@ -552,13 +661,11 @@ export const Accounts: React.FC = () => {
                           <label className="block text-body-xs font-semibold text-text-secondary mb-1">
                             Starting Balance
                           </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="e.g. 5000.00"
+                          <CurrencyInput
+                            placeholder="0.00"
                             value={manualBalance}
                             onChange={(e) => setManualBalance(e.target.value)}
-                            className="input bg-bg-card"
+                            className="bg-bg-card"
                           />
                         </div>
                         <div>
@@ -770,21 +877,6 @@ export const Accounts: React.FC = () => {
                           />
                         </div>
 
-                        {/* Currency */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Base Currency
-                          </label>
-                          <Select
-                            value={mergeCustomCurrency}
-                            onChange={setMergeCustomCurrency}
-                            options={[
-                              { value: "INR", label: "INR (₹)" },
-                              { value: "USD", label: "USD ($)" },
-                              { value: "EUR", label: "EUR (€)" },
-                            ]}
-                          />
-                        </div>
 
                         {/* Balance */}
                         <div>
@@ -792,15 +884,13 @@ export const Accounts: React.FC = () => {
                             Manual Balance Override (Leave empty to sum
                             balances)
                           </label>
-                          <input
-                            type="number"
-                            step="0.01"
+                          <CurrencyInput
                             placeholder="0.00"
                             value={mergeCustomBalance}
                             onChange={(e) =>
                               setMergeCustomBalance(e.target.value)
                             }
-                            className="input bg-bg-card"
+                            className="bg-bg-card"
                           />
                         </div>
                       </div>
@@ -837,7 +927,12 @@ export const Accounts: React.FC = () => {
         </>
       ) : (
         <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Import onUploadClick={() => setIsUploadModalOpen(true)} />
+          <Import
+            onUploadClick={() => setIsUploadModalOpen(true)}
+            searchQuery={historySearchQuery}
+            sourceFilter={historySourceFilter}
+            statusFilter={historyStatusFilter}
+          />
         </section>
       )}
 

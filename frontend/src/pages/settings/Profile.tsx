@@ -166,19 +166,23 @@ export const Profile: React.FC = () => {
   return (
     <div className="space-y-6 pb-16 max-w-2xl mx-auto">
       <h2 className="text-xl lg:text-3xl font-semibold text-text-primary">User Profile</h2>
+      
       {/* Header card */}
-      <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 p-6 bg-bg-surface border border-border rounded-xl shadow-sm">
-        <div className="h-20 w-20 rounded-full bg-brand/10 text-brand text-3xl font-bold flex items-center justify-center border border-brand/20">
+      <div className="flex flex-col items-center sm:flex-row sm:items-start gap-5 p-6 bg-bg-surface border border-border rounded-xl shadow-sm">
+        <div className="h-20 w-20 rounded-full bg-brand/10 text-brand text-3xl font-bold flex items-center justify-center border border-brand/20 shrink-0">
           {user?.fullName?.charAt(0) || 'U'}
         </div>
-        <div className="text-center sm:text-left space-y-1">
-          <h2 className="text-heading-lg font-bold text-text-primary">
-            {user?.fullName || 'User Profile'}
-          </h2>
-          <p className="text-body-md text-text-secondary">
-            {user?.email}
-          </p>
-          <div className="flex items-center justify-center sm:justify-start gap-3 mt-2">
+        <div className="text-center sm:text-left space-y-2 flex-1">
+          <div>
+            <h2 className="text-heading-lg font-bold text-text-primary">
+              {user?.fullName || 'User Profile'}
+            </h2>
+            <p className="text-body-md text-text-secondary">
+              {user?.email}
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-center sm:justify-start gap-3">
             <span className="inline-block px-2.5 py-0.5 text-body-xs font-semibold bg-brand/10 text-brand rounded-full">
               {(user as {role?: string} | null)?.role === 'ADMIN' ? 'Admin' : 'Member'}
             </span>
@@ -188,154 +192,39 @@ export const Profile: React.FC = () => {
               </span>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Profile Info Card */}
-      <div className="card space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-border-muted">
-          <div className="flex items-center gap-2 text-brand">
-            <UserIcon className="h-5 w-5" />
-            <h3 className="font-semibold text-text-primary text-body-lg">Personal Information</h3>
-          </div>
-          {!isEditingProfile && (
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-3 border-t border-border/40">
             <button
-              onClick={() => setIsEditingProfile(true)}
+              onClick={() => {
+                setIsEditingProfile(!isEditingProfile);
+                setIsEditingPassword(false);
+              }}
               className="flex items-center gap-1.5 px-3 py-1.5 text-body-sm font-semibold text-brand hover:text-brand-hover bg-brand/5 hover:bg-brand/10 rounded-md transition-colors cursor-pointer"
             >
               <Edit3 className="h-4 w-4" />
-              <span>Edit Info</span>
+              <span>{isEditingProfile ? 'Close Edit Profile' : 'Edit Profile'}</span>
             </button>
-          )}
-        </div>
-
-        {!isEditingProfile ? (
-          // Read-only Details View
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <span className="text-body-xs font-medium text-text-muted uppercase tracking-wider block">Full Name</span>
-                <p className="text-body-md font-semibold text-text-primary">{user?.fullName || '—'}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-body-xs font-medium text-text-muted uppercase tracking-wider block">Email Address</span>
-                <p className="text-body-md font-semibold text-text-primary">{user?.email || '—'}</p>
-              </div>
-            </div>
-
-            {/* Small inline option for password change */}
-            {!isEditingPassword ? (
-              <div className="pt-2">
-                <button
-                  onClick={() => setIsEditingPassword(true)}
-                  className="text-body-sm font-semibold text-brand hover:text-brand-hover hover:underline transition-colors cursor-pointer"
-                >
-                  Change Password
-                </button>
-              </div>
-            ) : (
-              // Small Password Edit Inline Form
-              <form onSubmit={handleUpdatePassword} className="pt-4 border-t border-border-muted space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-body-sm font-semibold text-text-secondary">
-                      Current Password *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleForgotCurrentPassword}
-                      className="text-body-xs font-semibold text-brand hover:text-brand-hover hover:underline cursor-pointer bg-transparent border-0 p-0"
-                    >
-                      Forgot current password?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                      <Lock className="h-5 w-5" />
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="Enter current account password"
-                      value={currentPassword}
-                      onChange={e => setCurrentPassword(e.target.value)}
-                      className="input !pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    New Password *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                      <Lock className="h-5 w-5" />
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="Enter new account password"
-                      value={newPassword}
-                      onChange={e => {
-                        setNewPassword(e.target.value);
-                        setPasswordError('');
-                      }}
-                      onBlur={handleNewPasswordBlur}
-                      className={`input !pl-10 ${passwordError ? 'input-error' : ''}`}
-                      required
-                    />
-                  </div>
-                  {passwordError && (
-                    <p className="text-destructive text-body-sm mt-1">{passwordError}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Confirm New Password *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                      <Lock className="h-5 w-5" />
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="Confirm new account password"
-                      value={confirmPassword}
-                      onChange={e => {
-                        setConfirmPassword(e.target.value);
-                        setConfirmPasswordError('');
-                      }}
-                      onBlur={handleConfirmPasswordBlur}
-                      className={`input !pl-10 ${confirmPasswordError ? 'input-error' : ''}`}
-                      required
-                    />
-                  </div>
-                  {confirmPasswordError && (
-                    <p className="text-destructive text-body-sm mt-1">{confirmPasswordError}</p>
-                  )}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <button
-                    type="submit"
-                    disabled={passwordLoading}
-                    className="btn btn-primary py-2 px-4 text-body-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    {passwordLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    <span>Update Password</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelPasswordEdit}
-                    disabled={passwordLoading}
-                    className="btn btn-secondary py-2 px-4 text-body-sm cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
+            <button
+              onClick={() => {
+                setIsEditingPassword(!isEditingPassword);
+                setIsEditingProfile(false);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-body-sm font-semibold text-text-secondary hover:text-text-primary bg-bg-subtle hover:bg-border/30 rounded-md transition-colors cursor-pointer"
+            >
+              <Lock className="h-4 w-4" />
+              <span>{isEditingPassword ? 'Close Password Change' : 'Change Password'}</span>
+            </button>
           </div>
-        ) : (
-          // Profile Edit Form View
+        </div>
+      </div>
+
+      {/* Profile Edit Form Card */}
+      {isEditingProfile && (
+        <div className="card space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2 pb-2 border-b border-border-muted text-brand">
+            <UserIcon className="h-5 w-5" />
+            <h3 className="font-semibold text-text-primary text-body-lg">Edit Personal Information</h3>
+          </div>
           <form onSubmit={handleUpdateProfile} className="space-y-4 pt-2">
             <div>
               <label className="block text-body-sm font-semibold text-text-secondary mb-1">
@@ -397,11 +286,118 @@ export const Profile: React.FC = () => {
               </button>
             </div>
           </form>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Password Edit Form Card */}
+      {isEditingPassword && (
+        <div className="card space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2 pb-2 border-b border-border-muted text-brand">
+            <Lock className="h-5 w-5" />
+            <h3 className="font-semibold text-text-primary text-body-lg">Change Account Password</h3>
+          </div>
+          <form onSubmit={handleUpdatePassword} className="space-y-4 pt-2">
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-body-sm font-semibold text-text-secondary">
+                  Current Password *
+                </label>
+                <button
+                  type="button"
+                  onClick={handleForgotCurrentPassword}
+                  className="text-body-xs font-semibold text-brand hover:text-brand-hover hover:underline cursor-pointer bg-transparent border-0 p-0"
+                >
+                  Forgot current password?
+                </button>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <input
+                  type="password"
+                  placeholder="Enter current account password"
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                  className="input !pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                New Password *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <input
+                  type="password"
+                  placeholder="Enter new account password"
+                  value={newPassword}
+                  onChange={e => {
+                    setNewPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  onBlur={handleNewPasswordBlur}
+                  className={`input !pl-10 ${passwordError ? 'input-error' : ''}`}
+                  required
+                />
+              </div>
+              {passwordError && (
+                <p className="text-destructive text-body-sm mt-1">{passwordError}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                Confirm New Password *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <input
+                  type="password"
+                  placeholder="Confirm new account password"
+                  value={confirmPassword}
+                  onChange={e => {
+                    setConfirmPassword(e.target.value);
+                    setConfirmPasswordError('');
+                  }}
+                  onBlur={handleConfirmPasswordBlur}
+                  className={`input !pl-10 ${confirmPasswordError ? 'input-error' : ''}`}
+                  required
+                />
+              </div>
+              {confirmPasswordError && (
+                <p className="text-destructive text-body-sm mt-1">{confirmPasswordError}</p>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="btn btn-primary py-2.5 flex-1 text-body-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {passwordLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                <span>Update Password</span>
+              </button>
+              <button
+                type="button"
+                onClick={cancelPasswordEdit}
+                disabled={passwordLoading}
+                className="btn btn-secondary py-2.5 flex-1 text-body-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Advanced Settings */}
-      <div className="flex items-center justify-center gap-6 pt-4">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4">
         <button
           onClick={() => navigate('/backup-restore')}
           className="text-body-sm font-semibold text-text-secondary hover:text-brand transition-colors cursor-pointer"

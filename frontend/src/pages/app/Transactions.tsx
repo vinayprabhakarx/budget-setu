@@ -2,16 +2,28 @@ import React, { useEffect, useState, useCallback } from "react";
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
 import { formatCurrency } from "../../utils/currency";
-import { Search, X, Trash2, Edit3, Loader2, History, Filter } from "lucide-react";
+import { X, Trash2, Edit3, Loader2, History } from "lucide-react";
 import { Select } from "../../components/shared/Select";
 import { TransactionsSkeleton } from "../../components/skeletons/TransactionsSkeleton";
 import { StateDisplay } from "../../components/shared/StateDisplay";
+import { CurrencyInput } from "../../components/shared/CurrencyInput";
+import { PageHeader } from "../../components/shared/PageHeader";
+import { FilterSection } from "../../components/shared/FilterSection";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "../../components/shared/Table";
 
 interface Account {
   id: string;
-  name: string;
   bankName: string;
   accountNumber: string;
+  accountType: string;
+  balance: number | null;
 }
 
 interface Category {
@@ -28,6 +40,7 @@ interface Transaction {
   transactionType: string;
   transactionDate: string;
   category: Category | null;
+  categoryId?: string;
   paymentMode: string | null;
   description: string | null;
   tags: string[];
@@ -81,6 +94,8 @@ export const Transactions: React.FC = () => {
   const [editPayee, setEditPayee] = useState("");
   const [editReferenceNumber, setEditReferenceNumber] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [applyMerchantRule, setApplyMerchantRule] = useState(false);
+  const [contributeGlobally, setContributeGlobally] = useState(false);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -237,11 +252,13 @@ export const Transactions: React.FC = () => {
 
   const openEditModal = async (tx: Transaction) => {
     setEditingTx(tx);
-    setEditCategory(tx.category?.id || "");
+    setEditCategory(tx.category?.id || tx.categoryId || "");
     setEditPaymentMode(tx.paymentMode || "");
     setEditDescription(tx.description || "");
     setEditPayee(tx.payee || "");
     setEditReferenceNumber(tx.referenceNumber || "");
+    setApplyMerchantRule(false);
+    setContributeGlobally(false);
     setAuditLogs([]);
 
     // Fetch audit history asynchronously
@@ -271,7 +288,42 @@ export const Transactions: React.FC = () => {
       };
 
       await api.patch(`/transactions/${editingTx.id}`, payload);
-      showToast("success", "Transaction details updated.");
+
+      if (applyMerchantRule && editPayee.trim() && editCategory) {
+        try {
+          const ruleRes = await api.post("/merchant-rules", {
+            merchantPattern: editPayee.trim(),
+            categoryId: editCategory,
+            matchType: "CONTAINS",
+          });
+          const newRuleId = (ruleRes as { data?: { id?: string }; id?: string }).data?.id || (ruleRes as { id?: string }).id;
+
+          if (contributeGlobally && newRuleId) {
+            try {
+              await api.post(`/merchant-rules/${newRuleId}/contribute`);
+            } catch (cErr) {
+              console.error("Failed to contribute rule globally:", cErr);
+            }
+          }
+
+          const recatRes = await api.post("/merchant-rules/recategorize", {
+            merchantPattern: editPayee.trim(),
+            categoryId: editCategory,
+          });
+          const count = (recatRes as { data?: { updated?: number; updatedCount?: number }; updated?: number }).data?.updated ?? (recatRes as { data?: { updatedCount?: number } }).data?.updatedCount ?? (recatRes as { updated?: number }).updated ?? 0;
+
+          if (count > 0) {
+            showToast("success", `Updated transaction & ${count} other matching transactions.`);
+          } else {
+            showToast("success", "Transaction updated & merchant rule saved for future.");
+          }
+        } catch (err) {
+          console.error("Failed to apply merchant rule:", err);
+          showToast("success", "Transaction updated (note: rule creation had an issue).");
+        }
+      } else {
+        showToast("success", "Transaction details updated.");
+      }
       setEditingTx(null);
       fetchTransactions();
       window.dispatchEvent(new CustomEvent("transaction-added"));
@@ -348,47 +400,30 @@ export const Transactions: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl lg:text-3xl font-semibold text-text-primary">Transactions</h2>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`p-2 rounded-lg border transition-colors flex items-center justify-center ${
-            showFilters
-              ? "bg-primary-50 text-primary-600 border-primary-200"
-              : "bg-bg-surface text-text-secondary border-border hover:bg-bg-muted"
-          }`}
-          title="Toggle Filters"
-        >
-          <Filter className="h-5 w-5" />
-        </button>
-      </div>
+      <PageHeader
+        title="Transactions"
+        subtitle="A comprehensive view of all your recorded transactions."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
+        onRefreshClick={fetchTransactions}
+        isRefreshing={loading}
+      />
       
       {/* 1. Filter Controls */}
-      <section className={`card p-5 space-y-4 ${showFilters ? 'block' : 'hidden'}`}>
-        <form
-          onSubmit={handleSearchSubmit}
-          className="flex flex-col md:flex-row gap-4"
-        >
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-text-muted" />
-            <input
-              type="text"
-              placeholder="Search merchant, purpose, or note..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input"
-              style={{ paddingLeft: "2.5rem" }}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Apply Search
-          </button>
-        </form>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <FilterSection
+        isOpen={showFilters}
+        searchQuery={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search merchant, purpose, or note..."
+        onSearchSubmit={handleSearchSubmit}
+        hasActiveFilters={Boolean(search || startDate || endDate || categoryId || accountId || type)}
+        onReset={resetFilters}
+        layout="stack"
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Start Date */}
           <div>
-            <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+            <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               From Date
             </label>
             <input
@@ -398,13 +433,13 @@ export const Transactions: React.FC = () => {
                 setStartDate(e.target.value);
                 setPage(0);
               }}
-              className="input"
+              className="input w-full"
             />
           </div>
 
           {/* End Date */}
           <div>
-            <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+            <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               To Date
             </label>
             <input
@@ -414,13 +449,13 @@ export const Transactions: React.FC = () => {
                 setEndDate(e.target.value);
                 setPage(0);
               }}
-              className="input"
+              className="input w-full"
             />
           </div>
 
           {/* Category Dropdown */}
           <div>
-            <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+            <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               Category
             </label>
             <Select
@@ -436,12 +471,13 @@ export const Transactions: React.FC = () => {
                   label: cat.name,
                 })),
               ]}
+              size="sm"
             />
           </div>
 
           {/* Account Dropdown */}
           <div>
-            <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+            <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               Account
             </label>
             <Select
@@ -451,15 +487,21 @@ export const Transactions: React.FC = () => {
                 setPage(0);
               }}
               options={[
-                { value: "", label: "All Accounts" },
-                ...accounts.map((acc) => ({ value: acc.id, label: acc.name })),
+                { value: "ALL", label: "All Accounts" },
+                ...accounts.map((acc) => {
+                  const bank = acc.bankName || acc.accountType || "Account";
+                  const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+                  const displayName = num ? `${bank} - ${num}` : bank;
+                  return { value: acc.id, label: displayName };
+                }),
               ]}
+              size="sm"
             />
           </div>
 
           {/* Type Dropdown */}
           <div>
-            <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+            <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               Type
             </label>
             <Select
@@ -475,20 +517,11 @@ export const Transactions: React.FC = () => {
                 { value: "TRANSFER", label: "Transfer" },
                 { value: "REFUND", label: "Refund" },
               ]}
+              size="sm"
             />
           </div>
         </div>
-
-        <div className="flex justify-end pt-2 border-t border-border-muted">
-          <button
-            onClick={resetFilters}
-            className="btn btn-secondary btn-sm flex items-center gap-1.5"
-          >
-            <X className="h-4 w-4" />
-            <span>Reset Filters</span>
-          </button>
-        </div>
-      </section>
+      </FilterSection>
 
       {/* 2. Stats Bar */}
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-4 rounded-xl border border-border shadow-sm">
@@ -530,143 +563,151 @@ export const Transactions: React.FC = () => {
             }
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border bg-bg-subtle/40 text-text-secondary text-body-sm font-semibold">
-                  <th className="py-3 px-2 sm:px-4">Date</th>
-                  <th className="py-3 px-2 sm:px-4">Payee</th>
-                  <th className="py-3 px-2 sm:px-4">Payment Mode</th>
-                  <th className="py-3 px-2 sm:px-4">Category</th>
-                  <th className="py-3 px-2 sm:px-4">Description</th>
-                  <th className="py-3 px-2 sm:px-4 text-right">Amount</th>
-                  <th className="py-3 px-2 sm:px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((tx) => {
-                  const isNegative = ["EXPENSE", "TRANSFER"].includes(
-                    tx.transactionType,
-                  );
-                  const isExpanded = expandedRows.has(tx.id);
-                  return (
-                    <tr
-                      key={tx.id}
-                      onClick={() => toggleRow(tx.id)}
-                      className="border-b border-border-muted hover:bg-bg-subtle/25 transition-colors text-body-md cursor-pointer md:cursor-default"
-                    >
-                      <td className="py-3 px-2 sm:px-4 text-text-secondary whitespace-nowrap">
-                        {new Date(tx.transactionDate).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
-                      </td>
-                      <td className="py-3 px-2 sm:px-4 font-medium text-text-primary">
-                        <div
-                          className={`max-w-20 sm:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
-                          title={tx.payee}
-                        >
-                          {tx.payee}
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 sm:px-4 text-text-secondary">
-                        {tx.paymentMode && tx.paymentMode !== "OTHER" ? (
-                          <span
-                            className={`inline-block px-1.5 py-0.5 rounded text-xs sm:text-xs font-medium bg-bg-muted text-text-muted max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
-                            title={tx.paymentMode}
-                          >
-                            {tx.paymentMode}
-                          </span>
-                        ) : (
-                          <span className="text-text-muted italic">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 sm:px-4">
-                        {tx.category ? (
-                          <span
-                            className={`badge max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
-                            style={{
-                              backgroundColor: `${tx.category.color}15`,
-                              color: tx.category.color,
-                            }}
-                            title={tx.category.name}
-                          >
-                            {tx.category.name}
-                          </span>
-                        ) : (
-                          <span className="text-text-muted italic">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 sm:px-4">
-                        <div
-                          className={`max-w-20 sm:max-w-52 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
-                        >
-                          {tx.description ? (
-                            <p
-                              className="text-body-sm text-text-secondary font-normal"
-                              title={tx.description}
-                            >
-                              {tx.description}
-                            </p>
-                          ) : (
-                            <span className="text-text-muted italic">—</span>
-                          )}
-                          {tx.tags && tx.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1.5">
-                              {tx.tags.map((t) => (
-                                <span
-                                  key={t}
-                                  className="text-xs sm:text-xs bg-bg-subtle text-text-secondary px-1.5 py-0.5 rounded"
-                                >
-                                  #{t}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td
-                        className={`py-3 px-2 sm:px-4 text-right num font-semibold whitespace-nowrap ${
-                          isNegative ? "num-negative" : "num-positive"
-                        }`}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Payee</TableHead>
+                <TableHead>Account</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((tx) => {
+                const isNegative = ["EXPENSE", "TRANSFER"].includes(
+                  tx.transactionType,
+                );
+                const isExpanded = expandedRows.has(tx.id);
+                const catObj = tx.category || categories.find((c) => c.id === tx.categoryId);
+                return (
+                  <TableRow
+                    key={tx.id}
+                    onClick={() => toggleRow(tx.id)}
+                    className="cursor-pointer md:cursor-default text-body-md"
+                  >
+                    <TableCell className="text-text-secondary whitespace-nowrap">
+                      {new Date(tx.transactionDate).toLocaleDateString(
+                        "en-IN",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium text-text-primary">
+                      <div
+                        className={`max-w-20 sm:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                        title={tx.payee}
                       >
-                        {isNegative ? "−" : "+"}
-                        {formatCurrency(tx.amount)}
-                      </td>
-                      <td className="py-3 px-2 sm:px-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditModal(tx);
-                            }}
-                            className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                            title="Edit / Audit Log"
+                        {tx.payee}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
+                      {(() => {
+                        const acc = accounts.find(a => a.id === tx.accountId);
+                        let accountName = "";
+                        if (acc) {
+                          const bank = acc.bankName || acc.accountType || "Account";
+                          const num = acc.accountNumber ? acc.accountNumber.slice(-4) : "";
+                          accountName = num ? `${bank} - ${num}` : bank;
+                        }
+                        return accountName ? (
+                          <span
+                            className={`inline-block px-1.5 py-0.5 rounded text-xs sm:text-xs font-medium bg-bg-muted text-text-muted max-w-24 sm:max-w-none transition-all duration-200 align-bottom truncate`}
+                            title={accountName}
                           >
-                            <Edit3 className="h-4.5 w-4.5" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(tx.id);
-                            }}
-                            className="p-1.5 rounded-md hover:bg-destructive-bg text-text-secondary hover:text-destructive transition-colors cursor-pointer"
-                            title="Delete"
+                            {accountName}
+                          </span>
+                        ) : (
+                          <span className="text-text-muted italic">—</span>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell>
+                      {catObj ? (
+                        <span
+                          className={`badge max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          style={{
+                            backgroundColor: `${catObj.color}15`,
+                            color: catObj.color,
+                          }}
+                          title={catObj.name}
+                        >
+                          {catObj.name}
+                        </span>
+                      ) : (
+                        <span className="text-text-muted italic">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        className={`max-w-20 sm:max-w-52 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                      >
+                        {tx.description ? (
+                          <p
+                            className="text-body-sm text-text-secondary font-normal"
+                            title={tx.description}
                           >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                            {tx.description}
+                          </p>
+                        ) : (
+                          <span className="text-text-muted italic">—</span>
+                        )}
+                        {tx.tags && tx.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {tx.tags.map((t) => (
+                              <span
+                                key={t}
+                                className="text-xs sm:text-xs bg-bg-subtle text-text-secondary px-1.5 py-0.5 rounded"
+                              >
+                                #{t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right num font-semibold whitespace-nowrap ${
+                        isNegative ? "num-negative" : "num-positive"
+                      }`}
+                    >
+                      {isNegative ? "−" : "+"}
+                      {formatCurrency(tx.amount)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(tx);
+                          }}
+                          className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                          title="Edit / Audit Log"
+                        >
+                          <Edit3 className="h-4.5 w-4.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(tx.id);
+                          }}
+                          className="p-1.5 rounded-md hover:bg-destructive-bg text-text-secondary hover:text-destructive transition-colors cursor-pointer"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         )}
       </section>
 
@@ -696,72 +737,127 @@ export const Transactions: React.FC = () => {
       {/* Edit / Audit History Modal */}
       {editingTx && (
         <div className="modal-overlay">
-          <div className="modal max-w-4xl flex flex-col md:flex-row overflow-hidden">
-            {/* Left Column: Form Edit */}
+          <div className="modal max-w-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-border-muted">
+              <h3 className="font-display text-text-primary text-heading-md">
+                Edit Transaction
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingTx(null)}
+                className="text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body & Form */}
             <form
               onSubmit={handleEditSubmit}
-              className="flex-1 p-6 space-y-4 border-b md:border-b-0 md:border-r border-border"
+              className="flex-1 flex flex-col overflow-y-auto max-h-[80vh]"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-border-muted">
-                <h3 className="font-display text-text-primary text-heading-md">
-                  Edit Transaction
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setEditingTx(null)}
-                  className="lg:hidden text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+              <div className="p-6 space-y-4 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      Payee
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={editPayee}
+                      onChange={(e) => setEditPayee(e.target.value)}
+                    />
+                  </div>
 
-              <div className="space-y-3 mt-4">
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Payee
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={editPayee}
-                    onChange={(e) => setEditPayee(e.target.value)}
-                  />
+                  <div>
+                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      Category
+                    </label>
+                    <Select
+                      value={editCategory}
+                      onChange={setEditCategory}
+                      options={[
+                        { value: "", label: "Select Category" },
+                        ...categories.map((cat) => ({
+                          value: cat.id,
+                          label: cat.name,
+                        })),
+                      ]}
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Category
-                  </label>
-                  <Select
-                    value={editCategory}
-                    onChange={setEditCategory}
-                    options={[
-                      { value: "", label: "Select Category" },
-                      ...categories.map((cat) => ({
-                        value: cat.id,
-                        label: cat.name,
-                      })),
-                    ]}
-                  />
-                </div>
+                {editPayee.trim() && editCategory && (
+                  <div className="space-y-2.5 pt-2 border-t border-border mt-3">
+                    <div className="flex items-start gap-2.5 bg-bg-subtle/80 p-3.5 rounded-xl border border-border">
+                      <input
+                        type="checkbox"
+                        id="applyMerchantRule"
+                        checked={applyMerchantRule}
+                        onChange={(e) => setApplyMerchantRule(e.target.checked)}
+                        className="mt-0.5 rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                      />
+                      <label htmlFor="applyMerchantRule" className="text-xs text-text-secondary leading-tight cursor-pointer flex-1">
+                        <span className="font-semibold text-text-primary block mb-0.5 text-body-sm">
+                          Always categorize "{editPayee.trim()}" as this category?
+                        </span>
+                        Automatically saves a rule for future imports and recategorizes all past matching transactions.
+                      </label>
+                    </div>
 
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Payment Mode
-                  </label>
-                  <Select
-                    value={editPaymentMode}
-                    onChange={setEditPaymentMode}
-                    options={[
-                      { value: "", label: "Select Mode" },
-                      { value: "UPI", label: "UPI" },
-                      { value: "CARD", label: "Card" },
-                      { value: "NETBANKING", label: "Net Banking" },
-                      { value: "WALLET", label: "Wallet" },
-                      { value: "CASH", label: "Cash" },
-                      { value: "OTHER", label: "Other" },
-                    ]}
-                  />
+                    {applyMerchantRule && (
+                      <div className="flex items-start gap-2.5 bg-primary/5 p-3.5 rounded-xl border border-primary/20 ml-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <input
+                          type="checkbox"
+                          id="contributeGlobally"
+                          checked={contributeGlobally}
+                          onChange={(e) => setContributeGlobally(e.target.checked)}
+                          className="mt-0.5 rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        />
+                        <label htmlFor="contributeGlobally" className="text-xs text-text-secondary leading-tight cursor-pointer flex-1">
+                          <span className="font-semibold text-primary block mb-0.5 text-body-sm">
+                            Contribute this merchant mapping globally
+                          </span>
+                          Help improve BudgetSetu by sharing this payee-to-category mapping with the community database.
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      Payment Mode
+                    </label>
+                    <Select
+                      value={editPaymentMode}
+                      onChange={setEditPaymentMode}
+                      options={[
+                        { value: "", label: "Select Mode" },
+                        { value: "UPI", label: "UPI" },
+                        { value: "CARD", label: "Card" },
+                        { value: "NETBANKING", label: "Net Banking" },
+                        { value: "WALLET", label: "Wallet" },
+                        { value: "CASH", label: "Cash" },
+                        { value: "OTHER", label: "Other" },
+                      ]}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      Reference Number
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={editReferenceNumber}
+                      onChange={(e) => setEditReferenceNumber(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -777,20 +873,72 @@ export const Transactions: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Reference Number
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={editReferenceNumber}
-                    onChange={(e) => setEditReferenceNumber(e.target.value)}
-                  />
+                {/* Audit History Accordion / Section */}
+                <div className="pt-4 border-t border-border-muted mt-2">
+                  <details className="group">
+                    <summary className="flex items-center justify-between text-body-sm font-semibold text-text-secondary hover:text-text-primary cursor-pointer select-none py-1">
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4 text-text-muted group-hover:text-primary transition-colors" />
+                        <span>Audit History</span>
+                        {auditLogs.length > 0 && (
+                          <span className="px-1.5 py-0.5 text-[0.6875rem] font-bold rounded-full bg-brand/10 text-brand">
+                            {auditLogs.length}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-text-muted group-open:hidden">View edits</span>
+                      <span className="text-xs text-text-muted hidden group-open:inline">Hide edits</span>
+                    </summary>
+
+                    <div className="mt-3 bg-bg-subtle/50 rounded-xl p-4 max-h-52 overflow-y-auto border border-border-muted">
+                      {loadingAudit ? (
+                        <div className="flex items-center justify-center py-6 text-brand">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        </div>
+                      ) : auditLogs.length === 0 ? (
+                        <p className="text-body-sm text-text-muted text-center py-4">
+                          No historical edits found for this transaction.
+                        </p>
+                      ) : (
+                        <div className="relative border-l-2 border-border pl-4 ml-2 space-y-4 my-2">
+                          {auditLogs.map((log) => (
+                            <div key={log.id} className="relative space-y-1">
+                              <div className="absolute -left-5.25 top-1.5 h-2 w-2 rounded-full bg-brand border-2 border-bg-surface" />
+                              <p className="text-body-sm font-semibold text-text-primary">
+                                Edited field:{" "}
+                                <span className="text-brand font-mono text-[0.6875rem]">
+                                  {log.fieldName}
+                                </span>
+                              </p>
+                              <p className="text-body-sm text-text-secondary">
+                                Changed:{" "}
+                                <span className="line-through text-text-muted">
+                                  {log.oldValue || "null"}
+                                </span>{" "}
+                                →{" "}
+                                <span className="font-semibold text-text-primary">
+                                  {log.newValue || "null"}
+                                </span>
+                              </p>
+                              <p className="text-[0.625rem] text-text-muted">
+                                by {log.actor} on{" "}
+                                {new Date(log.timestamp).toLocaleString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </details>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-border-muted">
+              <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border-muted bg-bg-surface/50">
                 <button
                   type="button"
                   onClick={() => setEditingTx(null)}
@@ -807,70 +955,6 @@ export const Transactions: React.FC = () => {
                 </button>
               </div>
             </form>
-
-            {/* Right Column: Transaction Audit Trail */}
-            <div className="w-full md:w-[20rem] bg-bg-subtle/50 p-6 flex flex-col">
-              <div className="flex items-center justify-between pb-3 border-b border-border-muted mb-4">
-                <div className="flex items-center gap-2 text-text-primary font-semibold">
-                  <History className="h-5 w-5 text-text-secondary" />
-                  <span>Audit History</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingTx(null)}
-                  className="hidden lg:block text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto space-y-4 max-h-75 md:max-h-105 pr-1">
-                {loadingAudit ? (
-                  <div className="flex items-center justify-center py-10 text-brand">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : auditLogs.length === 0 ? (
-                  <p className="text-body-sm text-text-muted text-center py-6">
-                    No historical edits found.
-                  </p>
-                ) : (
-                  <div className="relative border-l-2 border-border pl-4 ml-2 space-y-6">
-                    {auditLogs.map((log) => (
-                      <div key={log.id} className="relative space-y-1">
-                        {/* Dot */}
-                        <div className="absolute -left-5.75 top-1.5 h-2.5 w-2.5 rounded-full bg-brand border-2 border-bg-surface" />
-
-                        <p className="text-body-sm font-semibold text-text-primary">
-                          Edited field:{" "}
-                          <span className="text-brand font-mono text-[0.6875rem]">
-                            {log.fieldName}
-                          </span>
-                        </p>
-                        <p className="text-body-sm text-text-secondary">
-                          Changed:{" "}
-                          <span className="line-through">
-                            {log.oldValue || "null"}
-                          </span>{" "}
-                          →{" "}
-                          <span className="font-semibold text-text-primary">
-                            {log.newValue || "null"}
-                          </span>
-                        </p>
-                        <p className="text-[0.625rem] text-text-muted">
-                          by {log.actor} on{" "}
-                          {new Date(log.timestamp).toLocaleString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -948,14 +1032,10 @@ export const Transactions: React.FC = () => {
                   <label className="block text-body-sm font-semibold text-text-secondary mb-1">
                     Amount (INR) *
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
+                  <CurrencyInput
                     placeholder="0.00"
                     value={addAmount}
                     onChange={(e) => setAddAmount(e.target.value)}
-                    className="input"
                     required
                   />
                 </div>

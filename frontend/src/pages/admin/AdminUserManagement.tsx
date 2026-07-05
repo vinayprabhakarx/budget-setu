@@ -7,7 +7,18 @@ import {
   CheckCircle,
   Trash2,
 } from "lucide-react";
+import { Select } from "../../components/shared/Select";
 import { AdminUserManagementSkeleton } from "../../components/skeletons/AdminUserManagementSkeleton";
+import { PageHeader } from "../../components/shared/PageHeader";
+import { FilterSection } from "../../components/shared/FilterSection";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "../../components/shared/Table";
 
 interface AdminUser {
   id: string;
@@ -24,12 +35,18 @@ export const AdminUserManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination state could go here, for now using default page 0
+  // Search, filter, and pagination states matching Transactions table
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/admin/users?size=50");
+      const res = await api.get("/admin/users?size=500");
       setUsers(res.data.content || []);
     } catch (err) {
       const error = err as {
@@ -109,20 +126,39 @@ export const AdminUserManagement: React.FC = () => {
     }
   };
 
+  // Filter and paginate users matching Transactions functioning
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      !search.trim() ||
+      u.fullName.toLowerCase().includes(search.trim().toLowerCase()) ||
+      u.email.toLowerCase().includes(search.trim().toLowerCase());
+    const matchesRole = !roleFilter || u.role === roleFilter;
+    const matchesStatus =
+      !statusFilter ||
+      (statusFilter === "ACTIVE" ? u.isActive : !u.isActive);
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const paginatedUsers = filteredUsers.slice(
+    page * pageSize,
+    (page + 1) * pageSize,
+  );
+
   if (loading) {
     return <AdminUserManagementSkeleton />;
   }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary">
-          User Management
-        </h1>
-        <p className="text-body-sm text-text-secondary mt-1">
-          Manage platform users, roles, and access.
-        </p>
-      </div>
+      <PageHeader
+        title="User Management"
+        subtitle="Manage platform users, roles, and access."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
+        onRefreshClick={loadUsers}
+        isRefreshing={loading}
+      />
 
       {error && (
         <div className="p-4 bg-destructive-bg text-destructive rounded-lg border border-destructive/20">
@@ -130,35 +166,74 @@ export const AdminUserManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-bg-subtle border-b border-border">
-                <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                  Joined
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-bg-subtle/50 transition-colors"
-                >
-                  <td className="px-6 py-4">
+      {/* Filter & Search Controls */}
+      <FilterSection
+        isOpen={showFilters}
+        searchQuery={search}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(0);
+        }}
+        searchPlaceholder="Search user by name or email..."
+        hasActiveFilters={Boolean(search || roleFilter || statusFilter)}
+        onReset={() => {
+          setSearch("");
+          setRoleFilter("");
+          setStatusFilter("");
+          setPage(0);
+        }}
+      >
+        <Select
+          value={roleFilter}
+          onChange={(val) => {
+            setRoleFilter(val);
+            setPage(0);
+          }}
+          options={[
+            { value: "", label: "All Roles" },
+            { value: "ADMIN", label: "Admin" },
+            { value: "USER", label: "User" },
+          ]}
+          size="sm"
+        />
+        <Select
+          value={statusFilter}
+          onChange={(val) => {
+            setStatusFilter(val);
+            setPage(0);
+          }}
+          options={[
+            { value: "", label: "All Statuses" },
+            { value: "ACTIVE", label: "Active" },
+            { value: "SUSPENDED", label: "Suspended" },
+          ]}
+          size="sm"
+        />
+      </FilterSection>
+
+      {/* Table Container matching Transactions table */}
+      <section className="card p-0 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-text-secondary">
+                  No users found matching filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedUsers.map((user) => (
+                <TableRow key={user.id} className="text-body-md">
+                  <TableCell>
                     <div className="flex items-center">
                       <div className="h-10 w-10 shrink-0 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center border border-brand/20">
                         {user.fullName.charAt(0)}
@@ -177,33 +252,33 @@ export const AdminUserManagement: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-border ${
+                      className={`badge ${
                         user.role === "ADMIN" ? "badge-warning" : "badge-info"
                       }`}
                     >
                       {user.role}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-border ${
+                      className={`badge ${
                         user.isActive ? "badge-income" : "badge-expense"
                       }`}
                     >
                       {user.isActive ? "Active" : "Suspended"}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-text-secondary">
                     {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-right font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleRoleChange(user.id, user.role)}
-                        className={`p-1.5 rounded-md transition-colors ${
+                        className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                           user.role === "ADMIN"
                             ? "text-warning hover:bg-warning/10"
                             : "text-info hover:bg-info/10"
@@ -222,7 +297,7 @@ export const AdminUserManagement: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleToggleSuspend(user.id)}
-                        className={`p-1.5 rounded-md transition-colors ${
+                        className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                           user.isActive
                             ? "text-warning hover:bg-warning/10"
                             : "text-income hover:bg-income/10"
@@ -237,24 +312,42 @@ export const AdminUserManagement: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user.id)}
-                        className="p-1.5 rounded-md text-expense hover:bg-expense/10 transition-colors"
+                        className="p-1.5 rounded-md text-expense hover:bg-expense/10 transition-colors cursor-pointer"
                         title="Delete User"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </section>
+
+      {/* Pagination Footer matching Transactions table */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="btn btn-secondary btn-sm"
+          >
+            Previous
+          </button>
+          <span className="text-body-sm text-text-secondary font-medium mx-2">
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page === totalPages - 1}
+            className="btn btn-secondary btn-sm"
+          >
+            Next
+          </button>
         </div>
-        {users.length === 0 && (
-          <div className="p-8 text-center text-text-secondary">
-            No users found.
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

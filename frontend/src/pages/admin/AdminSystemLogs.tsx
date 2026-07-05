@@ -11,6 +11,15 @@ import {
   Shield,
 } from "lucide-react";
 import { AdminSystemLogsSkeleton } from "../../components/skeletons/AdminSystemLogsSkeleton";
+import { PageHeader } from "../../components/shared/PageHeader";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "../../components/shared/Table";
 
 interface AuditLog {
   id: string;
@@ -83,22 +92,12 @@ export const AdminSystemLogs: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary">
-            System Logs
-          </h1>
-          <p className="text-body-sm text-text-secondary mt-1">
-            Monitor audit trails, application logs, and database activity.
-          </p>
-        </div>
-        <button
-          onClick={loadData}
-          className="px-4 py-2 bg-bg-surface border border-border rounded-lg text-sm font-medium hover:bg-bg-subtle transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        title="System Logs"
+        subtitle="Monitor audit trails, application logs, and database activity."
+        onRefreshClick={loadData}
+        isRefreshing={loading}
+      />
 
       {/* Tabs */}
       <div className="flex space-x-2 border-b border-border pb-px overflow-x-auto no-scrollbar">
@@ -153,72 +152,62 @@ export const AdminSystemLogs: React.FC = () => {
       {loading ? (
         <AdminSystemLogsSkeleton />
       ) : (
-        <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden min-h-[60vh] lg:min-h-[70vh] flex flex-col">
+        <section className="card p-0 overflow-hidden min-h-[60vh] lg:min-h-[70vh] flex flex-col">
           {/* AUDIT LOGS */}
           {activeTab === "audit" && (
             <div className="overflow-auto flex-1">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-bg-subtle border-b border-border">
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Timestamp
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Action
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Admin
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Target User
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Details
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {auditLogs.map((log) => (
-                    <tr
-                      key={log.id}
-                      className="hover:bg-bg-subtle/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {new Date(log.timestamp).toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-bg-subtle text-text-primary border border-border">
-                          <Activity className="h-3 w-3" />
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-text-tertiary" />
-                          {log.adminEmail}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4 text-text-tertiary" />
-                          {log.targetUserEmail}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        {log.details}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {auditLogs.length === 0 && (
-                <div className="p-8 text-center text-text-secondary">
-                  No audit logs found.
-                </div>
-              )}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Admin</TableHead>
+                    <TableHead>Target User</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {auditLogs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-text-secondary">
+                        No audit logs found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    auditLogs.map((log) => (
+                      <TableRow key={log.id} className="text-body-md">
+                        <TableCell className="whitespace-nowrap text-text-secondary">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            {new Date(log.timestamp).toLocaleString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <span className="badge badge-neutral">
+                            <Activity className="h-3 w-3 inline mr-1" />
+                            {log.action}
+                          </span>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-text-primary">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-text-tertiary" />
+                            {log.adminEmail}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-text-primary">
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4 text-text-tertiary" />
+                            {log.targetUserEmail}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-text-secondary">
+                          {log.details}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
           )}
 
@@ -240,70 +229,60 @@ export const AdminSystemLogs: React.FC = () => {
           {/* DATABASE LOGS */}
           {activeTab === "db" && (
             <div className="overflow-auto flex-1">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-bg-subtle border-b border-border">
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      PID
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      App
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      State
-                    </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                      Query
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {dbLogs.map((log, idx) => (
-                    <tr
-                      key={idx}
-                      className="hover:bg-bg-subtle/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
-                        {log.pid}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                        {log.usename}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
-                        {log.application_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-border ${
-                            log.state === "active"
-                              ? "badge-income"
-                              : "badge-neutral"
-                          }`}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>PID</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>App</TableHead>
+                    <TableHead>State</TableHead>
+                    <TableHead>Query</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dbLogs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-text-secondary">
+                        No active queries found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    dbLogs.map((log, idx) => (
+                      <TableRow key={idx} className="text-body-md">
+                        <TableCell className="whitespace-nowrap font-medium text-text-primary">
+                          {log.pid}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-text-secondary">
+                          {log.usename}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-text-secondary">
+                          {log.application_name}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <span
+                            className={`badge ${
+                              log.state === "active"
+                                ? "badge-income"
+                                : "badge-neutral"
+                            }`}
+                          >
+                            {log.state}
+                          </span>
+                        </TableCell>
+                        <TableCell
+                          className="text-text-secondary font-mono max-w-md truncate"
+                          title={log.query}
                         >
-                          {log.state}
-                        </span>
-                      </td>
-                      <td
-                        className="px-6 py-4 text-sm text-text-secondary font-mono max-w-md truncate"
-                        title={log.query}
-                      >
-                        {log.query}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {dbLogs.length === 0 && (
-                <div className="p-8 text-center text-text-secondary">
-                  No active queries found.
-                </div>
-              )}
+                          {log.query}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );

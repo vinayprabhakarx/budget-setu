@@ -3,6 +3,7 @@ import { Plus, Trash2, X, Edit2, Coins, Trophy, Calendar } from 'lucide-react';
 import { Select } from '../../../components/shared/Select';
 import { SavingsGoalsSkeleton } from "../../../components/skeletons/SavingsGoalsSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
+import { CurrencyInput } from '../../../components/shared/CurrencyInput';
 import { formatCurrency } from '../../../utils/currency';
 import type { Goal } from './types';
 import api from '../../../api/axiosInstance';
@@ -84,7 +85,10 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-body-sm text-text-secondary font-medium">
+          {goals.length} savings {goals.length === 1 ? 'target' : 'targets'} configured
+        </div>
         <button onClick={openCreate} className="btn btn-primary flex items-center gap-2">
           <Plus className="h-4.5 w-4.5" /><span>New Target</span>
         </button>
@@ -95,37 +99,35 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
       ) : goals.length === 0 ? (
         <StateDisplay type="empty" title="No savings goals configured" className="py-12" action={{ label: "New Target", onClick: openCreate }} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {goals.map(g => {
             const isCompleted = g.completed;
             return (
-              <div key={g.id} className="card p-6 flex flex-col justify-between space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-text-primary text-body-md flex items-center gap-2">
-                        <span>{g.name}</span>
-                        {isCompleted && <Trophy className="h-4 w-4 text-income" />}
+              <div key={g.id} className="card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <h4 className="font-semibold text-text-primary text-body-lg leading-tight flex items-center gap-1.5 truncate max-w-full">
+                        <span className="truncate">{g.name || "N/A"}</span>
+                        {isCompleted && <Trophy className="h-4 w-4 text-income shrink-0" />}
                       </h4>
-                      <span className={`px-2 py-0.5 text-xs font-semibold tracking-wider uppercase rounded ${g.priority === 'HIGH' ? 'badge-expense' : g.priority === 'LOW' ? 'badge-income' : 'badge-warning'}`}>{g.priority || 'MEDIUM'}</span>
+                      <span className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${g.priority === 'HIGH' ? 'badge-expense' : g.priority === 'LOW' ? 'badge-income' : 'badge-warning'}`}>{g.priority || 'MEDIUM'}</span>
                     </div>
-                    {g.description && <p className="text-body-sm text-text-secondary">{g.description}</p>}
-                    {g.targetDate && (
-                      <p className="text-body-sm text-text-secondary flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>Target: {new Date(g.targetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                      </p>
-                    )}
+                    <p className="text-body-sm text-text-secondary truncate">{g.description || "Description: N/A"}</p>
+                    <p className="text-body-sm text-text-secondary flex items-center gap-1 whitespace-nowrap">
+                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      <span>Target: {g.targetDate ? new Date(g.targetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0 ml-1">
                     <button onClick={() => openEdit(g)} className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"><Edit2 className="h-4 w-4" /></button>
                     <button onClick={() => handleDelete(g.id)} className="p-1.5 rounded-md hover:bg-destructive-bg text-text-secondary hover:text-destructive transition-colors cursor-pointer"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-body-sm">
-                    <span className="text-text-secondary">Saved: <b className="num text-text-primary font-medium">{formatCurrency(g.currentAmount)}</b></span>
-                    <span className="text-text-secondary">Target: <b className="num text-text-primary font-medium">{formatCurrency(g.targetAmount)}</b></span>
+                <div className="space-y-2 mt-auto pt-2 border-t border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-body-sm">
+                    <span className="text-text-secondary whitespace-nowrap">Saved: <b className="num text-text-primary font-medium">{g.currentAmount !== null && g.currentAmount !== undefined ? formatCurrency(g.currentAmount) : "N/A"}</b></span>
+                    <span className="text-text-secondary whitespace-nowrap">Target: <b className="num text-text-primary font-medium">{g.targetAmount !== null && g.targetAmount !== undefined ? formatCurrency(g.targetAmount) : "N/A"}</b></span>
                   </div>
                   <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-deliberate ease-standard ${isCompleted ? 'bg-income' : 'bg-brand'}`} style={{ width: `${Math.min(g.percentageComplete, 100)}%` }} />
@@ -157,7 +159,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
             <form onSubmit={handleGoalSubmit}>
               <div className="p-4 space-y-4">
                 <div><label className="block text-body-sm text-text-secondary mb-1">Goal Name *</label><input type="text" value={goalName} onChange={e => setGoalName(e.target.value)} className="input" required /></div>
-                <div><label className="block text-body-sm text-text-secondary mb-1">Target Amount *</label><input type="number" step="0.01" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} className="input" required /></div>
+                <div><label className="block text-body-sm text-text-secondary mb-1">Target Amount *</label><CurrencyInput value={targetAmount} onChange={e => setTargetAmount(e.target.value)} required /></div>
                 <div><label className="block text-body-sm text-text-secondary mb-1">Target Date (Optional)</label><input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} className="input" /></div>
                 <div><label className="block text-body-sm text-text-secondary mb-1">Priority</label><Select value={priority} onChange={setPriority} options={[{ value: 'LOW', label: 'Low' }, { value: 'MEDIUM', label: 'Medium' }, { value: 'HIGH', label: 'High' }]} /></div>
                 <div><label className="block text-body-sm text-text-secondary mb-1">Description (Optional)</label><textarea value={description} onChange={e => setDescription(e.target.value)} className="input" rows={2}></textarea></div>
@@ -181,7 +183,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
             <form onSubmit={handleContributeSubmit}>
               <div className="p-4 space-y-4">
                 <p className="text-body-sm text-text-secondary">Allocate funds to <b>{contributionGoal.name}</b>.</p>
-                <div><label className="block text-body-sm text-text-secondary mb-1">Contribution Amount *</label><input type="number" step="0.01" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} className="input" autoFocus required /></div>
+                <div><label className="block text-body-sm text-text-secondary mb-1">Contribution Amount *</label><CurrencyInput value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} autoFocus required /></div>
               </div>
               <div className="p-4 border-t border-border flex justify-end gap-3 bg-background-alt/30">
                 <button type="button" onClick={() => setIsContributeOpen(false)} className="btn btn-secondary">Cancel</button>

@@ -21,6 +21,9 @@ interface ImportJob {
 
 interface ImportProps {
   onUploadClick?: () => void;
+  searchQuery?: string;
+  sourceFilter?: string;
+  statusFilter?: string;
 }
 
 /**
@@ -29,7 +32,12 @@ interface ImportProps {
  * Handles bulk importing of transactions via file uploads (e.g., CSV, OFX).
  * Displays a history of past imports and tracks the status of ongoing import processes.
  */
-export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
+export const Import: React.FC<ImportProps> = ({
+  onUploadClick,
+  searchQuery = "",
+  sourceFilter = "ALL",
+  statusFilter = "ALL",
+}) => {
   const { showToast } = useToast();
   const { jobs } = useImportProcess();
   const navigate = useNavigate();
@@ -91,7 +99,10 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
         fileName: j.filename,
         sourceName: historyMatch ? historyMatch.sourceName : (j.sourceName || 'AUTO'),
         completedAt: historyMatch?.completedAt,
-        progress: j.progress
+        progress: j.progress,
+        totalFound: historyMatch?.totalFound ?? j.result?.totalFound,
+        newImported: historyMatch?.newImported ?? j.result?.newImported,
+        duplicatesSkipped: historyMatch?.duplicatesSkipped ?? j.result?.duplicatesSkipped,
       } as ImportJob;
     });
 
@@ -99,6 +110,38 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
   const filteredHistory = importHistory.filter(h => !activeJobIds.has(h.importId));
 
   const allJobs: ImportJob[] = [...activeJobsList, ...filteredHistory];
+
+  const filteredJobs = allJobs.filter(j => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchFile = j.fileName?.toLowerCase().includes(q);
+      const matchSource = j.sourceName?.toLowerCase().includes(q);
+      if (!matchFile && !matchSource) return false;
+    }
+    if (sourceFilter && sourceFilter !== 'ALL') {
+      const src = (j.sourceName || '').toLowerCase().trim();
+      const flt = sourceFilter.toLowerCase().trim();
+      let isMatch = src === flt || src.includes(flt) || flt.includes(src);
+      if (flt === 'hdfc' && src.includes('hdfc')) isMatch = true;
+      if (flt === 'icici' && src.includes('icici')) isMatch = true;
+      if (flt === 'sbi' && (src.includes('sbi') || src.includes('state bank'))) isMatch = true;
+      if (flt === 'bob' && (src.includes('bob') || src.includes('baroda'))) isMatch = true;
+      if (flt === 'gpay' && (src.includes('gpay') || src.includes('google'))) isMatch = true;
+      if (flt === 'phonepe' && src.includes('phonepe')) isMatch = true;
+      if (flt === 'paytm' && src.includes('paytm')) isMatch = true;
+      if (flt === 'pnb' && (src.includes('pnb') || src.includes('punjab'))) isMatch = true;
+      if (!isMatch) return false;
+    }
+    if (statusFilter && statusFilter !== 'ALL') {
+      const st = (j.status || '').toUpperCase().trim();
+      const fltSt = statusFilter.toUpperCase().trim();
+      if (fltSt === 'DONE' && st !== 'DONE' && st !== 'COMPLETED' && st !== 'SUCCESS') return false;
+      if (fltSt === 'FAILED' && st !== 'FAILED' && st !== 'ERROR') return false;
+      if (fltSt === 'PROCESSING' && st !== 'PROCESSING' && st !== 'UPLOADING' && st !== 'PENDING' && st !== 'IN_PROGRESS') return false;
+      if (fltSt !== 'DONE' && fltSt !== 'FAILED' && fltSt !== 'PROCESSING' && st !== fltSt) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6 pb-16">
@@ -121,12 +164,21 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
             icon={<FileUp className="h-10 w-10 text-text-muted opacity-50" />}
           />
         </section>
+      ) : filteredJobs.length === 0 ? (
+        <section className="max-w-xl mx-auto mt-10">
+          <StateDisplay
+            type="empty"
+            title="No history records found"
+            description="Try adjusting your search or filter criteria."
+          />
+        </section>
       ) : (
         <section className="bg-bg-surface border border-border shadow-sm rounded-xl overflow-hidden transition-shadow hover:shadow-md">
           <div className="px-5 sm:px-8 py-5 border-b border-border flex items-center justify-between bg-bg-subtle/30">
             <h3 className="text-display-xs font-semibold text-text-primary tracking-tight">Import History</h3>
             {onUploadClick && (
               <button
+                type="button"
                 onClick={onUploadClick}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle text-body-sm font-medium transition-colors"
                 title="Select File"
@@ -139,7 +191,7 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
 
           <div className="overflow-x-auto">
             <ul className="divide-y divide-border min-w-full sm:min-w-fit">
-              {allJobs.map((h, i) => (
+              {filteredJobs.map((h, i) => (
                 <li
                   key={h.importId + '_' + i}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-5 sm:px-8 py-4 hover:bg-bg-subtle/30 transition-colors cursor-pointer group"
@@ -182,23 +234,8 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-8 w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0 pl-8 sm:pl-0">
-                    {h.status === 'DONE' ? (
-                      <div className="flex items-center gap-4 sm:gap-5 shrink-0">
-                        <div className="text-center">
-                          <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">Found</p>
-                          <p className="num font-medium text-text-primary">{h.totalFound}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">New</p>
-                          <p className="num font-semibold text-income">+{h.newImported}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">Skipped</p>
-                          <p className="num font-medium text-warning">{h.duplicatesSkipped}</p>
-                        </div>
-                      </div>
-                    ) : (h.status === 'PROCESSING' || h.status === 'UPLOADING') ? (
+                  <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0 pl-8 sm:pl-0">
+                    {h.status === 'PROCESSING' || h.status === 'UPLOADING' ? (
                       <div className="flex flex-col gap-2 w-full max-w-52 shrink-0">
                         <div className="flex justify-between text-body-xs text-text-secondary">
                           <span>{h.status === 'UPLOADING' ? 'Uploading...' : 'Processing...'}</span>
@@ -212,28 +249,44 @@ export const Import: React.FC<ImportProps> = ({ onUploadClick }) => {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-end gap-2 shrink-0 sm:ml-4 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-border">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(h.importId);
-                          }}
-                          disabled={deletingId === h.importId}
-                          className="p-2 text-text-muted hover:text-expense hover:bg-expense/10 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                          title="Delete imported statement and its transactions"
-                        >
-                          {deletingId === h.importId ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-5 w-5" />
-                          )}
-                        </button>
-                        {(h.status === 'DONE' || h.status === 'FAILED') && (
+                      <>
+                        {h.status === 'DONE' && (
+                          <div className="flex items-center gap-4 sm:gap-5 shrink-0">
+                            <div className="text-center">
+                              <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">Found</p>
+                              <p className="num font-medium text-text-primary">{h.totalFound}</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">New</p>
+                              <p className="num font-semibold text-income">+{h.newImported}</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-xs text-text-muted uppercase tracking-wider font-semibold">Skipped</p>
+                              <p className="num font-medium text-warning">{h.duplicatesSkipped}</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-end gap-1 shrink-0 sm:ml-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-border">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(h.importId);
+                            }}
+                            disabled={deletingId === h.importId}
+                            className="p-2 text-text-muted hover:text-expense hover:bg-expense/10 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                            title="Delete imported statement and its transactions"
+                          >
+                            {deletingId === h.importId ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-5 w-5" />
+                            )}
+                          </button>
                           <div className="p-2 text-text-muted group-hover:text-text-primary transition-colors">
                             <ChevronRight className="h-5 w-5" />
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </li>

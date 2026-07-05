@@ -3,6 +3,7 @@ import api from '../../api/axiosInstance';
 import { useToast } from '../../context/ToastContext';
 import { X, Loader2 } from 'lucide-react';
 import { Select } from './Select';
+import { CurrencyInput } from './CurrencyInput';
 
 interface Account {
   id: string;
@@ -179,16 +180,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen
                   <label className="block text-body-sm font-semibold text-text-secondary mb-1">
                     Amount *
                   </label>
-                  <div className="input-currency-wrapper">
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={amount}
-                      onChange={e => setAmount(e.target.value)}
-                      className={`input input-currency ${errors.amount ? 'input-error' : ''}`}
-                    />
-                  </div>
+                  <CurrencyInput
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    className={errors.amount ? 'input-error' : ''}
+                  />
                   {errors.amount && <p className="text-destructive text-body-sm mt-1">{errors.amount}</p>}
                 </div>
 

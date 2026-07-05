@@ -6,6 +6,14 @@ import { useToast } from '../../context/ToastContext';
 import { StateDisplay } from '../../components/shared/StateDisplay';
 import { ImportDetailsSkeleton } from '../../components/skeletons/ImportDetailsSkeleton';
 import { formatCurrency } from '../../utils/currency';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/shared/Table';
 
 interface TransactionDetail {
   transactionId: string;
@@ -196,45 +204,44 @@ export const ImportDetails: React.FC = () => {
             />
           ) : (
             <section className="card p-0 overflow-hidden mt-4">
-              <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border bg-bg-subtle/40 text-text-secondary text-body-sm font-semibold">
-                    <th className="py-3 px-2 sm:px-4">Date</th>
-                    <th className="py-3 px-2 sm:px-4">Payee</th>
-                    <th className="py-3 px-2 sm:px-4 text-right">Amount</th>
-                    <th className="py-3 px-2 sm:px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Payee</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredRows.map(row => {
                     const isNegative = !row.isIncome;
                     return (
-                      <tr
+                      <TableRow
                         key={row.id}
-                        className="border-b border-border-muted hover:bg-bg-subtle/25 transition-colors text-body-md"
+                        className="text-body-md"
                       >
                         {/* Date */}
-                        <td className="py-3 px-2 sm:px-4 text-text-secondary whitespace-nowrap">
+                        <TableCell className="text-text-secondary whitespace-nowrap">
                           {row.date ? formatDate(row.date) : '—'}
-                        </td>
+                        </TableCell>
 
                         {/* Payee */}
-                        <td className="py-3 px-2 sm:px-4 font-medium text-text-primary">
+                        <TableCell className="font-medium text-text-primary">
                           <span>{row.payee}</span>
-                        </td>
+                        </TableCell>
 
                         {/* Amount — same num classes as Transactions */}
-                        <td className={`py-3 px-2 sm:px-4 text-right num font-semibold whitespace-nowrap ${
+                        <TableCell className={`text-right num font-semibold whitespace-nowrap ${
                           isNegative
                             ? 'num-negative'
                             : 'num-positive'
                         }`}>
                           {`${isNegative ? '−' : '+'}${formatCurrency(row.amount)}`}
-                        </td>
+                        </TableCell>
 
                         {/* Status badge */}
-                        <td className="py-3 px-2 sm:px-4 whitespace-nowrap">
+                        <TableCell className="whitespace-nowrap">
                           {row.type === 'IMPORTED' && (
                             <span className="inline-flex items-center gap-1.5 text-income text-xs font-medium bg-income/10 px-2 py-1 rounded">
                               <CheckCircle className="w-3.5 h-3.5" /> Imported
@@ -245,13 +252,12 @@ export const ImportDetails: React.FC = () => {
                               <AlertCircle className="w-3.5 h-3.5" /> Skipped
                             </span>
                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
             </section>
           )}
         </>

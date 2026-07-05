@@ -4,6 +4,8 @@ import { useDateFilter } from '../../context/DateFilterContext';
 import api from '../../api/axiosInstance';
 import { useToast } from '../../context/ToastContext';
 import { Select } from '../../components/shared/Select';
+import { PageHeader } from '../../components/shared/PageHeader';
+import { FilterSection } from '../../components/shared/FilterSection';
 import { BudgetPlans } from './budgets/BudgetPlans';
 import { RecurringExpenses } from './budgets/RecurringExpenses';
 import { SavingsGoals } from './budgets/SavingsGoals';
@@ -48,6 +50,9 @@ export const Budgets: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterPeriod, setFilterPeriod] = useState<'ALL' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY'>('ALL');
+  const [quarter, setQuarter] = useState(Math.ceil((new Date().getMonth() + 1) / 3));
 
   const fetchData = useCallback(async () => {
     try {
@@ -88,36 +93,121 @@ export const Budgets: React.FC = () => {
     { key: 'goals' as const, label: 'Savings Goals' },
   ];
 
-  // Filter budget plans based on the selected month and year
-  const filteredBudgetPlans = budgetPlans.filter(p => {
+  // Filter date ranges
+  const getFilterRange = () => {
+    if (filterPeriod === 'ALL') return null;
+    if (filterPeriod === 'MONTHLY') {
+      return {
+        start: new Date(year, month - 1, 1),
+        end: new Date(year, month, 0, 23, 59, 59),
+      };
+    }
+    if (filterPeriod === 'QUARTERLY') {
+      const startMonth = (quarter - 1) * 3;
+      return {
+        start: new Date(year, startMonth, 1),
+        end: new Date(year, startMonth + 3, 0, 23, 59, 59),
+      };
+    }
+    if (filterPeriod === 'YEARLY') {
+      return {
+        start: new Date(year, 0, 1),
+        end: new Date(year, 11, 31, 23, 59, 59),
+      };
+    }
+    return null;
+  };
+
+  const range = getFilterRange();
+
+  // Filter budget plans based on range (default ALL)
+  const filteredBudgetPlans = range ? budgetPlans.filter(p => {
     const planStart = new Date(p.startDate);
     const planEnd = new Date(p.endDate);
-    const filterMonthStart = new Date(year, month - 1, 1);
-    const filterMonthEnd = new Date(year, month, 0); // Last day of month
-    
-    // They overlap if planStart <= filterMonthEnd && planEnd >= filterMonthStart
-    return planStart <= filterMonthEnd && planEnd >= filterMonthStart;
-  });
+    return planStart <= range.end && planEnd >= range.start;
+  }) : budgetPlans;
+
+  // Filter goals based on targetDate
+  const filteredGoals = range ? goals.filter(g => {
+    if (!g.targetDate) return true;
+    const gDate = new Date(g.targetDate);
+    return gDate >= range.start && gDate <= range.end;
+  }) : goals;
+
+  // Filter recurring expenses based on startDate
+  const filteredRecurring = range ? recurringExpenses.filter(e => {
+    if (!e.startDate) return true;
+    const eDate = new Date(e.startDate);
+    return eDate <= range.end;
+  }) : recurringExpenses;
 
   return (
     <div className="space-y-6 pb-16">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl lg:text-3xl font-semibold text-text-primary">Budgets & Goals</h2>
-        <div className="flex items-center gap-2">
-          <Select
-            value={String(month)}
-            onChange={(val) => setMonth(Number(val))}
-            options={months.map((m) => ({ value: String(m.val), label: m.label }))}
-            size="sm"
-          />
-          <Select
-            value={String(year)}
-            onChange={(val) => setYear(Number(val))}
-            options={years.map((y) => ({ value: String(y), label: String(y) }))}
-            size="sm"
-          />
+      <PageHeader
+        title="Budgets & Goals"
+        subtitle="Track financial budgets, recurring expenses, and savings targets."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
+        onRefreshClick={fetchData}
+        isRefreshing={loading}
+      />
+
+      {/* Filter Controls */}
+      <FilterSection
+        isOpen={showFilters}
+        hasActiveFilters={filterPeriod !== 'ALL'}
+        onReset={() => setFilterPeriod('ALL')}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-body-sm font-medium text-text-secondary mr-1">Period:</span>
+          {(['ALL', 'MONTHLY', 'QUARTERLY', 'YEARLY'] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setFilterPeriod(type)}
+              className={`px-3 py-1 rounded-lg text-body-sm font-medium transition-all ${
+                filterPeriod === type
+                  ? 'bg-primary text-text-inverse shadow-sm'
+                  : 'bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-border'
+              }`}
+            >
+              {type === 'ALL' ? 'All (Default)' : type.charAt(0) + type.slice(1).toLowerCase()}
+            </button>
+          ))}
         </div>
-      </div>
+
+        {filterPeriod !== 'ALL' && (
+          <div className="flex items-center gap-2 flex-wrap ml-2">
+            {filterPeriod === 'MONTHLY' && (
+              <Select
+                value={String(month)}
+                onChange={(val) => setMonth(Number(val))}
+                options={months.map((m) => ({ value: String(m.val), label: m.label }))}
+                size="sm"
+              />
+            )}
+            {filterPeriod === 'QUARTERLY' && (
+              <Select
+                value={String(quarter)}
+                onChange={(val) => setQuarter(Number(val))}
+                options={[
+                  { value: "1", label: "Q1 (Jan - Mar)" },
+                  { value: "2", label: "Q2 (Apr - Jun)" },
+                  { value: "3", label: "Q3 (Jul - Sep)" },
+                  { value: "4", label: "Q4 (Oct - Dec)" },
+                ]}
+                size="sm"
+              />
+            )}
+            <Select
+              value={String(year)}
+              onChange={(val) => setYear(Number(val))}
+              options={years.map((y) => ({ value: String(y), label: String(y) }))}
+              size="sm"
+            />
+          </div>
+        )}
+      </FilterSection>
       {/* Tab Navigation */}
       <section className="flex border-b border-border-muted pb-4">
         <div className="flex gap-4 overflow-x-auto hide-scrollbar">
@@ -143,10 +233,10 @@ export const Budgets: React.FC = () => {
           <BudgetPlans plans={filteredBudgetPlans} categories={categories} loading={loading} onRefresh={fetchData} />
         )}
         {activeTab === 'recurring' && (
-          <RecurringExpenses expenses={recurringExpenses} categories={categories} loading={loading} onRefresh={fetchData} />
+          <RecurringExpenses expenses={filteredRecurring} categories={categories} loading={loading} onRefresh={fetchData} />
         )}
         {activeTab === 'goals' && (
-          <SavingsGoals goals={goals} loading={loading} onRefresh={fetchData} />
+          <SavingsGoals goals={filteredGoals} loading={loading} onRefresh={fetchData} />
         )}
       </div>
     </div>

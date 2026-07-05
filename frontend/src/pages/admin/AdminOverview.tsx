@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Users, CreditCard, Receipt, UserCheck, RefreshCw, Cpu, Activity, ShieldAlert, ArrowRight, Server, Database, Box } from "lucide-react";
+import { Users, CreditCard, Receipt, UserCheck, Cpu, Activity, ShieldAlert, ArrowRight, Server, Database, Box } from "lucide-react";
 import { AdminOverviewSkeleton } from "../../components/skeletons/AdminOverviewSkeleton";
 import api from "../../api/axiosInstance";
 import { Link } from "react-router-dom";
+import { PageHeader } from "../../components/shared/PageHeader";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "../../components/shared/Table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
@@ -107,23 +116,12 @@ export const AdminOverview: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary">
-            Platform Overview
-          </h1>
-          <p className="text-body-sm text-text-secondary mt-1">
-            High-level metrics and performance analytics
-          </p>
-        </div>
-        <button
-          onClick={loadMetrics}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-bg-surface hover:bg-bg-subtle text-text-secondary hover:text-text-primary text-sm font-medium transition-colors cursor-pointer"
-        >
-          <RefreshCw className="h-4 w-4" />
-          <span>Refresh</span>
-        </button>
-      </div>
+      <PageHeader
+        title="Platform Overview"
+        subtitle="High-level metrics and performance analytics"
+        onRefreshClick={loadMetrics}
+        isRefreshing={loading}
+      />
 
       {/* TOP ROW: KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -406,7 +404,7 @@ export const AdminOverview: React.FC = () => {
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border)', borderRadius: '0.5rem' }}
                   labelFormatter={(val) => new Date(val).toLocaleDateString()}
-                  formatter={(value: any) => typeof value === 'number' ? value.toFixed(2) : value}
+                  formatter={(value: unknown) => typeof value === 'number' ? value.toFixed(2) : value}
                 />
                 
                 <Area yAxisId="left" type="monotone" name="CPU Usage (%)" dataKey="avgCpu" stroke="var(--color-info)" strokeWidth={3} fillOpacity={1} fill="url(#colorCpu)" />
@@ -423,7 +421,7 @@ export const AdminOverview: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Registrations Table */}
-        <div className="lg:col-span-2 bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <section className="lg:col-span-2 card p-0 overflow-hidden flex flex-col">
           <div className="p-5 border-b border-border flex items-center justify-between">
             <h3 className="text-base font-semibold text-text-primary">Recent Registrations</h3>
             <Link to="/users" className="text-sm font-medium text-brand hover:text-brand-dark flex items-center gap-1 transition-colors">
@@ -431,18 +429,18 @@ export const AdminOverview: React.FC = () => {
             </Link>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left">
-              <thead className="bg-bg-subtle/50">
-                <tr>
-                  <th className="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">User</th>
-                  <th className="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Joined</th>
-                  <th className="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {metrics?.recentUsers?.map((user) => (
-                  <tr key={user.id} className="hover:bg-bg-subtle/30 transition-colors">
-                    <td className="px-5 py-3">
+                  <TableRow key={user.id} className="text-body-md">
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xs shrink-0">
                           {user.fullName?.charAt(0) || "U"}
@@ -452,23 +450,23 @@ export const AdminOverview: React.FC = () => {
                           <p className="text-xs text-text-secondary">{user.email}</p>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-5 py-3 text-sm text-text-secondary">
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
                       {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-border ${
+                    </TableCell>
+                    <TableCell>
+                      <span className={`badge ${
                         user.isActive ? 'badge-income' : 'badge-expense'
                       }`}>
                         {user.isActive ? 'Active' : 'Suspended'}
                       </span>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        </section>
 
         {/* Quick Links / Actions */}
         <div className="bg-bg-surface border border-border rounded-xl shadow-sm p-5 flex flex-col">

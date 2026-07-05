@@ -49,10 +49,11 @@ export const Contact: React.FC = () => {
       setEmail("");
       setTopic("general");
       setMessage("");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Failed to submit contact form:", error);
       showToast(
         "error",
-        error.response?.data?.message || "Failed to send message. Please try again later."
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to send message. Please try again later."
       );
     } finally {
       setLoading(false);

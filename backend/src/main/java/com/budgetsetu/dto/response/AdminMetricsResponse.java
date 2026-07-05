@@ -12,7 +12,7 @@ public class AdminMetricsResponse {
     private long activeUsers;
     private long totalTransactions;
     private long totalAccounts;
-    
+
     private List<MonthlyStat> monthlySignups;
     private List<MonthlyStat> monthlyTransactions;
     private List<HistoricalInfraStat> historicalInfraMetrics;

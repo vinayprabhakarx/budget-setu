@@ -16,7 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for transaction categories.
- * Manages the taxonomy of categories (e.g., Food, Transport, Bills) used to classify transactions.
+ * Manages the taxonomy of categories (e.g., Food, Transport, Bills) used to
+ * classify transactions.
  */
 public class CategoryController {
 

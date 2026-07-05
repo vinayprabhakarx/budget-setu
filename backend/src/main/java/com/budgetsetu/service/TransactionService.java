@@ -5,15 +5,21 @@ import com.budgetsetu.exception.DuplicateTransactionException;
 import com.budgetsetu.exception.ResourceNotFoundException;
 import com.budgetsetu.model.sql.Transaction;
 import com.budgetsetu.repository.sql.TransactionRepository;
+import com.budgetsetu.repository.sql.CategoryRepository;
 import com.budgetsetu.util.FingerprintUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -23,6 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final CategoryRepository categoryRepository;
     private final AuditService auditService;
     private final AnalyticsService analyticsService;
     private final DashboardService dashboardService;
@@ -56,10 +63,61 @@ public class TransactionService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("transactionType"), type.toUpperCase()));
         }
         if (search != null && !search.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.or(
-                    cb.like(cb.lower(root.get("payee")), "%" + search.toLowerCase() + "%"),
-                    cb.like(cb.lower(root.get("description")), "%" + search.toLowerCase() + "%"),
-                    cb.like(cb.lower(root.get("paymentMode")), "%" + search.toLowerCase() + "%")));
+            List<Transaction> allMatching = transactionRepository.findAll(spec);
+            String searchLower = search.toLowerCase(Locale.ROOT);
+            String searchClean = searchLower.replace(",", "").replace("₹", "").replace("$", "").replace("rs.", "")
+                    .replace("rs", "").replace("inr", "").replace(" ", "").replace("+", "").replace("-", "");
+            Map<UUID, String> catNames = new HashMap<>();
+            if (categoryRepository != null) {
+                categoryRepository.findAllForUser(userId).forEach(
+                        c -> catNames.put(c.getId(), c.getName() != null ? c.getName().toLowerCase(Locale.ROOT) : ""));
+            }
+            List<Transaction> filtered = allMatching.stream().filter(t -> {
+                if (t.getPayee() != null && t.getPayee().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getDescription() != null && t.getDescription().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getReferenceNumber() != null
+                        && t.getReferenceNumber().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getPaymentMode() != null && t.getPaymentMode().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getRawDescription() != null
+                        && t.getRawDescription().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getAmount() != null) {
+                    String amtPlain = t.getAmount().toPlainString();
+                    String amtStripped = t.getAmount().stripTrailingZeros().toPlainString();
+                    if (amtPlain.contains(searchLower) || amtStripped.contains(searchLower))
+                        return true;
+                    if (!searchClean.isEmpty() && (amtPlain.contains(searchClean) || amtStripped.contains(searchClean)))
+                        return true;
+                }
+                if (t.getTransactionDate() != null && t.getTransactionDate().toString().contains(searchLower))
+                    return true;
+                if (t.getTransactionType() != null
+                        && t.getTransactionType().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getSource() != null && t.getSource().toLowerCase(Locale.ROOT).contains(searchLower))
+                    return true;
+                if (t.getTags() != null) {
+                    for (String tag : t.getTags()) {
+                        if (tag != null && tag.toLowerCase(Locale.ROOT).contains(searchLower))
+                            return true;
+                    }
+                }
+                if (t.getCategoryId() != null) {
+                    String cName = catNames.get(t.getCategoryId());
+                    if (cName != null && cName.contains(searchLower))
+                        return true;
+                }
+                return false;
+            }).toList();
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filtered.size());
+            List<Transaction> pageContent = start <= end ? filtered.subList(start, end) : List.of();
+            return new PageImpl<>(pageContent, pageable, filtered.size());
         }
 
         return transactionRepository.findAll(spec, pageable);
@@ -105,6 +163,8 @@ public class TransactionService {
                 .categorySource(request.getCategoryId() != null ? "USER_SET" : null)
                 .fingerprint(fingerprint)
                 .build();
+
+        syncTransactionTypeWithCategory(transaction, request.getCategoryId());
 
         Transaction saved = transactionRepository.save(transaction);
         analyticsService.evictAnalyticsCache(userId);
@@ -167,6 +227,8 @@ public class TransactionService {
             transaction.setFingerprint(fingerprint);
         }
 
+        syncTransactionTypeWithCategory(transaction, transaction.getCategoryId());
+
         Transaction saved = transactionRepository.save(transaction);
         analyticsService.evictAnalyticsCache(userId);
         dashboardService.evictDashboardCache(userId);
@@ -221,6 +283,17 @@ public class TransactionService {
             recordChange(userId, id, "referenceNumber", transaction.getReferenceNumber(), newRef);
             transaction.setReferenceNumber(newRef);
         }
+        if (updates.containsKey("tags")) {
+            Object tagsVal = updates.get("tags");
+            List<String> newTags = null;
+            if (tagsVal instanceof List<?> rawList) {
+                newTags = rawList.stream()
+                        .filter(tag -> tag instanceof String)
+                        .map(tag -> (String) tag)
+                        .toList();
+            }
+            transaction.setTags(newTags != null ? newTags.toArray(new String[0]) : null);
+        }
 
         // Re-calculate fingerprint
         String fingerprint = FingerprintUtil.generate(
@@ -231,11 +304,21 @@ public class TransactionService {
                 transaction.getAccountId().toString());
         transaction.setFingerprint(fingerprint);
 
+        syncTransactionTypeWithCategory(transaction, transaction.getCategoryId());
+
         Transaction saved = transactionRepository.save(transaction);
         analyticsService.evictAnalyticsCache(userId);
         dashboardService.evictDashboardCache(userId);
         budgetPlanService.evictBudgetCache(userId);
         return saved;
+    }
+
+    private void syncTransactionTypeWithCategory(Transaction transaction, UUID categoryId) {
+        if (categoryId != null) {
+            categoryRepository.findById(categoryId).ifPresent(category -> {
+                transaction.setTransactionType(category.getType());
+            });
+        }
     }
 
     private void recordChange(UUID userId, UUID entityId, String field, Object oldValue, Object newValue) {

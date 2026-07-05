@@ -19,7 +19,11 @@ public class ImportDetailsResponse {
     private List<SkippedDetail> skipped;
     private List<FailedDetail> failed;
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class TransactionDetail {
         private String transactionId;
         private String date;
@@ -30,14 +34,22 @@ public class ImportDetailsResponse {
         private String rawRow;
     }
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SkippedDetail {
         private String reason;
         private String rawRow;
         private TransactionDetail collidedWith;
     }
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class FailedDetail {
         private String reason;
         private String rawRow;

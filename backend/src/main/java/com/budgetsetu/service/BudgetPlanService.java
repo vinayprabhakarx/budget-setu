@@ -124,7 +124,8 @@ public class BudgetPlanService {
         try {
             String cached = redisTemplate.opsForValue().get(cacheKey);
             if (cached != null) {
-                return objectMapper.readValue(cached, new TypeReference<List<BudgetPlanResponse>>() {});
+                return objectMapper.readValue(cached, new TypeReference<List<BudgetPlanResponse>>() {
+                });
             }
         } catch (Exception e) {
             log.warn("Failed to read budget cache for key {}: {}", cacheKey, e.getMessage());

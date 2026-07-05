@@ -27,6 +27,5 @@ public class MergeAccountRequest {
     private String customBankName;
     private String customAccountNumber;
     private String customAccountType;
-    private String customCurrency;
     private BigDecimal customBalance;
 }

@@ -18,7 +18,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for dashboard summaries.
- * Aggregates high-level metrics such as net worth, recent transactions, and overall financial health for the user's landing page.
+ * Aggregates high-level metrics such as net worth, recent transactions, and
+ * overall financial health for the user's landing page.
  */
 public class DashboardController {
 

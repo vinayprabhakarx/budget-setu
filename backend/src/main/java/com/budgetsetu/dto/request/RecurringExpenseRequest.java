@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @Data
 public class RecurringExpenseRequest {
-    
+
     private UUID categoryId;
 
     @NotBlank(message = "Name is required.")

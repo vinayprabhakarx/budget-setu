@@ -93,9 +93,9 @@ public class LogFileService {
     public List<Map<String, Object>> getDatabaseActivity() {
         try {
             String sql = "SELECT pid, usename, application_name, client_addr, backend_start, state, query " +
-                         "FROM pg_stat_activity " +
-                         "WHERE state IS NOT NULL AND query NOT LIKE '%pg_stat_activity%' " +
-                         "ORDER BY backend_start DESC LIMIT 100";
+                    "FROM pg_stat_activity " +
+                    "WHERE state IS NOT NULL AND query NOT LIKE '%pg_stat_activity%' " +
+                    "ORDER BY backend_start DESC LIMIT 100";
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
             log.error("Failed to query database activity", e);

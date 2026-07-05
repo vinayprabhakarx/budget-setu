@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   # ── PostgreSQL ──────────────────────────────────────────
   datasource:
@@ -47,7 +47,6 @@ spring:
       max-file-size: 20MB
       max-request-size: 25MB
 
-
 # ── Server ──────────────────────────────────────────────
 server:
   address: 0.0.0.0
@@ -58,16 +57,16 @@ server:
 
 # ── App Config ──────────────────────────────────────────
 app:
-  frontend-url: ${FRONTEND_URL}
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
   admin:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
   email-verification:
-    required: ${EMAIL_VERIFICATION_REQUIRED}
+    required: ${EMAIL_VERIFICATION_REQUIRED:false}
   jwt:
-    secret: ${JWT_SECRET}
-    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS}
-    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS}
+    secret: ${JWT_SECRET:budgetsetu_default_secret_jwt_key_32_bytes_long_min}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
 
   resend:
     api-key: ${RESEND_API_KEY:}
@@ -75,3 +74,6 @@ app:
 
   statement:
     storage-prefix: statements/
+
+encryption:
+  secret-key: ${ENCRYPTION_SECRET_KEY:budgetsetu_default_secret_key_do_not_use_in_prod_32b}

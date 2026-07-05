@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Analytics API response — summary cards, income/expense trend, and category breakdown.
+ * Analytics API response — summary cards, income/expense trend, and category
+ * breakdown.
  */
 @Getter
 @Setter

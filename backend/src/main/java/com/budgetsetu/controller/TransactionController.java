@@ -26,7 +26,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @RequiredArgsConstructor
 /**
  * REST Controller for transactions.
- * Manages individual income and expense records, including creation, modification, soft-deletion, and audit history.
+ * Manages individual income and expense records, including creation,
+ * modification, soft-deletion, and audit history.
  */
 public class TransactionController {
 
@@ -44,13 +45,12 @@ public class TransactionController {
             @RequestParam(required = false) String search,
             @PageableDefault(size = 25) Pageable pageable) {
         return ResponseEntity.ok(transactionService.getTransactions(
-            userId, startDate, endDate, categoryId, accountId, type, search, pageable
-        ));
+                userId, startDate, endDate, categoryId, accountId, type, search, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> getTransaction(@PathVariable UUID id,
-                                                       @AuthenticationPrincipal UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         return ResponseEntity.ok(transactionService.getTransaction(id, userId));
     }
 
@@ -82,7 +82,7 @@ public class TransactionController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable UUID id,
-                                                   @AuthenticationPrincipal UUID userId) {
+            @AuthenticationPrincipal UUID userId) {
         transactionService.softDelete(id, userId);
         return ResponseEntity.noContent().build();
     }

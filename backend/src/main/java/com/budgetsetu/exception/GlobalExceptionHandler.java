@@ -14,7 +14,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Global exception handler — maps all exceptions to the standard API error response format.
+ * Global exception handler — maps all exceptions to the standard API error
+ * response format.
  * Never exposes stack traces, SQL, or internal IDs in user-facing messages.
  */
 @RestControllerAdvice

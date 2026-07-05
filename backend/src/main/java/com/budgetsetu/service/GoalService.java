@@ -97,9 +97,9 @@ public class GoalService {
         double percentage = goal.getTargetAmount().compareTo(BigDecimal.ZERO) == 0
                 ? 0
                 : savedAmount.multiply(BigDecimal.valueOf(100))
-                .divide(goal.getTargetAmount(), 2, RoundingMode.HALF_UP)
-                .min(BigDecimal.valueOf(100))
-                .doubleValue();
+                        .divide(goal.getTargetAmount(), 2, RoundingMode.HALF_UP)
+                        .min(BigDecimal.valueOf(100))
+                        .doubleValue();
         boolean completed = "COMPLETED".equalsIgnoreCase(goal.getStatus())
                 || savedAmount.compareTo(goal.getTargetAmount()) >= 0;
         Long daysRemaining = goal.getTargetDate() == null

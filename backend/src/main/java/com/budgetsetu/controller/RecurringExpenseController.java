@@ -17,7 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for recurring expenses.
- * Manages fixed subscriptions and recurring bills, tracking their due dates and statuses.
+ * Manages fixed subscriptions and recurring bills, tracking their due dates and
+ * statuses.
  */
 public class RecurringExpenseController {
 
@@ -25,15 +26,15 @@ public class RecurringExpenseController {
 
     @PostMapping
     public ResponseEntity<RecurringExpenseResponse> createRecurringExpense(Authentication authentication,
-                                                                           @Valid @RequestBody RecurringExpenseRequest request) {
+            @Valid @RequestBody RecurringExpenseRequest request) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(recurringExpenseService.createRecurringExpense(userId, request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<RecurringExpenseResponse> updateRecurringExpense(Authentication authentication,
-                                                                           @PathVariable UUID id,
-                                                                           @Valid @RequestBody RecurringExpenseRequest request) {
+            @PathVariable UUID id,
+            @Valid @RequestBody RecurringExpenseRequest request) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(recurringExpenseService.updateRecurringExpense(userId, id, request));
     }

@@ -8,8 +8,10 @@ import java.util.List;
 /**
  * Dashboard summary response — single API call returns all dashboard data.
  */
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class DashboardResponse {
 
@@ -19,8 +21,10 @@ public class DashboardResponse {
     private List<BudgetStatus> budgetStatus;
     private List<TransactionResponse> recentTransactions;
 
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class Summary {
         private BigDecimal totalIncome;
@@ -29,8 +33,10 @@ public class DashboardResponse {
         private BigDecimal netWorth;
     }
 
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class CategoryBreakdown {
         private String categoryId;
@@ -40,8 +46,10 @@ public class DashboardResponse {
         private double percentage;
     }
 
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class MonthlyTrend {
         private String month;
@@ -49,8 +57,10 @@ public class DashboardResponse {
         private BigDecimal expense;
     }
 
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class BudgetStatus {
         private String categoryName;

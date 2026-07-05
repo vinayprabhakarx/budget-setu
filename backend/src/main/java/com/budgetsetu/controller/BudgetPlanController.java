@@ -17,7 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for managing active budget plans.
- * Provides endpoints to define, track, and update spending limits across different categories over specific time periods.
+ * Provides endpoints to define, track, and update spending limits across
+ * different categories over specific time periods.
  */
 public class BudgetPlanController {
 
@@ -25,15 +26,15 @@ public class BudgetPlanController {
 
     @PostMapping
     public ResponseEntity<BudgetPlanResponse> createBudgetPlan(Authentication authentication,
-                                                               @Valid @RequestBody BudgetPlanRequest request) {
+            @Valid @RequestBody BudgetPlanRequest request) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(budgetPlanService.createBudgetPlan(userId, request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BudgetPlanResponse> updateBudgetPlan(Authentication authentication,
-                                                               @PathVariable UUID id,
-                                                               @Valid @RequestBody BudgetPlanRequest request) {
+            @PathVariable UUID id,
+            @Valid @RequestBody BudgetPlanRequest request) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(budgetPlanService.updateBudgetPlan(userId, id, request));
     }

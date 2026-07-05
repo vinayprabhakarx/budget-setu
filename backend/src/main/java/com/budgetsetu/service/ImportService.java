@@ -47,6 +47,7 @@ public class ImportService {
     private final com.budgetsetu.repository.sql.TransactionRepository transactionRepository;
     private final com.budgetsetu.parser.BankDetector bankDetector;
     private final ImportProgressTracker progressTracker;
+    private final com.budgetsetu.security.AesUtil aesUtil;
 
     public ImportUploadResponse uploadStatement(UUID userId,
             UUID accountId,
@@ -253,20 +254,15 @@ public class ImportService {
         String accountType = discovery.accountType();
 
         final String finalBankName = bankName;
-        String accountName = finalBankName + " - " + accountNumber + " (" + accountType + ")";
-
         return accountRepository
                 .findByUserIdAndBankNameAndAccountNumberAndAccountType(userId, finalBankName, accountNumber,
                         accountType)
-                .or(() -> accountRepository.findByUserIdAndName(userId, accountName))
                 .orElseGet(() -> accountRepository.save(Account.builder()
                         .userId(userId)
-                        .name(accountName)
                         .bankName(finalBankName)
                         .accountNumber(accountNumber)
                         .accountType(accountType)
                         .balance(java.math.BigDecimal.ZERO)
-                        .currency("INR")
                         .isActive(true)
                         .build()));
     }
@@ -285,7 +281,8 @@ public class ImportService {
                 "(?i)statement\\s+of\\s+transactions\\s+in\\s+(?:savings|current)\\s+account\\s+([xX*]{2,}\\d{4}|\\d{4,})\\b",
                 "(?i)bank\\s*-\\s*([xX*]{2,}\\d{4}|\\d{4,})\\b",
                 "(?i)paid by\\s+[^\\n\\r]*?\\s(\\d{4})\\b",
-                "(?i)paid from\\s+[^\\n\\r]*?\\s(\\d{4})\\b"
+                "(?i)paid from\\s+[^\\n\\r]*?\\s(\\d{4})\\b",
+                "(?i)(?:mobile|mob|mobile\\s*no\\.?|phone\\s*no\\.?|phone)\\s*:?\\s*(?:\\+91[- ]?)?(\\d{10})\\b"
         };
         for (String patternText : explicitPatterns) {
             Matcher matcher = Pattern.compile(patternText).matcher(text);
@@ -637,7 +634,7 @@ public class ImportService {
                             .type(tx.getTransactionType())
                             .payee(tx.getPayee())
                             .description(tx.getDescription())
-                            .rawRow(event.getRawRow())
+                            .rawRow(aesUtil.decrypt(event.getRawRow()))
                             .build());
                 }
             } else if ("SKIPPED".equals(event.getType())) {
@@ -651,18 +648,18 @@ public class ImportService {
                             .type(tx.getTransactionType())
                             .payee(tx.getPayee())
                             .description(tx.getDescription())
-                            .rawRow(event.getRawRow())
+                            .rawRow(aesUtil.decrypt(event.getRawRow()))
                             .build();
                 }
                 skipped.add(SkippedDetail.builder()
                         .reason(event.getReason())
-                        .rawRow(event.getRawRow())
+                        .rawRow(aesUtil.decrypt(event.getRawRow()))
                         .collidedWith(collidedWith)
                         .build());
             } else if ("ERROR".equals(event.getType())) {
                 failed.add(FailedDetail.builder()
                         .reason(event.getReason())
-                        .rawRow(event.getRawRow())
+                        .rawRow(aesUtil.decrypt(event.getRawRow()))
                         .build());
             }
         }

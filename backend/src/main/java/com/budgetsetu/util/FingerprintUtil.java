@@ -10,15 +10,16 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class FingerprintUtil {
 
-    private FingerprintUtil() {}
+    private FingerprintUtil() {
+    }
 
     public static String generate(String date, String amount, String reference,
-                                   String description, String accountId) {
+            String description, String accountId) {
         String raw = normalize(date) + "|" +
-                     normalize(amount) + "|" +
-                     normalize(reference) + "|" +
-                     normalize(description) + "|" +
-                     normalize(accountId);
+                normalize(amount) + "|" +
+                normalize(reference) + "|" +
+                normalize(description) + "|" +
+                normalize(accountId);
         return sha256(raw);
     }
 

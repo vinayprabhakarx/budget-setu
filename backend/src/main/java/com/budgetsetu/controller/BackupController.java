@@ -16,7 +16,8 @@ import java.util.UUID;
 @RequestMapping("/api/backup")
 /**
  * REST Controller for managing data backups.
- * Allows users to trigger data exports (e.g. JSON/CSV) of their financial records for safe keeping.
+ * Allows users to trigger data exports (e.g. JSON/CSV) of their financial
+ * records for safe keeping.
  */
 public class BackupController {
 

@@ -32,7 +32,8 @@ public class EmailService {
         String magicLink = frontendUrl + "/reset-password/confirm?token=" + token;
         String subject = "Reset your BudgetSetu Password";
         String body = "Hello,\n\n" +
-                "You requested a password reset for your BudgetSetu account. Please click the link below to get your verification code:\n" +
+                "You requested a password reset for your BudgetSetu account. Please click the link below to get your verification code:\n"
+                +
                 magicLink + "\n\n" +
                 "This link will expire in 10 minutes.\n\n" +
                 "If you did not request a password reset, you can safely ignore this email.\n\n" +
@@ -44,7 +45,8 @@ public class EmailService {
     public void sendContactConfirmationEmail(String email, String fullName, String topic) {
         String subject = "We received your message - BudgetSetu";
         String body = "Hello " + fullName + ",\n\n" +
-                "Thank you for reaching out to BudgetSetu! We have received your message regarding \"" + topic + "\".\n\n" +
+                "Thank you for reaching out to BudgetSetu! We have received your message regarding \"" + topic
+                + "\".\n\n" +
                 "Our team will review your inquiry and get back to you shortly at this email address.\n\n" +
                 "Best regards,\nThe BudgetSetu Team";
 

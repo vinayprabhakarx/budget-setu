@@ -11,11 +11,13 @@ public final class CurrencyUtil {
 
     private static final Locale INDIA = Locale.of("en", "IN");
 
-    private CurrencyUtil() {}
+    private CurrencyUtil() {
+    }
 
     /** Format as ₹1,23,456.00 */
     public static String formatINR(BigDecimal amount) {
-        if (amount == null) return "₹0.00";
+        if (amount == null)
+            return "₹0.00";
         NumberFormat format = NumberFormat.getCurrencyInstance(INDIA);
         return format.format(amount);
     }

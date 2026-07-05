@@ -25,8 +25,8 @@ public class RateLimitService {
      * Checks rate limit and increments counter.
      * Throws RateLimitExceededException if limit is reached.
      *
-     * @param key Identifies the rate limit bucket (e.g., IP or email)
-     * @param maxRequests Maximum allowed requests within the window
+     * @param key           Identifies the rate limit bucket (e.g., IP or email)
+     * @param maxRequests   Maximum allowed requests within the window
      * @param windowSeconds Window duration in seconds
      */
     public void checkRateLimit(String key, int maxRequests, long windowSeconds) {
@@ -55,7 +55,7 @@ public class RateLimitService {
         long windowMs = windowSeconds * 1000L;
         inMemoryCache.compute(key, (k, val) -> {
             if (val == null || now > val[1]) {
-                return new long[]{1L, now + windowMs};
+                return new long[] { 1L, now + windowMs };
             }
             if (val[0] >= maxRequests) {
                 throw new RateLimitExceededException("Too many requests. Please try again later.");

@@ -31,7 +31,8 @@ public class MailService {
 
     public boolean sendEmail(String to, String subject, String body) {
         if (!isConfigured()) {
-            log.warn("Resend API key (RESEND_API_KEY) is not configured. Email to {} with subject '{}' was suppressed.", to, subject);
+            log.warn("Resend API key (RESEND_API_KEY) is not configured. Email to {} with subject '{}' was suppressed.",
+                    to, subject);
             return false;
         }
 
@@ -48,7 +49,7 @@ public class MailService {
             payload.put("to", Collections.singletonList(to));
             payload.put("subject", subject);
             payload.put("text", body);
-            payload.put("html", "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">" + 
+            payload.put("html", "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">" +
                     body.replace("\n", "<br/>") + "</div>");
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
@@ -59,7 +60,8 @@ public class MailService {
                 log.info("Email sent successfully via Resend API to {} with subject: {}", to, subject);
                 return true;
             } else {
-                log.error("Failed to send email via Resend API to {} with subject: {}. Response: {}", to, subject, response.getBody());
+                log.error("Failed to send email via Resend API to {} with subject: {}. Response: {}", to, subject,
+                        response.getBody());
                 return false;
             }
         } catch (Exception e) {
@@ -68,4 +70,3 @@ public class MailService {
         }
     }
 }
-

@@ -109,6 +109,9 @@ public class BudgetSetuBackendApplication {
 							System.setProperty("spring.data.redis.password", value);
 							System.setProperty("spring.redis.password", value);
 						}
+						if ("ENCRYPTION_SECRET_KEY".equals(key)) {
+							System.setProperty("encryption.secret-key", value);
+						}
 						System.out.println("BudgetSetu Env Loader: Set property: " + key);
 					}
 				}
@@ -125,7 +128,8 @@ public class BudgetSetuBackendApplication {
 	private static void applyUriMappings() {
 		// 1. PostgreSQL / Database URL
 		String pgUrl = getEnvOrProp("POSTGRES_URL");
-		if (pgUrl == null) pgUrl = getEnvOrProp("DATABASE_URL");
+		if (pgUrl == null)
+			pgUrl = getEnvOrProp("DATABASE_URL");
 		if (pgUrl != null && !pgUrl.isEmpty()) {
 			String cleanUrl = pgUrl;
 			int protoEnd = cleanUrl.indexOf("://");

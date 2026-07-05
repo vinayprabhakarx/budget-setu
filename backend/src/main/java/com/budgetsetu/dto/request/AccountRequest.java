@@ -9,17 +9,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AccountRequest {
-
-    @NotBlank(message = "Account name is required.")
-    private String name;
+    private String accountHolderName;
 
     private String bankName;
     private String accountNumber;
 
-    @NotBlank(message = "Account type is required.")
+    @NotBlank(message = "Account Type is required")
     private String accountType;
-
-    private String currency;
 
     private java.math.BigDecimal manualBalance;
     private java.time.LocalDate manualBalanceDate;

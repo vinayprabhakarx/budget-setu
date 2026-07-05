@@ -22,7 +22,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for user authentication.
- * Handles registration, login, logout, and token refresh workflows, issuing stateless JWTs.
+ * Handles registration, login, logout, and token refresh workflows, issuing
+ * stateless JWTs.
  */
 public class AuthController {
 
@@ -59,8 +60,7 @@ public class AuthController {
                             .body(Map.of(
                                     "code", "TOKEN_EXPIRED",
                                     "message", "This verification token has expired.",
-                                    "email", email
-                            ));
+                                    "email", email));
                 }
                 return ResponseEntity.status(HttpStatus.GONE) // 410 GONE
                         .body(Map.of("code", "TOKEN_EXPIRED", "message", "This verification token has expired."));
@@ -123,8 +123,7 @@ public class AuthController {
                             .body(Map.of(
                                     "code", "TOKEN_EXPIRED",
                                     "message", "This password reset token has expired.",
-                                    "email", email
-                            ));
+                                    "email", email));
                 }
                 return ResponseEntity.status(HttpStatus.GONE) // 410 GONE
                         .body(Map.of("code", "TOKEN_EXPIRED", "message", "This password reset token has expired."));
@@ -164,7 +163,6 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(
             @CookieValue(name = "refreshToken", required = false) String refreshTokenVal) {
@@ -172,7 +170,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "REFRESH_TOKEN_INVALID", "message", "No refresh token provided"));
         }
-        
+
         try {
             String newAccessToken = authService.refreshAccessToken(refreshTokenVal);
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
@@ -192,7 +190,7 @@ public class AuthController {
         if (refreshTokenVal != null && !refreshTokenVal.trim().isEmpty()) {
             authService.revokeToken(refreshTokenVal);
         }
-        
+
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(false)
@@ -201,7 +199,7 @@ public class AuthController {
                 .sameSite("Lax")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        
+
         return ResponseEntity.noContent().build();
     }
 

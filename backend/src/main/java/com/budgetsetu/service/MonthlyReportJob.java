@@ -39,8 +39,8 @@ public class MonthlyReportJob {
     @Transactional
     public void generateReports() {
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
-                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("system", null, java.util.List.of())
-        );
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("system", null,
+                        java.util.List.of()));
         try {
             LocalDate today = LocalDate.now();
             LocalDate lastMonthDate = today.minusMonths(1);
@@ -54,16 +54,21 @@ public class MonthlyReportJob {
             List<User> users = userRepository.findAll();
             for (User user : users) {
                 try {
-                    BigDecimal income = transactionRepository.sumAmountByTypeAndDateRange(user.getId(), "INCOME", start, end);
-                    BigDecimal expense = transactionRepository.sumAmountByTypeAndDateRange(user.getId(), "EXPENSE", start, end);
+                    BigDecimal income = transactionRepository.sumAmountByTypeAndDateRange(user.getId(), "INCOME", start,
+                            end);
+                    BigDecimal expense = transactionRepository.sumAmountByTypeAndDateRange(user.getId(), "EXPENSE",
+                            start, end);
 
-                    if (income == null) income = BigDecimal.ZERO;
-                    if (expense == null) expense = BigDecimal.ZERO;
+                    if (income == null)
+                        income = BigDecimal.ZERO;
+                    if (expense == null)
+                        expense = BigDecimal.ZERO;
 
                     BigDecimal netSavings = income.subtract(expense);
 
                     StringBuilder categorySummary = new StringBuilder();
-                    List<Object[]> groupedExpenses = transactionRepository.sumAmountByTypeGroupedByCategory(user.getId(), "EXPENSE", start, end);
+                    List<Object[]> groupedExpenses = transactionRepository
+                            .sumAmountByTypeGroupedByCategory(user.getId(), "EXPENSE", start, end);
                     if (groupedExpenses != null && !groupedExpenses.isEmpty()) {
                         categorySummary.append("\nTop Spending Categories:\n");
                         for (Object[] row : groupedExpenses) {
@@ -71,7 +76,8 @@ public class MonthlyReportJob {
                             BigDecimal amount = (BigDecimal) row[1];
                             Category category = categoryRepository.findById(categoryId).orElse(null);
                             String categoryName = category != null ? category.getName() : "Unknown";
-                            categorySummary.append(String.format(" - %s: %s\n", categoryName, amount.setScale(2, RoundingMode.HALF_UP).toString()));
+                            categorySummary.append(String.format(" - %s: %s\n", categoryName,
+                                    amount.setScale(2, RoundingMode.HALF_UP).toString()));
                         }
                     } else {
                         categorySummary.append("\nNo expenses recorded last month.\n");
@@ -80,20 +86,19 @@ public class MonthlyReportJob {
                     String subject = String.format("BudgetSetu: Monthly Financial Summary for %s %d", monthName, year);
                     String body = String.format(
                             "Hello,\n\n" +
-                            "Here is your financial summary for %s %d:\n\n" +
-                            " - Total Income: %s\n" +
-                            " - Total Expenses: %s\n" +
-                            " - Net Savings: %s\n" +
-                            "%s\n" +
-                            "Keep tracking your finances to reach your financial goals!\n\n" +
-                            "Best regards,\nBudgetSetu Team",
+                                    "Here is your financial summary for %s %d:\n\n" +
+                                    " - Total Income: %s\n" +
+                                    " - Total Expenses: %s\n" +
+                                    " - Net Savings: %s\n" +
+                                    "%s\n" +
+                                    "Keep tracking your finances to reach your financial goals!\n\n" +
+                                    "Best regards,\nBudgetSetu Team",
                             monthName,
                             year,
                             income.setScale(2, RoundingMode.HALF_UP).toString(),
                             expense.setScale(2, RoundingMode.HALF_UP).toString(),
                             netSavings.setScale(2, RoundingMode.HALF_UP).toString(),
-                            categorySummary.toString()
-                    );
+                            categorySummary.toString());
 
                     mailService.sendEmail(user.getEmail(), subject, body);
                 } catch (Exception e) {

@@ -19,7 +19,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for handling financial analytics and reporting.
- * Exposes endpoints to retrieve aggregated spending trends, category breakdowns, and income vs expense comparisons.
+ * Exposes endpoints to retrieve aggregated spending trends, category
+ * breakdowns, and income vs expense comparisons.
  */
 public class AnalyticsController {
 

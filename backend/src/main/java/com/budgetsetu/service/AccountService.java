@@ -61,12 +61,6 @@ public class AccountService {
 
     @Transactional
     public Account createAccount(UUID userId, AccountRequest request) {
-        if (accountRepository.existsByUserIdAndName(userId, request.getName())) {
-            throw new IllegalArgumentException(
-                    "You already have an account named '" + request.getName() + "'. Please use a different name."
-            );
-        }
-
         String accountNumber = request.getAccountNumber();
         if (accountNumber != null && accountNumber.length() >= 4) {
             accountNumber = accountNumber.substring(accountNumber.length() - 4);
@@ -74,11 +68,10 @@ public class AccountService {
 
         Account account = Account.builder()
                 .userId(userId)
-                .name(request.getName().trim())
+                .accountHolderName(request.getAccountHolderName())
                 .bankName(request.getBankName())
                 .accountNumber(accountNumber)
                 .accountType(request.getAccountType().toUpperCase())
-                .currency(request.getCurrency() != null ? request.getCurrency() : "INR")
                 .manualBalance(request.getManualBalance())
                 .manualBalanceDate(request.getManualBalanceDate())
                 .build();
@@ -90,15 +83,7 @@ public class AccountService {
     public Account updateAccount(UUID id, UUID userId, AccountRequest request) {
         Account account = getAccount(id, userId);
 
-        if (!account.getName().equals(request.getName().trim())) {
-            if (accountRepository.existsByUserIdAndName(userId, request.getName().trim())) {
-                throw new IllegalArgumentException(
-                        "You already have an account named '" + request.getName() + "'. Please use a different name."
-                );
-            }
-        }
-
-        account.setName(request.getName().trim());
+        account.setAccountHolderName(request.getAccountHolderName());
         account.setBankName(request.getBankName());
 
         String accountNumber = request.getAccountNumber();
@@ -108,9 +93,6 @@ public class AccountService {
         account.setAccountNumber(accountNumber);
 
         account.setAccountType(request.getAccountType().toUpperCase());
-        if (request.getCurrency() != null) {
-            account.setCurrency(request.getCurrency());
-        }
         account.setManualBalance(request.getManualBalance());
         account.setManualBalanceDate(request.getManualBalanceDate());
 
@@ -147,34 +129,15 @@ public class AccountService {
         String mode = request.getDetailsSource().trim().toUpperCase();
         if ("SOURCE".equals(mode)) {
             // Keep source details on the destination account
-            destAccount.setName(sourceAccount.getName());
             destAccount.setBankName(sourceAccount.getBankName());
             destAccount.setAccountNumber(sourceAccount.getAccountNumber());
             destAccount.setAccountType(sourceAccount.getAccountType());
-            destAccount.setCurrency(sourceAccount.getCurrency());
             destAccount.setBalance(destBal.add(sourceBal));
         } else if ("DESTINATION".equals(mode)) {
             // Keep destination details, just sum balance
             destAccount.setBalance(destBal.add(sourceBal));
         } else if ("CUSTOM".equals(mode)) {
             // Custom details
-            String customName = request.getCustomName();
-            if (customName == null || customName.trim().isBlank()) {
-                throw new IllegalArgumentException("Custom account name is required.");
-            }
-            customName = customName.trim();
-            // Validate name uniqueness if it changes
-            if (!destAccount.getName().equalsIgnoreCase(customName)) {
-                java.util.Optional<Account> existingOpt = accountRepository.findByUserIdAndName(userId, customName);
-                if (existingOpt.isPresent()) {
-                    Account existing = existingOpt.get();
-                    if (!existing.getId().equals(request.getSourceAccountId()) && !existing.getId().equals(request.getDestinationAccountId())) {
-                        throw new IllegalArgumentException("You already have an account named '" + customName + "'. Please use a different name.");
-                    }
-                }
-            }
-
-            destAccount.setName(customName);
             destAccount.setBankName(request.getCustomBankName());
 
             String accountNumber = request.getCustomAccountNumber();
@@ -187,10 +150,6 @@ public class AccountService {
                 throw new IllegalArgumentException("Custom account type is required.");
             }
             destAccount.setAccountType(request.getCustomAccountType().trim().toUpperCase());
-
-            if (request.getCustomCurrency() != null) {
-                destAccount.setCurrency(request.getCustomCurrency().trim());
-            }
 
             if (request.getCustomBalance() != null) {
                 destAccount.setBalance(request.getCustomBalance());

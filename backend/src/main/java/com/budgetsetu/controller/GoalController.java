@@ -26,7 +26,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for savings goals.
- * Allows users to create savings targets, track progress, and contribute funds over time.
+ * Allows users to create savings targets, track progress, and contribute funds
+ * over time.
  */
 public class GoalController {
 
@@ -39,27 +40,27 @@ public class GoalController {
 
     @PostMapping
     public ResponseEntity<GoalResponse> createGoal(@AuthenticationPrincipal UUID userId,
-                                                   @Valid @RequestBody GoalRequest request) {
+            @Valid @RequestBody GoalRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(goalService.createGoal(userId, request));
     }
 
     @PostMapping("/{id}/contribute")
     public ResponseEntity<GoalResponse> contribute(@AuthenticationPrincipal UUID userId,
-                                                   @PathVariable UUID id,
-                                                   @Valid @RequestBody GoalContributionRequest request) {
+            @PathVariable UUID id,
+            @Valid @RequestBody GoalContributionRequest request) {
         return ResponseEntity.ok(goalService.contribute(userId, id, request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<GoalResponse> updateGoal(@AuthenticationPrincipal UUID userId,
-                                                   @PathVariable UUID id,
-                                                   @Valid @RequestBody GoalRequest request) {
+            @PathVariable UUID id,
+            @Valid @RequestBody GoalRequest request) {
         return ResponseEntity.ok(goalService.updateGoal(userId, id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGoal(@AuthenticationPrincipal UUID userId,
-                                           @PathVariable UUID id) {
+            @PathVariable UUID id) {
         goalService.deleteGoal(userId, id);
         return ResponseEntity.noContent().build();
     }

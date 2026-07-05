@@ -28,7 +28,8 @@ public class StatementParserService {
     private final GenericPdfParser pdfParser;
     private final GenericHtmlParser htmlParser;
 
-    public List<Map<String, String>> parse(InputStream inputStream, String fileName, String source, String password, String bankKey) {
+    public List<Map<String, String>> parse(InputStream inputStream, String fileName, String source, String password,
+            String bankKey) {
         byte[] fileBytes;
         try {
             fileBytes = inputStream.readAllBytes();
@@ -44,14 +45,20 @@ public class StatementParserService {
 
         if (needsExtraction) {
             if (lowerSource.contains("pdf") || lowerFileName.endsWith(".pdf")) {
-                try (PDDocument document = password == null || password.isEmpty() ? Loader.loadPDF(fileBytes) : Loader.loadPDF(fileBytes, password)) {
+                try (PDDocument document = password == null || password.isEmpty() ? Loader.loadPDF(fileBytes)
+                        : Loader.loadPDF(fileBytes, password)) {
                     extractedText = new PDFTextStripper().getText(document);
-                    if (extractedText != null) extractedText = extractedText.replace("\u0000", "");
+                    if (extractedText != null)
+                        extractedText = extractedText.replace("\u0000", "");
                 } catch (Exception e) {
                     // Ignore extraction errors
                 }
             } else if (lowerFileName.endsWith(".xls") || lowerFileName.endsWith(".xlsx")) {
-                try (org.apache.poi.ss.usermodel.Workbook wb = password == null || password.isEmpty() ? org.apache.poi.ss.usermodel.WorkbookFactory.create(new java.io.ByteArrayInputStream(fileBytes)) : org.apache.poi.ss.usermodel.WorkbookFactory.create(new java.io.ByteArrayInputStream(fileBytes), password)) {
+                try (org.apache.poi.ss.usermodel.Workbook wb = password == null || password.isEmpty()
+                        ? org.apache.poi.ss.usermodel.WorkbookFactory
+                                .create(new java.io.ByteArrayInputStream(fileBytes))
+                        : org.apache.poi.ss.usermodel.WorkbookFactory
+                                .create(new java.io.ByteArrayInputStream(fileBytes), password)) {
                     org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
                     StringBuilder sb = new StringBuilder();
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
@@ -84,14 +91,17 @@ public class StatementParserService {
 
         if (specificParser != null) {
             try {
-                List<Map<String, String>> result = specificParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
-                
-                // If a specific bank was chosen, return exactly what it produced (no fallback to generic)
+                List<Map<String, String>> result = specificParser.parse(new ByteArrayInputStream(fileBytes), fileName,
+                        password);
+
+                // If a specific bank was chosen, return exactly what it produced (no fallback
+                // to generic)
                 if (!isAutoMode) {
                     return result;
                 }
-                
-                // In AUTO mode, only return if we actually found transactions, otherwise fall back to generic
+
+                // In AUTO mode, only return if we actually found transactions, otherwise fall
+                // back to generic
                 if (result != null && !result.isEmpty()) {
                     return result;
                 }

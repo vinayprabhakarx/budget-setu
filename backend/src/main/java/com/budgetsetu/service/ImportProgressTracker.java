@@ -11,7 +11,8 @@ public class ImportProgressTracker {
     private final Map<UUID, org.springframework.web.servlet.mvc.method.annotation.SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public org.springframework.web.servlet.mvc.method.annotation.SseEmitter subscribe(UUID importId) {
-        org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = new org.springframework.web.servlet.mvc.method.annotation.SseEmitter(300000L); // 5 minutes timeout
+        org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = new org.springframework.web.servlet.mvc.method.annotation.SseEmitter(
+                300000L); // 5 minutes timeout
         emitters.put(importId, emitter);
 
         emitter.onCompletion(() -> emitters.remove(importId));
@@ -20,7 +21,8 @@ public class ImportProgressTracker {
 
         try {
             int current = progressMap.getOrDefault(importId, 0);
-            emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("progress").data(current));
+            emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("progress")
+                    .data(current));
         } catch (java.io.IOException e) {
             emitter.completeWithError(e);
         }
@@ -33,7 +35,8 @@ public class ImportProgressTracker {
         org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = emitters.get(importId);
         if (emitter != null) {
             try {
-                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("progress").data(percentage));
+                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("progress")
+                        .data(percentage));
             } catch (java.io.IOException e) {
                 emitters.remove(importId);
             }
@@ -44,7 +47,8 @@ public class ImportProgressTracker {
         org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = emitters.get(importId);
         if (emitter != null) {
             try {
-                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("complete").data(status));
+                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event().name("complete")
+                        .data(status));
                 emitter.complete();
             } catch (java.io.IOException e) {
                 // Ignore

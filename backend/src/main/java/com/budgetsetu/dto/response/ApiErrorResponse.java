@@ -9,8 +9,10 @@ import java.time.Instant;
  * Standard API error response — matches the format in the security doc.
  * Every error uses this structure for consistency.
  */
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiErrorResponse {

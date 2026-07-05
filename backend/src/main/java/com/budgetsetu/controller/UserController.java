@@ -19,68 +19,67 @@ import java.util.UUID;
 @RequiredArgsConstructor
 /**
  * REST Controller for user management.
- * Provides endpoints for retrieving user profiles, updating settings, and managing account preferences.
+ * Provides endpoints for retrieving user profiles, updating settings, and
+ * managing account preferences.
  */
 public class UserController {
 
-    private final UserService userService;
+        private final UserService userService;
 
-    @PutMapping("/profile")
-    public ResponseEntity<UserProfileResponse> updateProfile(
-            @AuthenticationPrincipal UUID userId,
-            @Valid @RequestBody ProfileUpdateRequest request) {
-        
-        User updatedUser = userService.updateProfile(
-                userId,
-                request.getFullName(),
-                request.getEmail()
-        );
+        @PutMapping("/profile")
+        public ResponseEntity<UserProfileResponse> updateProfile(
+                        @AuthenticationPrincipal UUID userId,
+                        @Valid @RequestBody ProfileUpdateRequest request) {
 
-        UserProfileResponse response = UserProfileResponse.builder()
-                .userId(updatedUser.getId().toString())
-                .email(updatedUser.getEmail())
-                .fullName(updatedUser.getFullName())
-                .createdAt(updatedUser.getCreatedAt())
-                .emailVerified(updatedUser.getEmailVerified())
-                .role(updatedUser.getRole())
-                .build();
+                User updatedUser = userService.updateProfile(
+                                userId,
+                                request.getFullName(),
+                                request.getEmail());
 
-        return ResponseEntity.ok(response);
-    }
+                UserProfileResponse response = UserProfileResponse.builder()
+                                .userId(updatedUser.getId().toString())
+                                .email(updatedUser.getEmail())
+                                .fullName(updatedUser.getFullName())
+                                .createdAt(updatedUser.getCreatedAt())
+                                .emailVerified(updatedUser.getEmailVerified())
+                                .role(updatedUser.getRole())
+                                .build();
 
-    @PutMapping("/password")
-    public ResponseEntity<Void> updatePassword(
-            @AuthenticationPrincipal UUID userId,
-            @Valid @RequestBody PasswordUpdateRequest request) {
-        
-        userService.updatePassword(
-                userId,
-                request.getCurrentPassword(),
-                request.getNewPassword()
-        );
+                return ResponseEntity.ok(response);
+        }
 
-        return ResponseEntity.noContent().build();
-    }
+        @PutMapping("/password")
+        public ResponseEntity<Void> updatePassword(
+                        @AuthenticationPrincipal UUID userId,
+                        @Valid @RequestBody PasswordUpdateRequest request) {
 
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteAccount(
-            @AuthenticationPrincipal UUID userId,
-            @Valid @RequestBody DeleteAccountRequest request) {
-        userService.deleteUserAccount(userId, request.getPassword());
-        return ResponseEntity.noContent().build();
-    }
+                userService.updatePassword(
+                                userId,
+                                request.getCurrentPassword(),
+                                request.getNewPassword());
 
-    @GetMapping("/me")
-    public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal UUID userId) {
-        User user = userService.getUserById(userId);
-        UserProfileResponse response = UserProfileResponse.builder()
-                .userId(user.getId().toString())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .createdAt(user.getCreatedAt())
-                .emailVerified(user.getEmailVerified())
-                .role(user.getRole())
-                .build();
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.noContent().build();
+        }
+
+        @DeleteMapping("/me")
+        public ResponseEntity<Void> deleteAccount(
+                        @AuthenticationPrincipal UUID userId,
+                        @Valid @RequestBody DeleteAccountRequest request) {
+                userService.deleteUserAccount(userId, request.getPassword());
+                return ResponseEntity.noContent().build();
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal UUID userId) {
+                User user = userService.getUserById(userId);
+                UserProfileResponse response = UserProfileResponse.builder()
+                                .userId(user.getId().toString())
+                                .email(user.getEmail())
+                                .fullName(user.getFullName())
+                                .createdAt(user.getCreatedAt())
+                                .emailVerified(user.getEmailVerified())
+                                .role(user.getRole())
+                                .build();
+                return ResponseEntity.ok(response);
+        }
 }

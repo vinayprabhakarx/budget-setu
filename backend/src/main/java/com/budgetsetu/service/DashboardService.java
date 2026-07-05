@@ -90,14 +90,15 @@ public class DashboardService {
                 Map<UUID, Category> categories = categoryRepository.findAllForUser(userId).stream()
                                 .collect(Collectors.toMap(c -> c.getId(), c -> c, (left, right) -> left));
 
-                List<Object[]> expenseRows = transactionRepository.sumAmountByTypeGroupedByCategory(userId, "EXPENSE",
+                List<Object[]> expenseRowsThisMonth = transactionRepository.sumAmountByTypeGroupedByCategory(userId,
+                                "EXPENSE",
                                 start, end);
-                Map<UUID, BigDecimal> expenseByCategory = new HashMap<>();
-                for (Object[] row : expenseRows) {
-                        expenseByCategory.put((UUID) row[0], nullToZero((BigDecimal) row[1]));
+                Map<UUID, BigDecimal> expenseByCategoryThisMonth = new HashMap<>();
+                for (Object[] row : expenseRowsThisMonth) {
+                        expenseByCategoryThisMonth.put((UUID) row[0], nullToZero((BigDecimal) row[1]));
                 }
 
-                List<DashboardResponse.CategoryBreakdown> categoryBreakdown = expenseRows.stream()
+                List<DashboardResponse.CategoryBreakdown> categoryBreakdown = expenseRowsThisMonth.stream()
                                 .map(row -> toCategoryBreakdown(row, categories, totalExpense))
                                 .sorted(Comparator.comparing((DashboardResponse.CategoryBreakdown cb) -> cb.getAmount())
                                                 .reversed())
@@ -105,7 +106,7 @@ public class DashboardService {
 
                 List<DashboardResponse.MonthlyTrend> monthlyTrend = buildMonthlyTrend(userId, period);
                 List<DashboardResponse.BudgetStatus> budgetStatus = buildBudgetStatus(userId, period, categories,
-                                expenseByCategory);
+                                expenseByCategoryThisMonth);
                 List<TransactionResponse> recentTransactions = transactionRepository
                                 .findTop5ByUserIdAndIsDeletedFalseOrderByTransactionDateDescCreatedAtDesc(userId)
                                 .stream()

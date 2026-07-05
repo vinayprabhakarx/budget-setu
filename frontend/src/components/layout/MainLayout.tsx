@@ -51,7 +51,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
   const [isPinned, setIsPinned] = useState(() => {
     const saved = localStorage.getItem("budgetsetu_sidebar_pinned");
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : false;
   });
 
   const isExpanded = isPinned;

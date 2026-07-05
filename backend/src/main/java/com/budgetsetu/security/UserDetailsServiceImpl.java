@@ -28,7 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getPasswordHash(),
                 user.getIsActive(),
                 true, true, true,
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-        );
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())));
     }
 }

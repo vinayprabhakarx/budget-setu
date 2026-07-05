@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 /**
- * Aspect to dynamically set the app.current_user_id session variable in PostgreSQL.
+ * Aspect to dynamically set the app.current_user_id session variable in
+ * PostgreSQL.
  * This session variable is checked by Row-Level Security (RLS) policies.
  */
 @Aspect
@@ -42,8 +43,7 @@ public class RowLevelSecurityAspect {
             jdbcTemplate.queryForObject(
                     "SELECT set_config('app.current_user_id', ?, true)",
                     String.class,
-                    currentSetting
-            );
+                    currentSetting);
         } catch (Exception e) {
             log.warn("Failed to set PostgreSQL app.current_user_id session context: {}", e.getMessage());
         }

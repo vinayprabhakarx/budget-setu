@@ -21,18 +21,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   children,
 }) => {
   return (
-    <div className="flex items-start sm:items-center justify-between gap-4">
-      <div className="min-w-0 flex-1">
-        <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-body-sm text-text-secondary mt-1">
-            {subtitle}
-          </p>
-        )}
-      </div>
-      <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+    <div className="grid grid-cols-[1fr_auto] gap-x-4">
+      <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary min-w-0 col-start-1 row-start-1 self-center">
+        {title}
+      </h1>
+      {subtitle && (
+        <p className="text-body-sm text-text-secondary mt-1.5 sm:mt-0 col-span-2 sm:col-span-1 col-start-1 row-start-2">
+          {subtitle}
+        </p>
+      )}
+      <div className="col-start-2 row-start-1 sm:row-span-2 flex items-center gap-2 flex-wrap justify-end self-start sm:self-center">
         {onFilterClick && (
           <button
             type="button"

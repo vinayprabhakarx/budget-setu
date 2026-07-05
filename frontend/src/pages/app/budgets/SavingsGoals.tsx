@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, X, Edit2, Coins, Trophy, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Trash2, X, Edit2, Coins, Trophy, Calendar } from 'lucide-react';
 import { Select } from '../../../components/shared/Select';
 import { SavingsGoalsSkeleton } from "../../../components/skeletons/SavingsGoalsSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
@@ -35,10 +35,18 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
   const [priority, setPriority] = useState('MEDIUM');
   const [description, setDescription] = useState('');
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setActiveGoal(null); setGoalName(''); setTargetAmount(''); setTargetDate(''); setPriority('MEDIUM'); setDescription('');
     setIsGoalModalOpen(true);
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleOpen = () => openCreate();
+    window.addEventListener('open-new-goal', handleOpen);
+    return () => window.removeEventListener('open-new-goal', handleOpen);
+  }, [openCreate]);
+
+
   const openEdit = (g: Goal) => {
     setActiveGoal(g); setGoalName(g.name); setTargetAmount(g.targetAmount.toString()); setTargetDate(g.targetDate || ''); setPriority(g.priority || 'MEDIUM'); setDescription(g.description || '');
     setIsGoalModalOpen(true);
@@ -85,14 +93,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-body-sm text-text-secondary font-medium">
-          {goals.length} savings {goals.length === 1 ? 'target' : 'targets'} configured
-        </div>
-        <button onClick={openCreate} className="btn btn-primary flex items-center gap-2">
-          <Plus className="h-4.5 w-4.5" /><span>New Target</span>
-        </button>
-      </div>
+
 
       {loading ? (
         <SavingsGoalsSkeleton />

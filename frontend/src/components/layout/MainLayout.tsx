@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import api from "../../api/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { ThemeToggle } from "../shared/ThemeToggle";
@@ -30,6 +31,24 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
   const [isAddTxnOpen, setIsAddTxnOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasAccounts, setHasAccounts] = useState<boolean>(true);
+
+  useEffect(() => {
+    let active = true;
+    const fetchAccounts = async () => {
+      try {
+        const response = await api.get("/accounts");
+        if (active) {
+          setHasAccounts(response.data.length > 0);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchAccounts();
+    return () => { active = false; };
+  }, [location.pathname]);
+
   const [isPinned, setIsPinned] = useState(() => {
     const saved = localStorage.getItem("budgetsetu_sidebar_pinned");
     return saved !== null ? JSON.parse(saved) : true;
@@ -163,10 +182,10 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsUploadOpen(true)}
-            className="p-2 rounded-md hover:bg-bg-subtle text-text-secondary transition-colors"
+            className="btn btn-primary btn-sm px-2 flex items-center justify-center"
             title="Upload Statement"
           >
-            <FileUp className="h-5 w-5" />
+            <FileUp className="h-4 w-4" />
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -235,7 +254,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           {/* Upload Statement Button */}
           <button
             onClick={() => setIsUploadOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-text-secondary hover:text-text-primary hover:bg-bg-subtle text-body-sm font-medium transition-colors"
+            className="btn btn-primary btn-sm flex items-center gap-2"
             title="Upload Statement"
           >
             <FileUp className="h-4 w-4" />
@@ -289,17 +308,14 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           })}
         </nav>
 
-        {/* Floating Add Transaction Button — dashboard and transactions only */}
         <GlobalImportIndicator />
-        {(location.pathname === "/dashboard" || location.pathname === "/transactions" || location.pathname === "/") && (
-          <button
-            onClick={() => setIsAddTxnOpen(true)}
-            className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
-            title="Add Transaction"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
-        )}
+        <button
+          onClick={() => hasAccounts ? setIsAddTxnOpen(true) : navigate("/accounts#new")}
+          className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
+          title={hasAccounts ? "Add Transaction" : "Add Bank Account"}
+        >
+          {hasAccounts ? <Plus className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
+        </button>
       </div>
 
       {/* Global Add Transaction Dialog */}

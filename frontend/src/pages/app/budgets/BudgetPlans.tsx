@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, X, ChevronDown, ChevronRight, Calendar, Edit2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Trash2, X, ChevronDown, ChevronRight, Calendar, Edit2 } from 'lucide-react';
 import { Select } from '../../../components/shared/Select';
 import { BudgetPlansSkeleton } from "../../../components/skeletons/BudgetPlansSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
@@ -33,6 +33,19 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
     name: '', periodType: 'MONTH', startDate: '', endDate: '', totalAmount: 0,
   });
   const [planAllocations, setPlanAllocations] = useState<{ categoryId: string; amount: number }[]>([]);
+
+  const openCreate = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setPlanForm({ name: '', periodType: 'MONTHLY', startDate: today, endDate: calculateEndDate(today, 'MONTHLY'), totalAmount: 0 });
+    setPlanAllocations([]);
+    setIsPlanModalOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const handleOpen = () => openCreate();
+    window.addEventListener('open-new-plan', handleOpen);
+    return () => window.removeEventListener('open-new-plan', handleOpen);
+  }, [openCreate]);
 
   const processedPlans = useMemo(() => {
     const sorted = [...plans].sort((a, b) => {
@@ -94,12 +107,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
     } catch { showToast('error', 'Failed to delete budget plan.'); }
   };
 
-  const openCreate = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setPlanForm({ name: '', periodType: 'MONTHLY', startDate: today, endDate: calculateEndDate(today, 'MONTHLY'), totalAmount: 0 });
-    setPlanAllocations([]);
-    setIsPlanModalOpen(true);
-  };
+
 
   const openEdit = (plan: BudgetPlan) => {
     setPlanForm({ id: plan.id, name: plan.name, periodType: plan.periodType, startDate: plan.startDate, endDate: plan.endDate, totalAmount: plan.totalAmount });
@@ -218,14 +226,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-body-sm text-text-secondary font-medium">
-          {processedPlans.length} budget {processedPlans.length === 1 ? 'plan' : 'plans'} configured
-        </div>
-        <button onClick={openCreate} className="btn btn-primary flex items-center gap-2">
-          <Plus className="h-4.5 w-4.5" /><span>New Plan</span>
-        </button>
-      </div>
+
 
       {loading ? (
         <BudgetPlansSkeleton />

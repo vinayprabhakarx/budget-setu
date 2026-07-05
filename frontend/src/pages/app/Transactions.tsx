@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
 import { formatCurrency } from "../../utils/currency";
-import { X, Trash2, Edit3, Loader2, History } from "lucide-react";
+import { X, Trash2, Edit3, Loader2, History, Plus } from "lucide-react";
 import { Select } from "../../components/shared/Select";
 import { TransactionsSkeleton } from "../../components/skeletons/TransactionsSkeleton";
 import { StateDisplay } from "../../components/shared/StateDisplay";
@@ -66,6 +67,7 @@ interface AuditLog {
  */
 export const Transactions: React.FC = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -407,7 +409,15 @@ export const Transactions: React.FC = () => {
         showFilters={showFilters}
         onRefreshClick={fetchTransactions}
         isRefreshing={loading}
-      />
+      >
+        <button
+          onClick={() => accounts.length > 0 ? setIsAddModalOpen(true) : navigate('/accounts#new')}
+          className="btn btn-primary btn-sm flex items-center justify-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          <span>{accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}</span>
+        </button>
+      </PageHeader>
       
       {/* 1. Filter Controls */}
       <FilterSection
@@ -559,7 +569,10 @@ export const Transactions: React.FC = () => {
             className="py-16"
             action={(search || startDate || endDate || categoryId || accountId || type)
               ? { label: "Clear Filters", onClick: resetFilters }
-              : { label: "Add Transaction", onClick: () => setIsAddModalOpen(true) }
+              : { 
+                  label: accounts.length > 0 ? "Add Transaction" : "Add Bank Account", 
+                  onClick: () => accounts.length > 0 ? setIsAddModalOpen(true) : navigate('/accounts#new') 
+                }
             }
           />
         ) : (

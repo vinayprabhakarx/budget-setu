@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDateFilter } from '../../context/DateFilterContext';
 import api from '../../api/axiosInstance';
 import { useToast } from '../../context/ToastContext';
+import { Plus } from 'lucide-react';
 import { Select } from '../../components/shared/Select';
 import { PageHeader } from '../../components/shared/PageHeader';
 import { FilterSection } from '../../components/shared/FilterSection';
@@ -87,11 +88,7 @@ export const Budgets: React.FC = () => {
     };
   }, [fetchData]);
 
-  const tabs = [
-    { key: 'plans' as const, label: 'Budget Plans' },
-    { key: 'recurring' as const, label: 'Recurring Expenses' },
-    { key: 'goals' as const, label: 'Savings Goals' },
-  ];
+
 
   // Filter date ranges
   const getFilterRange = () => {
@@ -141,6 +138,12 @@ export const Budgets: React.FC = () => {
     return eDate <= range.end;
   }) : recurringExpenses;
 
+  const tabs = [
+    { key: 'plans' as const, label: `Budget Plans (${filteredBudgetPlans.length})` },
+    { key: 'recurring' as const, label: `Recurring Expenses (${filteredRecurring.length})` },
+    { key: 'goals' as const, label: `Savings Goals (${filteredGoals.length})` },
+  ];
+
   return (
     <div className="space-y-6 pb-16">
       <PageHeader
@@ -150,7 +153,23 @@ export const Budgets: React.FC = () => {
         showFilters={showFilters}
         onRefreshClick={fetchData}
         isRefreshing={loading}
-      />
+      >
+        {activeTab === 'plans' && (
+          <button onClick={() => window.dispatchEvent(new CustomEvent('open-new-plan'))} className="btn btn-primary btn-sm flex items-center gap-2">
+            <Plus className="h-4 w-4" /><span>New Plan</span>
+          </button>
+        )}
+        {activeTab === 'recurring' && (
+          <button onClick={() => window.dispatchEvent(new CustomEvent('open-add-recurring'))} className="btn btn-primary btn-sm flex items-center gap-2">
+            <Plus className="h-4 w-4" /><span>Add Recurring</span>
+          </button>
+        )}
+        {activeTab === 'goals' && (
+          <button onClick={() => window.dispatchEvent(new CustomEvent('open-new-goal'))} className="btn btn-primary btn-sm flex items-center gap-2">
+            <Plus className="h-4 w-4" /><span>New Target</span>
+          </button>
+        )}
+      </PageHeader>
 
       {/* Filter Controls */}
       <FilterSection

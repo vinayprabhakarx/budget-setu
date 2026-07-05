@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Plus, Trash2, X, Play, Pause, Edit2 } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Trash2, X, Play, Pause, Edit2 } from "lucide-react";
 import { Select } from "../../../components/shared/Select";
 import { RecurringExpensesSkeleton } from "../../../components/skeletons/RecurringExpensesSkeleton";
 import { StateDisplay } from "../../../components/shared/StateDisplay";
@@ -45,7 +45,7 @@ export const RecurringExpenses: React.FC<Props> = ({
     categoryId: "",
   });
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setForm({
       name: "",
       frequency: "MONTHLY",
@@ -55,7 +55,15 @@ export const RecurringExpenses: React.FC<Props> = ({
       categoryId: categories[0]?.id || "",
     });
     setIsModalOpen(true);
-  };
+  }, [categories]);
+
+  useEffect(() => {
+    const handleOpen = () => openCreate();
+    window.addEventListener('open-add-recurring', handleOpen);
+    return () => window.removeEventListener('open-add-recurring', handleOpen);
+  }, [openCreate]);
+
+
 
   const handleDelete = async (id: string) => {
     if (
@@ -118,19 +126,7 @@ export const RecurringExpenses: React.FC<Props> = ({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-body-sm text-text-secondary font-medium">
-          {expenses.length} recurring{" "}
-          {expenses.length === 1 ? "expense" : "expenses"} configured
-        </div>
-        <button
-          onClick={openCreate}
-          className="btn btn-primary flex items-center gap-2"
-        >
-          <Plus className="h-4.5 w-4.5" />
-          <span>Add Recurring</span>
-        </button>
-      </div>
+
 
       {loading ? (
         <RecurringExpensesSkeleton />

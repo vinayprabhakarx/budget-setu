@@ -137,6 +137,22 @@ export const Accounts: React.FC = () => {
   }, [showToast]);
 
   useEffect(() => {
+    if (location.hash === '#new' && !isModalOpen) {
+      setTimeout(() => {
+        setActiveAccount(null);
+        setAccountHolderName(user?.fullName || "");
+        setBankName("");
+        setAccountNumber("");
+        setAccountType("SAVINGS");
+        setManualBalance("");
+        setManualBalanceDate("");
+        setIsModalOpen(true);
+        navigate(location.pathname, { replace: true, state: location.state });
+      }, 0);
+    }
+  }, [location.hash, location.pathname, location.state, isModalOpen, navigate, user?.fullName]);
+
+  useEffect(() => {
     let active = true;
     Promise.resolve().then(() => {
       if (active) {
@@ -345,7 +361,28 @@ export const Accounts: React.FC = () => {
           }
         }}
         isRefreshing={loading}
-      />
+      >
+        {activeTab === "accounts" && (
+          <>
+            {accounts.length >= 2 && (
+              <button
+                onClick={openMergeModal}
+                className="btn btn-secondary btn-sm flex items-center justify-center gap-2"
+              >
+                <GitMerge className="h-4 w-4" />
+                <span className="hidden sm:inline">Merge Accounts</span>
+              </button>
+            )}
+            <button
+              onClick={openCreateModal}
+              className="btn btn-primary btn-sm flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Account</span>
+            </button>
+          </>
+        )}
+      </PageHeader>
 
       {/* Filter Controls */}
       {activeTab === "accounts" ? (
@@ -434,7 +471,7 @@ export const Accounts: React.FC = () => {
             className={`text-body-lg font-semibold px-2 py-1 border-b-2 transition-colors whitespace-nowrap ${activeTab === "accounts" ? "border-primary text-text-primary" : "border-transparent text-text-muted hover:text-text-primary"}`}
             onClick={() => setActiveTab("accounts")}
           >
-            Bank Accounts
+            Bank Accounts ({accounts.length})
           </button>
           <button
             className={`text-body-lg font-semibold px-2 py-1 border-b-2 transition-colors whitespace-nowrap ${activeTab === "upload" ? "border-primary text-text-primary" : "border-transparent text-text-muted hover:text-text-primary"}`}
@@ -447,24 +484,7 @@ export const Accounts: React.FC = () => {
 
       {activeTab === "accounts" ? (
         <>
-          <div className="flex justify-end gap-2">
-            {accounts.length >= 2 && (
-              <button
-                onClick={openMergeModal}
-                className="btn btn-secondary flex items-center justify-center gap-2"
-              >
-                <GitMerge className="h-4.5 w-4.5" />
-                <span>Merge Accounts</span>
-              </button>
-            )}
-            <button
-              onClick={openCreateModal}
-              className="btn btn-primary flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4.5 w-4.5" />
-              <span>Add Account</span>
-            </button>
-          </div>
+
           
           {/* Accounts grid */}
           {loading ? (

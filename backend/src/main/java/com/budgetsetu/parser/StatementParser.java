@@ -20,7 +20,8 @@ public interface StatementParser {
     List<Map<String, String>> parse(InputStream inputStream, String fileName);
 
     /**
-     * @return the source identifier this parser handles (e.g., "HDFC_PDF", "PHONEPE_CSV")
+     * @return the source identifier this parser handles (e.g., "HDFC_PDF",
+     *         "PHONEPE_CSV")
      */
     String getSource();
 }

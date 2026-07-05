@@ -44,10 +44,14 @@ public class GenericCsvParser implements StatementParser {
                     if (normalized.contains("date")) {
                         hasDate = true;
                     }
-                    if (normalized.contains("particulars") || normalized.contains("description") || normalized.contains("narration") || normalized.contains("details") || normalized.contains("mode")) {
+                    if (normalized.contains("particulars") || normalized.contains("description")
+                            || normalized.contains("narration") || normalized.contains("details")
+                            || normalized.contains("mode")) {
                         hasDescription = true;
                     }
-                    if (normalized.contains("deposit") || normalized.contains("withdrawal") || normalized.contains("amount") || normalized.contains("balance") || normalized.contains("debit") || normalized.contains("credit")) {
+                    if (normalized.contains("deposit") || normalized.contains("withdrawal")
+                            || normalized.contains("amount") || normalized.contains("balance")
+                            || normalized.contains("debit") || normalized.contains("credit")) {
                         hasAmount = true;
                     }
                 }

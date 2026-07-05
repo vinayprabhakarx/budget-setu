@@ -14,37 +14,37 @@ public class BobParser extends BaseBankParser {
     private static final Pattern DATE_LEAD = Pattern.compile("^\\s*(\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
 
     private static final Pattern BOB_WITHDRAWAL = Pattern.compile(
-        "^\\s*\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}\\s+" +
-        "([\\d,]+\\.\\d{2})(Cr|Dr|CR|DR)\\s*" +
-        "(.*?)\\s+" +
-        "([\\d,]+\\.\\d{2})\\s*(\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})\\s*$"
-    );
+            "^\\s*\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}\\s+" +
+                    "([\\d,]+\\.\\d{2})(Cr|Dr|CR|DR)\\s*" +
+                    "(.*?)\\s+" +
+                    "([\\d,]+\\.\\d{2})\\s*(\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})\\s*$");
 
     private static final Pattern BOB_DEPOSIT = Pattern.compile(
-        "^\\s*\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}\\s+" +
-        "([\\d,]+\\.\\d{2})\\s+" +
-        "([\\d,]+\\.\\d{2})(Cr|Dr|CR|DR)\\s*" +
-        "(.*?)\\s*" +
-        "(\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})?\\s*$"
-    );
+            "^\\s*\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}\\s+" +
+                    "([\\d,]+\\.\\d{2})\\s+" +
+                    "([\\d,]+\\.\\d{2})(Cr|Dr|CR|DR)\\s*" +
+                    "(.*?)\\s*" +
+                    "(\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})?\\s*$");
 
     @Override
     public List<Map<String, String>> parseText(String text, String fileName) {
         List<Map<String, String>> rows = new ArrayList<>();
-        if (text == null || text.isBlank()) return rows;
+        if (text == null || text.isBlank())
+            return rows;
 
         List<List<String>> blocks = groupIntoBlocks(text);
 
         for (List<String> block : blocks) {
             String fullText = String.join(" ", block).replaceAll("\\s+", " ").trim();
             Matcher dateMatcher = DATE_LEAD.matcher(fullText);
-            if (!dateMatcher.find()) continue;
+            if (!dateMatcher.find())
+                continue;
 
             String dateStr = dateMatcher.group(1);
-            
+
             Matcher wdl = BOB_WITHDRAWAL.matcher(fullText);
             Matcher dep = BOB_DEPOSIT.matcher(fullText);
-            
+
             Map<String, String> txn = ParserUtil.emptyTransaction();
             txn.put("transaction_date", ParserUtil.normalizeDate(dateStr));
 
@@ -74,8 +74,10 @@ public class BobParser extends BaseBankParser {
                 txn.put("mode", "UPI");
                 String upiStr = narration.substring(narration.indexOf("UPI/"));
                 String[] parts = upiStr.split("/");
-                if (parts.length >= 2) txn.put("transaction_id", parts[1]);
-                if (parts.length >= 3 && parts[2].matches("\\d{2}:\\d{2}:\\d{2}")) txn.put("transaction_time", parts[2]);
+                if (parts.length >= 2)
+                    txn.put("transaction_id", parts[1]);
+                if (parts.length >= 3 && parts[2].matches("\\d{2}:\\d{2}:\\d{2}"))
+                    txn.put("transaction_time", parts[2]);
                 if (parts.length >= 5) {
                     txn.put("upi_id", parts[4]);
                     String handle = parts[4].split("@")[0];
@@ -89,8 +91,10 @@ public class BobParser extends BaseBankParser {
                 txn.put("mode", "IMPS");
                 String impsStr = narration.substring(narration.indexOf("IMPS/"));
                 String[] parts = impsStr.split("/");
-                if (parts.length >= 3) txn.put("transaction_id", parts[2]);
-                if (parts.length >= 5) txn.put("remarks", parts[4]);
+                if (parts.length >= 3)
+                    txn.put("transaction_id", parts[2]);
+                if (parts.length >= 5)
+                    txn.put("remarks", parts[4]);
             } else if (narration.contains("Int.Pd")) {
                 txn.put("mode", "INTEREST");
                 txn.put("remarks", narration.substring(narration.indexOf("Int.Pd")));
@@ -111,7 +115,8 @@ public class BobParser extends BaseBankParser {
 
     @Override
     public boolean canHandle(String text, String fileName) {
-        if (text == null) return false;
+        if (text == null)
+            return false;
         return text.contains("Bank of Baroda") || text.contains("BANK OF BARODA");
     }
 

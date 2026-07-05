@@ -28,40 +28,40 @@ public class GenericExcelParser implements StatementParser {
 
         try {
             byte[] bytes = inputStream.readAllBytes();
-            try (Workbook workbook = password == null || password.isEmpty() 
-                    ? WorkbookFactory.create(new java.io.ByteArrayInputStream(bytes)) 
+            try (Workbook workbook = password == null || password.isEmpty()
+                    ? WorkbookFactory.create(new java.io.ByteArrayInputStream(bytes))
                     : WorkbookFactory.create(new java.io.ByteArrayInputStream(bytes), password)) {
                 Sheet sheet = workbook.getSheetAt(0);
-            if (sheet == null || sheet.getPhysicalNumberOfRows() < 2) {
-                return rows;
-            }
-
-            Row headerRow = sheet.getRow(sheet.getFirstRowNum());
-            List<String> headers = new ArrayList<>();
-            for (Cell cell : headerRow) {
-                headers.add(normalizeHeader(formatter.formatCellValue(cell)));
-            }
-
-            for (int rowIndex = sheet.getFirstRowNum() + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row sheetRow = sheet.getRow(rowIndex);
-                if (sheetRow == null) {
-                    continue;
+                if (sheet == null || sheet.getPhysicalNumberOfRows() < 2) {
+                    return rows;
                 }
 
-                Map<String, String> row = new HashMap<>();
-                StringBuilder raw = new StringBuilder();
-                for (int i = 0; i < headers.size(); i++) {
-                    String value = formatter.formatCellValue(sheetRow.getCell(i)).trim();
-                    row.put(headers.get(i), value);
-                    if (!value.isBlank()) {
-                        raw.append(value).append(" | ");
+                Row headerRow = sheet.getRow(sheet.getFirstRowNum());
+                List<String> headers = new ArrayList<>();
+                for (Cell cell : headerRow) {
+                    headers.add(normalizeHeader(formatter.formatCellValue(cell)));
+                }
+
+                for (int rowIndex = sheet.getFirstRowNum() + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                    Row sheetRow = sheet.getRow(rowIndex);
+                    if (sheetRow == null) {
+                        continue;
+                    }
+
+                    Map<String, String> row = new HashMap<>();
+                    StringBuilder raw = new StringBuilder();
+                    for (int i = 0; i < headers.size(); i++) {
+                        String value = formatter.formatCellValue(sheetRow.getCell(i)).trim();
+                        row.put(headers.get(i), value);
+                        if (!value.isBlank()) {
+                            raw.append(value).append(" | ");
+                        }
+                    }
+                    if (!row.isEmpty()) {
+                        row.put("raw_row", raw.toString());
+                        rows.add(row);
                     }
                 }
-                if (!row.isEmpty()) {
-                    row.put("raw_row", raw.toString());
-                    rows.add(row);
-                }
-            }
             }
             return rows;
         } catch (Exception ex) {

@@ -11,32 +11,34 @@ import java.util.regex.Pattern;
 @Component
 public class PhonePeParser extends BaseBankParser {
 
-    private static final Pattern DATE_LEAD = Pattern.compile("^\\s*([A-Za-z]{3,9}\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,]*\\d{2,4})?|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
+    private static final Pattern DATE_LEAD = Pattern.compile(
+            "^\\s*([A-Za-z]{3,9}\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,]*\\d{2,4})?|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
     private static final Pattern AMOUNT = Pattern.compile("(?:₹|Rs\\.?)\\s*([\\d,.]+)");
 
     @Override
     public List<Map<String, String>> parseText(String text, String fileName) {
         List<Map<String, String>> rows = new ArrayList<>();
-        if (text == null || text.isBlank()) return rows;
+        if (text == null || text.isBlank())
+            return rows;
 
         List<List<String>> blocks = groupIntoBlocks(text);
 
         for (List<String> block : blocks) {
             String fullText = String.join(" ", block).replaceAll("\\s+", " ").trim();
             Matcher dateMatcher = DATE_LEAD.matcher(fullText);
-            if (!dateMatcher.find()) continue;
+            if (!dateMatcher.find())
+                continue;
 
             String dateStr = dateMatcher.group(1);
             Matcher amtMatcher = AMOUNT.matcher(fullText);
-            
-            if (amtMatcher.find() && (
-                    fullText.contains("Transaction ID") ||
+
+            if (amtMatcher.find() && (fullText.contains("Transaction ID") ||
                     fullText.contains("Paid to") ||
                     fullText.contains("Payment to") ||
                     fullText.contains("Received from") ||
                     fullText.contains("Sent to") ||
                     fullText.contains("PhonePe"))) {
-                
+
                 String amount = amtMatcher.group(1).replace(",", "");
                 String type = "DEBIT";
                 String narration = fullText;
@@ -72,8 +74,10 @@ public class PhonePeParser extends BaseBankParser {
                 txn.put("mode", "UPI");
 
                 if (party != null) {
-                    if (type.equals("DEBIT")) txn.put("payee", party);
-                    else txn.put("payer", party);
+                    if (type.equals("DEBIT"))
+                        txn.put("payee", party);
+                    else
+                        txn.put("payer", party);
                 }
 
                 Matcher txIdMatcher = Pattern.compile("Transaction ID\\s*[:\\-]?\\s*([A-Za-z0-9]+)").matcher(fullText);
@@ -100,24 +104,27 @@ public class PhonePeParser extends BaseBankParser {
 
     private String extractAfter(String text, String prefix) {
         int idx = text.indexOf(prefix);
-        if (idx == -1) return null;
+        if (idx == -1)
+            return null;
         String rest = text.substring(idx + prefix.length()).trim();
         int txIdx = rest.indexOf("Transaction ID");
         if (txIdx != -1) {
             rest = rest.substring(0, txIdx).trim();
         }
-        
+
         // Remove CREDIT, DEBIT, and amounts from the extracted payee name
         rest = rest.replaceAll("(?i)\\s+(CREDIT|DEBIT|SUCCESSFUL|FAILED).*", "").trim();
         rest = rest.replaceAll("\\s*₹.*", "").trim();
-        
+
         return rest;
     }
 
     @Override
     public boolean canHandle(String text, String fileName) {
-        if (text == null) return false;
-        return text.contains("support.phonepe.com/statement") || (fileName != null && fileName.toLowerCase().contains("phonepe"));
+        if (text == null)
+            return false;
+        return text.contains("support.phonepe.com/statement")
+                || (fileName != null && fileName.toLowerCase().contains("phonepe"));
     }
 
     @Override

@@ -49,8 +49,7 @@ public class BankDetector {
         return bankParsers.stream()
                 .map(parser -> Map.of(
                         "key", parser.getBankKey(),
-                        "displayName", parser.getBankDisplayName()
-                ))
+                        "displayName", parser.getBankDisplayName()))
                 .collect(Collectors.toList());
     }
 }

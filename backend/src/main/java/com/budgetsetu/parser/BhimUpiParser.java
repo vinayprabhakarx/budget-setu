@@ -17,7 +17,8 @@ public class BhimUpiParser extends BaseBankParser {
     @Override
     public List<Map<String, String>> parseText(String text, String fileName) {
         List<Map<String, String>> rows = new ArrayList<>();
-        if (text == null || text.isBlank() || !text.contains("<table")) return rows;
+        if (text == null || text.isBlank() || !text.contains("<table"))
+            return rows;
 
         Matcher rowMatcher = ROW_PATTERN.matcher(text);
         while (rowMatcher.find()) {
@@ -29,7 +30,8 @@ public class BhimUpiParser extends BaseBankParser {
             }
 
             if (cells.size() >= 10 && cells.get(0).matches("\\d{1,2}/\\d{1,2}/\\d{2,4}")) {
-                if ("FAILED".equalsIgnoreCase(cells.get(10))) continue; // Skip failed
+                if ("FAILED".equalsIgnoreCase(cells.get(10)))
+                    continue; // Skip failed
 
                 String dateStr = cells.get(0);
                 String timeStr = cells.get(1);
@@ -62,7 +64,7 @@ public class BhimUpiParser extends BaseBankParser {
                 txn.put("merchant", ParserUtil.normalizeMerchant(txn.get("payee")));
                 String partyName = "CR".equalsIgnoreCase(drCr) ? txn.get("payer") : txn.get("payee");
                 txn.put("narration", "BHIM UPI " + txn.get("transaction_type") + " to/from " + partyName);
-                
+
                 rows.add(txn);
             }
         }
@@ -70,7 +72,8 @@ public class BhimUpiParser extends BaseBankParser {
     }
 
     private String cleanCell(String text) {
-        if (text == null) return "";
+        if (text == null)
+            return "";
         return text.replaceAll("(?is)<[^>]+>", " ").replaceAll("&nbsp;", " ").replaceAll("\\s+", " ").trim();
     }
 
@@ -84,11 +87,13 @@ public class BhimUpiParser extends BaseBankParser {
     }
 
     private String extractUpiId(String cellText) {
-        if (cellText == null) return "";
+        if (cellText == null)
+            return "";
         int idx = cellText.indexOf('(');
         if (idx != -1) {
             String upi = cellText.substring(0, idx).trim();
-            if (upi.contains("@")) return upi;
+            if (upi.contains("@"))
+                return upi;
         } else if (cellText.contains("@")) {
             return cellText.trim();
         }
@@ -97,8 +102,10 @@ public class BhimUpiParser extends BaseBankParser {
 
     @Override
     public boolean canHandle(String text, String fileName) {
-        if (text == null) return false;
-        return text.contains("BHIM") && text.contains("UPI") && text.contains("<table") && (text.contains("Payment ID/Reference Number") || text.contains("Pay/Collect"));
+        if (text == null)
+            return false;
+        return text.contains("BHIM") && text.contains("UPI") && text.contains("<table")
+                && (text.contains("Payment ID/Reference Number") || text.contains("Pay/Collect"));
     }
 
     @Override

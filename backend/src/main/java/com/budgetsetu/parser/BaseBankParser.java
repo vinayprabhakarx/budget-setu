@@ -51,7 +51,8 @@ public abstract class BaseBankParser implements BankStatementParser {
                     tempFile.delete();
                 }
             } else if (lowerFileName.endsWith(".pdf")) {
-                try (PDDocument document = password == null || password.isEmpty() ? Loader.loadPDF(bytes) : Loader.loadPDF(bytes, password)) {
+                try (PDDocument document = password == null || password.isEmpty() ? Loader.loadPDF(bytes)
+                        : Loader.loadPDF(bytes, password)) {
                     text = new PDFTextStripper().getText(document);
                     text = text.replace("\u0000", ""); // Strip null bytes for PostgreSQL
                 }
@@ -83,16 +84,17 @@ public abstract class BaseBankParser implements BankStatementParser {
 
     protected List<List<String>> groupIntoBlocks(String text) {
         List<List<String>> blocks = new java.util.ArrayList<>();
-        if (text == null || text.isBlank()) return blocks;
+        if (text == null || text.isBlank())
+            return blocks;
 
         String[] lines = text.split("\\r?\\n");
         List<String> currentBlock = new java.util.ArrayList<>();
         java.util.regex.Pattern dateLead = java.util.regex.Pattern.compile(
-                "^\\s*([A-Za-z]{3,9}\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}|\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,]*\\d{2,4})?)"
-        );
+                "^\\s*([A-Za-z]{3,9}\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4}|\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,]*\\d{2,4})?)");
 
         for (String line : lines) {
-            if (line.trim().isEmpty()) continue;
+            if (line.trim().isEmpty())
+                continue;
             if (dateLead.matcher(line).find()) {
                 if (!currentBlock.isEmpty()) {
                     blocks.add(new java.util.ArrayList<>(currentBlock));

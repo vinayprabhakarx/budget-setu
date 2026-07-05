@@ -57,7 +57,8 @@ public class GenericHtmlParser implements StatementParser {
         for (int i = 0; i < rows.size(); i++) {
             List<String> row = rows.get(i);
             String joined = String.join(" ", row).toLowerCase(Locale.ROOT);
-            if (joined.contains("date") && (joined.contains("amount") || joined.contains("debit") || joined.contains("credit") || joined.contains("reference"))) {
+            if (joined.contains("date") && (joined.contains("amount") || joined.contains("debit")
+                    || joined.contains("credit") || joined.contains("reference"))) {
                 headerIndex = i;
                 headers = row.stream().map(this::normalizeHeader).toList();
                 break;
@@ -86,7 +87,8 @@ public class GenericHtmlParser implements StatementParser {
             String drCr = firstNonBlank(mapped, "dr_cr", "drcr", "debit_credit");
             String payCollect = firstNonBlank(mapped, "pay_collect");
             String amount = firstNonBlank(mapped, "amount_in_rs", "amount", "value");
-            String reference = firstNonBlank(mapped, "payment_id_reference_number", "reference_number", "payment_id", "reference");
+            String reference = firstNonBlank(mapped, "payment_id_reference_number", "reference_number", "payment_id",
+                    "reference");
             String transactionType = resolveTransactionType(drCr, payCollect);
             String counterparty = "INCOME".equals(transactionType)
                     ? firstNonBlank(mapped, "sender", "receiver")
@@ -102,7 +104,8 @@ public class GenericHtmlParser implements StatementParser {
             mapped.put("payee", counterparty == null ? "" : counterparty);
             mapped.put("counterparty", counterparty == null ? "" : counterparty);
             mapped.put("reference_number", reference == null ? "" : reference);
-            mapped.put("description", String.join(" ", nonBlankValues(reference, counterparty, payCollect, drCr)).trim());
+            mapped.put("description",
+                    String.join(" ", nonBlankValues(reference, counterparty, payCollect, drCr)).trim());
             mapped.put("raw_row", String.join(" | ", row));
             parsed.add(mapped);
         }

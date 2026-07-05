@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.budgetsetu.security.AesAttributeConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,6 +52,7 @@ public class Transaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDate transactionDate;
 
+    @Convert(converter = AesAttributeConverter.class)
     @Column(name = "payee")
     private String payee;
 
@@ -58,6 +60,7 @@ public class Transaction {
     @Column(name = "payment_mode", length = 30)
     private String paymentMode;
 
+    @Convert(converter = AesAttributeConverter.class)
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -69,9 +72,11 @@ public class Transaction {
     @Column(length = 20)
     private String source = "MANUAL";
 
+    @Convert(converter = AesAttributeConverter.class)
     @Column(name = "reference_number")
     private String referenceNumber;
 
+    @Convert(converter = AesAttributeConverter.class)
     @Column(name = "raw_description", columnDefinition = "TEXT")
     private String rawDescription;
 

@@ -12,8 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "recurring_expenses")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class RecurringExpense {
 

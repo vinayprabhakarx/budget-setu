@@ -9,8 +9,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "email_verifications")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class EmailVerification {
 

@@ -33,10 +33,6 @@ public class User {
     private String fullName;
 
     @Builder.Default
-    @Column(length = 10)
-    private String currency = "INR";
-
-    @Builder.Default
     @Column(length = 50)
     private String timezone = "Asia/Kolkata";
 

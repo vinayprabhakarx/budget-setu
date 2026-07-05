@@ -17,10 +17,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     Optional<Account> findByIdAndUserId(UUID id, UUID userId);
 
-    boolean existsByUserIdAndName(UUID userId, String name);
-
-    Optional<Account> findByUserIdAndName(UUID userId, String name);
-
-    Optional<Account> findByUserIdAndBankNameAndAccountNumberAndAccountType(
-            UUID userId, String bankName, String accountNumber, String accountType);
+    Optional<Account> findByUserIdAndBankNameAndAccountNumberAndAccountType(UUID userId, String bankName,
+            String accountNumber, String accountType);
 }

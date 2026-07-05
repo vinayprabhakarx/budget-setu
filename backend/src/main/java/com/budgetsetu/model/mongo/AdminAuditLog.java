@@ -14,16 +14,16 @@ import java.time.LocalDateTime;
 public class AdminAuditLog {
     @Id
     private String id;
-    
+
     @Indexed
     private String adminEmail;
-    
+
     @Indexed
     private String targetUserEmail;
-    
+
     private String action; // e.g. "PROMOTED_TO_ADMIN", "SUSPENDED_USER", "DELETED_USER"
     private String details;
-    
+
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 }

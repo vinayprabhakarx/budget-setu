@@ -12,8 +12,10 @@ import java.time.Instant;
  * Records are never deleted or modified.
  */
 @Document(collection = "audit_events")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class AuditEvent {
 
@@ -23,13 +25,13 @@ public class AuditEvent {
     @Indexed
     private String userId;
 
-    private String entityType;    // TRANSACTION, BUDGET, GOAL, ACCOUNT
+    private String entityType; // TRANSACTION, BUDGET, GOAL, ACCOUNT
     private String entityId;
-    private String action;        // CREATE, UPDATE, DELETE
+    private String action; // CREATE, UPDATE, DELETE
     private String fieldChanged;
     private String oldValue;
     private String newValue;
-    private String source;        // USER, SYSTEM
+    private String source; // USER, SYSTEM
 
     @Builder.Default
     private Instant timestamp = Instant.now();

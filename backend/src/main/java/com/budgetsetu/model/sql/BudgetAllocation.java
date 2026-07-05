@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "budget_allocations", uniqueConstraints = @UniqueConstraint(columnNames = {"budget_plan_id", "category_id"}))
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "budget_allocations", uniqueConstraints = @UniqueConstraint(columnNames = { "budget_plan_id",
+        "category_id" }))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BudgetAllocation {
 

@@ -14,8 +14,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "budget_plans")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BudgetPlan {
 
@@ -25,8 +27,6 @@ public class BudgetPlan {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
-
-
 
     @Column(nullable = false)
     private String name;
@@ -54,8 +54,6 @@ public class BudgetPlan {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-
 
     public void addAllocation(BudgetAllocation allocation) {
         allocations.add(allocation);

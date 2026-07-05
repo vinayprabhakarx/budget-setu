@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface InfrastructureMetricRepository extends JpaRepository<InfrastructureMetric, UUID> {
-    
+
     // Group by day for the last 30 days
     @Query(value = "SELECT " +
             "DATE(recorded_at) as date, " +

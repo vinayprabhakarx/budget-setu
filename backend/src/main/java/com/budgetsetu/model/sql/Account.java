@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.budgetsetu.security.AesAttributeConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,10 +15,11 @@ import java.util.UUID;
  * Only the last 4 digits of account numbers are ever stored.
  */
 @Entity
-@Table(name = "accounts",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "name"}))
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "accounts")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Account {
 
@@ -28,12 +30,13 @@ public class Account {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "account_holder_name")
+    private String accountHolderName;
 
     @Column(name = "bank_name")
     private String bankName;
 
+    @Convert(converter = AesAttributeConverter.class)
     @Column(name = "account_number", length = 50)
     private String accountNumber;
 
@@ -49,10 +52,6 @@ public class Account {
 
     @Column(name = "manual_balance_date")
     private java.time.LocalDate manualBalanceDate;
-
-    @Builder.Default
-    @Column(length = 10)
-    private String currency = "INR";
 
     @Builder.Default
     @Column(name = "is_active")

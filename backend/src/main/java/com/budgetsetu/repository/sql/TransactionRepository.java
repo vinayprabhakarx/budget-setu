@@ -17,104 +17,124 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
-                                               JpaSpecificationExecutor<Transaction> {
+              JpaSpecificationExecutor<Transaction> {
 
-    Optional<Transaction> findByIdAndUserIdAndIsDeletedFalse(UUID id, UUID userId);
+       Optional<Transaction> findByIdAndUserIdAndIsDeletedFalse(UUID id, UUID userId);
 
-    Page<Transaction> findByUserIdAndIsDeletedFalse(UUID userId, Pageable pageable);
+       Page<Transaction> findByUserIdAndIsDeletedFalse(UUID userId, Pageable pageable);
 
-    boolean existsByUserIdAndFingerprint(UUID userId, String fingerprint);
+       List<Transaction> findAllByUserIdAndIsDeletedFalse(UUID userId);
 
-    List<Transaction> findByUserId(UUID userId);
-    List<Transaction> findByUserIdAndFingerprintIn(UUID userId, List<String> fingerprints);
+       boolean existsByUserIdAndFingerprint(UUID userId, String fingerprint);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.data.jpa.repository.Query("DELETE FROM Transaction t WHERE t.userId = :userId AND t.fingerprint IN :fingerprints")
-    void deleteAllByUserIdAndFingerprintIn(@org.springframework.data.repository.query.Param("userId") UUID userId, @org.springframework.data.repository.query.Param("fingerprints") List<String> fingerprints);
+       List<Transaction> findByUserId(UUID userId);
 
-    @Query("SELECT SUM(t.amount) FROM Transaction t " +
-           "WHERE t.userId = :userId AND t.transactionType = :type " +
-           "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false")
-    BigDecimal sumAmountByTypeAndDateRange(@Param("userId") UUID userId,
-                                          @Param("type") String type,
-                                          @Param("start") LocalDate start,
-                                          @Param("end") LocalDate end);
+       List<Transaction> findByUserIdAndFingerprintIn(UUID userId, List<String> fingerprints);
 
-    @Query("SELECT SUM(t.amount) FROM Transaction t " +
-           "WHERE t.userId = :userId AND t.categoryId = :categoryId " +
-           "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false")
-    BigDecimal sumAmountByCategoryAndDateRange(@Param("userId") UUID userId,
-                                              @Param("categoryId") UUID categoryId,
-                                              @Param("start") LocalDate start,
-                                              @Param("end") LocalDate end);
+       @org.springframework.data.jpa.repository.Modifying
+       @org.springframework.data.jpa.repository.Query("DELETE FROM Transaction t WHERE t.userId = :userId AND t.fingerprint IN :fingerprints")
+       void deleteAllByUserIdAndFingerprintIn(@org.springframework.data.repository.query.Param("userId") UUID userId,
+                     @org.springframework.data.repository.query.Param("fingerprints") List<String> fingerprints);
 
-    @Query("SELECT SUM(t.amount) FROM Transaction t " +
-           "WHERE t.userId = :userId AND t.categoryId = :categoryId " +
-           "AND t.transactionType = :type AND t.transactionDate BETWEEN :start AND :end " +
-           "AND t.isDeleted = false")
-    BigDecimal sumAmountByCategoryTypeAndDateRange(@Param("userId") UUID userId,
-                                                   @Param("categoryId") UUID categoryId,
-                                                   @Param("type") String type,
-                                                   @Param("start") LocalDate start,
-                                                   @Param("end") LocalDate end);
+       @Query("SELECT SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = :type " +
+                     "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false")
+       BigDecimal sumAmountByTypeAndDateRange(@Param("userId") UUID userId,
+                     @Param("type") String type,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end);
 
-    @Query("SELECT t.categoryId, SUM(t.amount) FROM Transaction t " +
-           "WHERE t.userId = :userId AND t.transactionType = :type " +
-           "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
-           "AND t.categoryId IS NOT NULL GROUP BY t.categoryId")
-    List<Object[]> sumAmountByTypeGroupedByCategory(@Param("userId") UUID userId,
-                                                    @Param("type") String type,
-                                                    @Param("start") LocalDate start,
-                                                    @Param("end") LocalDate end);
+       @Query("SELECT SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.categoryId = :categoryId " +
+                     "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false")
+       BigDecimal sumAmountByCategoryAndDateRange(@Param("userId") UUID userId,
+                     @Param("categoryId") UUID categoryId,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end);
 
-    List<Transaction> findTop5ByUserIdAndIsDeletedFalseOrderByTransactionDateDescCreatedAtDesc(UUID userId);
+       @Query("SELECT SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.categoryId = :categoryId " +
+                     "AND t.transactionType = :type AND t.transactionDate BETWEEN :start AND :end " +
+                     "AND t.isDeleted = false")
+       BigDecimal sumAmountByCategoryTypeAndDateRange(@Param("userId") UUID userId,
+                     @Param("categoryId") UUID categoryId,
+                     @Param("type") String type,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end);
 
-    @Query("SELECT t FROM Transaction t " +
-           "WHERE t.userId = :userId AND t.transactionType = 'EXPENSE' " +
-           "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
-           "ORDER BY t.amount DESC")
-    List<Transaction> findTopExpensesByDateRange(@Param("userId") UUID userId,
-                                                 @Param("start") LocalDate start,
-                                                 @Param("end") LocalDate end,
-                                                 Pageable pageable);
+       @Query("SELECT t.categoryId, SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = :type " +
+                     "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
+                     "AND t.categoryId IS NOT NULL GROUP BY t.categoryId")
+       List<Object[]> sumAmountByTypeGroupedByCategory(@Param("userId") UUID userId,
+                     @Param("type") String type,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @Query("DELETE FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId")
-    void deleteByAccountIdAndUserId(@Param("accountId") UUID accountId, @Param("userId") UUID userId);
+       @Query("SELECT SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = :type AND t.isDeleted = false")
+       BigDecimal sumAmountByType(@Param("userId") UUID userId,
+                     @Param("type") String type);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @Query("UPDATE Transaction t SET t.accountId = :destAccountId WHERE t.accountId = :sourceAccountId AND t.userId = :userId")
-    void updateAccountId(@Param("sourceAccountId") UUID sourceAccountId, @Param("destAccountId") UUID destAccountId, @Param("userId") UUID userId);
+       @Query("SELECT t.categoryId, SUM(t.amount) FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = :type AND t.isDeleted = false " +
+                     "AND t.categoryId IS NOT NULL GROUP BY t.categoryId")
+       List<Object[]> sumAmountByTypeGroupedByCategoryAllTime(@Param("userId") UUID userId,
+                     @Param("type") String type);
 
-    @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
-           "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false")
-    BigDecimal calculateBalanceByAccountIdAndUserId(@Param("accountId") UUID accountId, @Param("userId") UUID userId);
+       List<Transaction> findTop5ByUserIdAndIsDeletedFalseOrderByTransactionDateDescCreatedAtDesc(UUID userId);
 
-    @Query("SELECT t.runningBalance FROM Transaction t " +
-           "WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false AND t.runningBalance IS NOT NULL " +
-           "ORDER BY t.transactionDate DESC, t.createdAt DESC, t.id DESC")
-    List<BigDecimal> findLatestRunningBalance(@Param("accountId") UUID accountId, @Param("userId") UUID userId, org.springframework.data.domain.Pageable pageable);
+       @Query("SELECT t FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = 'EXPENSE' " +
+                     "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
+                     "ORDER BY t.amount DESC")
+       List<Transaction> findTopExpensesByDateRange(@Param("userId") UUID userId,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end,
+                     Pageable pageable);
 
-    @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
-           "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false " +
-           "AND t.transactionDate >= :startDate")
-    BigDecimal sumTransactionsAfterDate(@Param("accountId") UUID accountId, @Param("userId") UUID userId, @Param("startDate") LocalDate startDate);
+       @org.springframework.data.jpa.repository.Modifying
+       @Query("DELETE FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId")
+       void deleteByAccountIdAndUserId(@Param("accountId") UUID accountId, @Param("userId") UUID userId);
 
-    /**
-     * Aggregate income/expense totals grouped by truncated date period.
-     * Uses PostgreSQL DATE_TRUNC for efficient single-query trend computation.
-     * Returns rows of [period (Date), type (String), total (BigDecimal)].
-     */
-    @Query(value = "SELECT DATE_TRUNC(CAST(:groupBy AS text), t.transaction_date)::date AS period, " +
-           "t.transaction_type AS type, SUM(t.amount) AS total " +
-           "FROM transactions t " +
-           "WHERE t.user_id = :userId AND t.is_deleted = false " +
-           "AND t.transaction_date BETWEEN :start AND :end " +
-           "AND t.transaction_type IN ('INCOME', 'EXPENSE') " +
-           "GROUP BY period, type ORDER BY period",
-           nativeQuery = true)
-    List<Object[]> aggregateByPeriodAndType(@Param("userId") UUID userId,
-                                           @Param("start") LocalDate start,
-                                           @Param("end") LocalDate end,
-                                           @Param("groupBy") String groupBy);
+       @org.springframework.data.jpa.repository.Modifying
+       @Query("UPDATE Transaction t SET t.accountId = :destAccountId WHERE t.accountId = :sourceAccountId AND t.userId = :userId")
+       void updateAccountId(@Param("sourceAccountId") UUID sourceAccountId, @Param("destAccountId") UUID destAccountId,
+                     @Param("userId") UUID userId);
+
+       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
+                     "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false")
+       BigDecimal calculateBalanceByAccountIdAndUserId(@Param("accountId") UUID accountId,
+                     @Param("userId") UUID userId);
+
+       @Query("SELECT t.runningBalance FROM Transaction t " +
+                     "WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false AND t.runningBalance IS NOT NULL "
+                     +
+                     "ORDER BY t.transactionDate DESC, t.createdAt DESC, t.id DESC")
+       List<BigDecimal> findLatestRunningBalance(@Param("accountId") UUID accountId, @Param("userId") UUID userId,
+                     org.springframework.data.domain.Pageable pageable);
+
+       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
+                     "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false "
+                     +
+                     "AND t.transactionDate >= :startDate")
+       BigDecimal sumTransactionsAfterDate(@Param("accountId") UUID accountId, @Param("userId") UUID userId,
+                     @Param("startDate") LocalDate startDate);
+
+       /**
+        * Aggregate income/expense totals grouped by truncated date period.
+        * Uses PostgreSQL DATE_TRUNC for efficient single-query trend computation.
+        * Returns rows of [period (Date), type (String), total (BigDecimal)].
+        */
+       @Query(value = "SELECT DATE_TRUNC(CAST(:groupBy AS text), t.transaction_date)::date AS period, " +
+                     "t.transaction_type AS type, SUM(t.amount) AS total " +
+                     "FROM transactions t " +
+                     "WHERE t.user_id = :userId AND t.is_deleted = false " +
+                     "AND t.transaction_date BETWEEN :start AND :end " +
+                     "AND t.transaction_type IN ('INCOME', 'EXPENSE') " +
+                     "GROUP BY period, type ORDER BY period", nativeQuery = true)
+       List<Object[]> aggregateByPeriodAndType(@Param("userId") UUID userId,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end,
+                     @Param("groupBy") String groupBy);
 }

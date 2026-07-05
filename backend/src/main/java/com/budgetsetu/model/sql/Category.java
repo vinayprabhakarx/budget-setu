@@ -10,12 +10,14 @@ import java.util.UUID;
 /**
  * Expense / income category.
  * user_id = NULL → system default visible to all users.
- * user_id = set  → custom category belonging to one user.
+ * user_id = set → custom category belonging to one user.
  */
 @Entity
 @Table(name = "categories")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Category {
 

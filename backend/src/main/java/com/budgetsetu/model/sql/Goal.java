@@ -16,8 +16,10 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "goals")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Goal {
 

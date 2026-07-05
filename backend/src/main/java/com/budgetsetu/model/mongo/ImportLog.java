@@ -14,8 +14,10 @@ import java.util.List;
  * One document per import — the events array holds one entry per parsed row.
  */
 @Document(collection = "import_logs")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ImportLog {
 
@@ -33,14 +35,16 @@ public class ImportLog {
     @CreatedDate
     private Instant createdAt;
 
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class ImportEvent {
         private Instant timestamp;
-        private String type;        // PARSED, SKIPPED, IMPORTED, ERROR
+        private String type; // PARSED, SKIPPED, IMPORTED, ERROR
         private String rawRow;
         private String fingerprint;
-        private String reason;      // DUPLICATE, INVALID_DATE, MISSING_AMOUNT
+        private String reason; // DUPLICATE, INVALID_DATE, MISSING_AMOUNT
     }
 }

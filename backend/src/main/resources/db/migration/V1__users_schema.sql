@@ -3,7 +3,6 @@ CREATE TABLE users (
     email         VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name     VARCHAR(255) NOT NULL,
-    currency      VARCHAR(10)  DEFAULT 'INR',
     timezone      VARCHAR(50)  DEFAULT 'Asia/Kolkata',
     role          VARCHAR(20)  DEFAULT 'USER',
     is_active     BOOLEAN      DEFAULT TRUE,

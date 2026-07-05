@@ -17,9 +17,12 @@ public interface StatementImportRepository extends JpaRepository<StatementImport
 
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM StatementImport s WHERE s.accountId = :accountId AND s.userId = :userId")
-    void deleteByAccountIdAndUserId(@org.springframework.data.repository.query.Param("accountId") UUID accountId, @org.springframework.data.repository.query.Param("userId") UUID userId);
+    void deleteByAccountIdAndUserId(@org.springframework.data.repository.query.Param("accountId") UUID accountId,
+            @org.springframework.data.repository.query.Param("userId") UUID userId);
 
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("UPDATE StatementImport s SET s.accountId = :destAccountId WHERE s.accountId = :sourceAccountId AND s.userId = :userId")
-    void updateAccountId(@org.springframework.data.repository.query.Param("sourceAccountId") UUID sourceAccountId, @org.springframework.data.repository.query.Param("destAccountId") UUID destAccountId, @org.springframework.data.repository.query.Param("userId") UUID userId);
+    void updateAccountId(@org.springframework.data.repository.query.Param("sourceAccountId") UUID sourceAccountId,
+            @org.springframework.data.repository.query.Param("destAccountId") UUID destAccountId,
+            @org.springframework.data.repository.query.Param("userId") UUID userId);
 }

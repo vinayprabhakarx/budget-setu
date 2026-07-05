@@ -9,8 +9,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "password_resets")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class PasswordReset {
 

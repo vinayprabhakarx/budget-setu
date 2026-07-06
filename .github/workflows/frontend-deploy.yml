@@ -65,7 +65,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "3"
+          wranglerVersion: "4"
           command: deploy
           workingDirectory: frontend
 
@@ -74,6 +74,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Notify Status
     if: always()
+    defaults:
+      run:
+        working-directory: .
     steps:
       - name: Determine status
         run: |

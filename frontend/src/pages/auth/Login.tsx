@@ -34,7 +34,7 @@ const PasswordStrengthMeter = ({ password }: { password: string }) => {
   ];
 
   return (
-    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
       {requirements.map((req, idx) => (
         <div
           key={idx}
@@ -216,8 +216,8 @@ export const Login: React.FC = () => {
 
   return (
     <PublicLayout>
-      <div className="grow flex items-center justify-center py-4 px-4">
-        <div className="card w-full max-w-120 p-6 space-y-4">
+      <div className="grow flex items-center justify-center py-2 px-4">
+        <div className="card w-full max-w-120 p-5 sm:p-6 space-y-3">
           <div className="text-center space-y-2">
             <h1 className="font-display text-text-primary text-3xl md:text-4xl leading-tight flex items-center justify-center gap-2">
               BudgetSetu
@@ -258,7 +258,7 @@ export const Login: React.FC = () => {
             <>
               {!isRecovering && (
                 <>
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-4">
                     <button
                       type="button"
                       onClick={() => loginWithGoogle()}
@@ -271,19 +271,19 @@ export const Login: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="relative mb-6">
+                  <div className="relative mb-4">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border-color"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
                       <span className="px-2 bg-surface text-text-muted">
-                        Or continue with email
+                        Or
                       </span>
                     </div>
                   </div>
                 </>
               )}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 {isRegistering && (
                   <div>
                     <label className="block text-body-sm font-semibold text-text-secondary mb-1">

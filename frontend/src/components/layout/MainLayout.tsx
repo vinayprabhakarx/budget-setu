@@ -121,8 +121,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
               isExpanded ? "px-2 py-2 w-full" : "justify-center p-1.5"
             }`}
           >
-            <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0">
-              {user?.fullName?.charAt(0) || "U"}
+            <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0 overflow-hidden">
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                user?.fullName?.charAt(0) || "U"
+              )}
             </div>
             {isExpanded && (
               <div className="min-w-0">
@@ -216,8 +220,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 hover:bg-bg-subtle p-2 rounded-lg transition-colors cursor-pointer w-full"
             >
-              <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0">
-                {user?.fullName?.charAt(0) || "U"}
+              <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0 overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user?.fullName?.charAt(0) || "U"
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-body-md font-semibold truncate text-text-primary">

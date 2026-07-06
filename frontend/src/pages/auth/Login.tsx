@@ -12,6 +12,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogo } from "../../components/shared/GoogleLogo";
 import { PublicLayout } from "../../components/layout/PublicLayout";
 import {
   validatePassword,
@@ -51,7 +53,7 @@ const PasswordStrengthMeter = ({ password }: { password: string }) => {
 };
 
 export const Login: React.FC = () => {
-  const { login, register, forgotPassword } = useAuth();
+  const { login, register, forgotPassword, googleLogin } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -180,6 +182,38 @@ export const Login: React.FC = () => {
     }
   };
 
+  const handleGoogleSuccess = async (tokenResponse: {
+    access_token?: string;
+  }) => {
+    if (tokenResponse.access_token) {
+      setLoading(true);
+      try {
+        await googleLogin(tokenResponse.access_token);
+        showToast("success", "Successfully logged in with Google!");
+        navigate("/dashboard", { replace: true });
+      } catch (err: unknown) {
+        const apiError = err as {
+          response?: { data?: { message?: string } };
+        };
+        const msg =
+          apiError.response?.data?.message ||
+          "Google login failed. Please try again.";
+        showToast("error", msg);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleGoogleError = () => {
+    showToast("error", "Google login failed. Please try again.");
+  };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: handleGoogleError,
+  });
+
   return (
     <PublicLayout>
       <div className="grow flex items-center justify-center py-4 px-4">
@@ -221,230 +255,265 @@ export const Login: React.FC = () => {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {isRegistering && (
-                <div>
-                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                      <User className="h-5 w-5" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Arjun Sharma"
-                      value={fullName}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setFullName(val);
-                        const err = validateName(val);
-                        if (err)
-                          setFieldErrors((prev) => ({
-                            ...prev,
-                            fullName: err,
-                          }));
-                        else
-                          setFieldErrors((prev) => ({ ...prev, fullName: "" }));
-                      }}
-                      autoComplete="name"
-                      maxLength={25}
-                      className={`input pl-10! ${fieldErrors.fullName ? "input-error" : ""}`}
-                      disabled={loading}
-                    />
-                  </div>
-                  {fieldErrors.fullName && (
-                    <p className="text-destructive text-body-sm mt-1">
-                      {fieldErrors.fullName}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="arjun@example.com"
-                    value={email}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setEmail(val);
-                      if (val.length > 50) {
-                        setFieldErrors((prev) => ({
-                          ...prev,
-                          email: "Email cannot exceed 50 characters",
-                        }));
-                      } else {
-                        setFieldErrors((prev) => ({ ...prev, email: "" }));
-                      }
-                    }}
-                    onBlur={handleEmailBlur}
-                    autoComplete="email"
-                    maxLength={50}
-                    className={`input pl-10! ${fieldErrors.email ? "input-error" : ""}`}
-                    disabled={loading}
-                  />
-                </div>
-                {fieldErrors.email && (
-                  <p className="text-destructive text-body-sm mt-1">
-                    {fieldErrors.email}
-                  </p>
-                )}
-              </div>
-
+            <>
               {!isRecovering && (
                 <>
-                  <div>
-                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                        <Lock className="h-5 w-5" />
-                      </div>
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setPassword(val);
-                          if (val.length > 25) {
-                            setFieldErrors((prev) => ({
-                              ...prev,
-                              password: "Password cannot exceed 25 characters",
-                            }));
-                          } else {
-                            setFieldErrors((prev) => ({
-                              ...prev,
-                              password: "",
-                            }));
-                          }
-                        }}
-                        onBlur={handlePasswordBlur}
-                        autoComplete={
-                          isRegistering ? "new-password" : "current-password"
-                        }
-                        maxLength={25}
-                        className={`input pl-10! pr-10! ${fieldErrors.password ? "input-error" : ""}`}
-                        disabled={loading}
-                      />
-                      {password.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
-                      )}
+                  <div className="flex justify-center mb-6">
+                    <button
+                      type="button"
+                      onClick={() => loginWithGoogle()}
+                      className="btn btn-secondary w-full py-3 flex items-center justify-center gap-2 hover:bg-surface-hover transition-colors"
+                    >
+                      <GoogleLogo className="w-5 h-5" />
+                      {isRegistering
+                        ? "Sign up with Google"
+                        : "Sign in with Google"}
+                    </button>
+                  </div>
+
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border-color"></div>
                     </div>
-                    {fieldErrors.password && (
-                      <p className="text-destructive text-body-sm mt-1">
-                        {fieldErrors.password}
-                      </p>
-                    )}
-                    {isRegistering && (
-                      <PasswordStrengthMeter password={password} />
-                    )}
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-surface text-text-muted">
+                        Or continue with email
+                      </span>
+                    </div>
                   </div>
                 </>
               )}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {isRegistering && (
+                  <div>
+                    <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Arjun Sharma"
+                        value={fullName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFullName(val);
+                          const err = validateName(val);
+                          if (err)
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              fullName: err,
+                            }));
+                          else
+                            setFieldErrors((prev) => ({
+                              ...prev,
+                              fullName: "",
+                            }));
+                        }}
+                        autoComplete="name"
+                        maxLength={25}
+                        className={`input pl-10! ${fieldErrors.fullName ? "input-error" : ""}`}
+                        disabled={loading}
+                      />
+                    </div>
+                    {fieldErrors.fullName && (
+                      <p className="text-destructive text-body-sm mt-1">
+                        {fieldErrors.fullName}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-              {isRegistering && !isRecovering && (
                 <div>
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={acceptedTerms}
-                      onChange={(e) => {
-                        setAcceptedTerms(e.target.checked);
-                        setFieldErrors((prev) => ({
-                          ...prev,
-                          acceptedTerms: "",
-                        }));
-                      }}
-                      disabled={loading}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-brand cursor-pointer"
-                    />
-                    <span className="text-body-sm text-text-secondary leading-relaxed">
-                      I agree to the{" "}
-                      <Link
-                        to="/terms"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand hover:text-brand-hover font-medium transition-colors"
-                      >
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        to="/privacy"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand hover:text-brand-hover font-medium transition-colors"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </span>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Email Address
                   </label>
-                  {fieldErrors.acceptedTerms && (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                      <Mail className="h-5 w-5" />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="arjun@example.com"
+                      value={email}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEmail(val);
+                        if (val.length > 50) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            email: "Email cannot exceed 50 characters",
+                          }));
+                        } else {
+                          setFieldErrors((prev) => ({ ...prev, email: "" }));
+                        }
+                      }}
+                      onBlur={handleEmailBlur}
+                      autoComplete="email"
+                      maxLength={50}
+                      className={`input pl-10! ${fieldErrors.email ? "input-error" : ""}`}
+                      disabled={loading}
+                    />
+                  </div>
+                  {fieldErrors.email && (
                     <p className="text-destructive text-body-sm mt-1">
-                      {fieldErrors.acceptedTerms}
+                      {fieldErrors.email}
                     </p>
                   )}
                 </div>
-              )}
 
-              {!isRegistering && !isRecovering && (
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsRecovering(true);
-                      setFieldErrors({});
-                    }}
-                    className="text-brand hover:text-brand-hover text-body-sm font-medium transition-colors cursor-pointer"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || (isRegistering && !passwordMeetsAllCriteria)}
-                className="btn btn-primary w-full py-3 mt-2 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-              >
-                {loading ? (
+                {!isRecovering && (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    {isRecovering
-                      ? "Sending reset link..."
-                      : isRegistering
-                        ? "Creating account..."
-                        : "Signing in..."}
+                    <div>
+                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                          <Lock className="h-5 w-5" />
+                        </div>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setPassword(val);
+                            if (val.length > 25) {
+                              setFieldErrors((prev) => ({
+                                ...prev,
+                                password:
+                                  "Password cannot exceed 25 characters",
+                              }));
+                            } else {
+                              setFieldErrors((prev) => ({
+                                ...prev,
+                                password: "",
+                              }));
+                            }
+                          }}
+                          onBlur={handlePasswordBlur}
+                          autoComplete={
+                            isRegistering ? "new-password" : "current-password"
+                          }
+                          maxLength={25}
+                          className={`input pl-10! pr-10! ${fieldErrors.password ? "input-error" : ""}`}
+                          disabled={loading}
+                        />
+                        {password.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                      {fieldErrors.password && (
+                        <p className="text-destructive text-body-sm mt-1">
+                          {fieldErrors.password}
+                        </p>
+                      )}
+                      {isRegistering && (
+                        <PasswordStrengthMeter password={password} />
+                      )}
+                    </div>
                   </>
-                ) : isRecovering ? (
-                  "Send Reset Link"
-                ) : isRegistering ? (
-                  "Create Account"
-                ) : (
-                  "Sign In"
                 )}
-              </button>
-            </form>
+
+                {isRegistering && !isRecovering && (
+                  <div>
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => {
+                          setAcceptedTerms(e.target.checked);
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            acceptedTerms: "",
+                          }));
+                        }}
+                        disabled={loading}
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-brand cursor-pointer"
+                      />
+                      <span className="text-body-sm text-text-secondary leading-relaxed">
+                        I agree to the{" "}
+                        <Link
+                          to="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand hover:text-brand-hover font-medium transition-colors"
+                        >
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          to="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand hover:text-brand-hover font-medium transition-colors"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </span>
+                    </label>
+                    {fieldErrors.acceptedTerms && (
+                      <p className="text-destructive text-body-sm mt-1">
+                        {fieldErrors.acceptedTerms}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {!isRegistering && !isRecovering && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsRecovering(true);
+                        setFieldErrors({});
+                      }}
+                      className="text-brand hover:text-brand-hover text-body-sm font-medium transition-colors cursor-pointer"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={
+                    loading || (isRegistering && !passwordMeetsAllCriteria)
+                  }
+                  className="btn btn-primary w-full py-3 mt-2 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {isRecovering
+                        ? "Sending reset link..."
+                        : isRegistering
+                          ? "Creating account..."
+                          : "Signing in..."}
+                    </>
+                  ) : isRecovering ? (
+                    "Send Reset Link"
+                  ) : isRegistering ? (
+                    "Create Account"
+                  ) : (
+                    "Sign In"
+                  )}
+                </button>
+              </form>
+            </>
           )}
 
           {!recoverySent && (

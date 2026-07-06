@@ -7,6 +7,9 @@ CREATE TABLE users (
     role          VARCHAR(20)  DEFAULT 'USER',
     is_active     BOOLEAN      DEFAULT TRUE,
     email_verified BOOLEAN     DEFAULT FALSE,
+    has_local_password BOOLEAN DEFAULT TRUE,
+    avatar_url    VARCHAR(500),
+    is_google_linked BOOLEAN   DEFAULT FALSE,
     created_at    TIMESTAMP    DEFAULT NOW(),
     updated_at    TIMESTAMP    DEFAULT NOW()
 );

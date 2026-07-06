@@ -30,13 +30,21 @@ public class RateLimitService {
      * @param windowSeconds Window duration in seconds
      */
     public void checkRateLimit(String key, int maxRequests, long windowSeconds) {
+        checkRateLimit(key, maxRequests, windowSeconds, "Too many requests. Please try again later.");
+    }
+
+    /**
+     * Checks rate limit and increments counter with a custom error message.
+     * Throws RateLimitExceededException if limit is reached.
+     */
+    public void checkRateLimit(String key, int maxRequests, long windowSeconds, String errorMessage) {
         try {
             if (redisTemplate != null) {
                 String countStr = redisTemplate.opsForValue().get(key);
                 if (countStr != null) {
                     int count = Integer.parseInt(countStr);
                     if (count >= maxRequests) {
-                        throw new RateLimitExceededException("Too many requests. Please try again later.");
+                        throw new RateLimitExceededException(errorMessage);
                     }
                     redisTemplate.opsForValue().increment(key);
                 } else {
@@ -58,7 +66,7 @@ public class RateLimitService {
                 return new long[] { 1L, now + windowMs };
             }
             if (val[0] >= maxRequests) {
-                throw new RateLimitExceededException("Too many requests. Please try again later.");
+                throw new RateLimitExceededException(errorMessage);
             }
             val[0]++;
             return val;

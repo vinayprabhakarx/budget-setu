@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -16,4 +17,8 @@ public class UserProfileResponse {
     private java.time.LocalDateTime createdAt;
     private boolean emailVerified;
     private String role;
+    private boolean hasLocalPassword;
+    private String avatarUrl;
+    @JsonProperty("isGoogleLinked")
+    private boolean isGoogleLinked;
 }

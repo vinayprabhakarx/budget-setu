@@ -2,6 +2,7 @@ package com.budgetsetu.controller;
 
 import com.budgetsetu.dto.request.LoginRequest;
 import com.budgetsetu.dto.request.RegisterRequest;
+import com.budgetsetu.dto.request.GoogleAuthRequest;
 import com.budgetsetu.dto.response.AuthResponse;
 import com.budgetsetu.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         AuthResponse authResponse = authService.login(request);
+        setRefreshTokenCookie(response, UUID.fromString(authResponse.getUserId()));
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleAuthRequest request, HttpServletResponse response) {
+        AuthResponse authResponse = authService.googleLogin(request.getCredential());
         setRefreshTokenCookie(response, UUID.fromString(authResponse.getUserId()));
         return ResponseEntity.ok(authResponse);
     }

@@ -6,6 +6,8 @@ import com.budgetsetu.dto.request.DeleteAccountRequest;
 import com.budgetsetu.dto.response.UserProfileResponse;
 import com.budgetsetu.model.sql.User;
 import com.budgetsetu.service.UserService;
+import com.budgetsetu.dto.request.GoogleAuthRequest;
+import com.budgetsetu.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class UserController {
 
         private final UserService userService;
+        private final AuthService authService;
 
         @PutMapping("/profile")
         public ResponseEntity<UserProfileResponse> updateProfile(
@@ -43,6 +46,9 @@ public class UserController {
                                 .createdAt(updatedUser.getCreatedAt())
                                 .emailVerified(updatedUser.getEmailVerified())
                                 .role(updatedUser.getRole())
+                                .hasLocalPassword(updatedUser.getHasLocalPassword())
+                                .avatarUrl(updatedUser.getAvatarUrl())
+                                .isGoogleLinked(updatedUser.getIsGoogleLinked())
                                 .build();
 
                 return ResponseEntity.ok(response);
@@ -79,6 +85,30 @@ public class UserController {
                                 .createdAt(user.getCreatedAt())
                                 .emailVerified(user.getEmailVerified())
                                 .role(user.getRole())
+                                .hasLocalPassword(user.getHasLocalPassword())
+                                .avatarUrl(user.getAvatarUrl())
+                                .isGoogleLinked(user.getIsGoogleLinked())
+                                .build();
+                return ResponseEntity.ok(response);
+        }
+
+        @PostMapping("/link-google")
+        public ResponseEntity<UserProfileResponse> linkGoogleAccount(
+                        @AuthenticationPrincipal UUID userId,
+                        @Valid @RequestBody GoogleAuthRequest request) {
+                authService.linkGoogleAccount(userId, request.getCredential());
+                
+                User user = userService.getUserById(userId);
+                UserProfileResponse response = UserProfileResponse.builder()
+                                .userId(user.getId().toString())
+                                .email(user.getEmail())
+                                .fullName(user.getFullName())
+                                .createdAt(user.getCreatedAt())
+                                .emailVerified(user.getEmailVerified())
+                                .role(user.getRole())
+                                .hasLocalPassword(user.getHasLocalPassword())
+                                .avatarUrl(user.getAvatarUrl())
+                                .isGoogleLinked(user.getIsGoogleLinked())
                                 .build();
                 return ResponseEntity.ok(response);
         }

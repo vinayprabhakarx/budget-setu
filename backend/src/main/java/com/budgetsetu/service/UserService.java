@@ -90,11 +90,17 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Incorrect current password.");
+        if (user.getHasLocalPassword()) {
+            if (currentPassword == null || currentPassword.isEmpty()) {
+                throw new IllegalArgumentException("Current password is required.");
+            }
+            if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+                throw new IllegalArgumentException("Incorrect current password.");
+            }
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setHasLocalPassword(true);
         userRepository.save(user);
     }
 

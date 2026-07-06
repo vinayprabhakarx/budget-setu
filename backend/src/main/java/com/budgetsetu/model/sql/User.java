@@ -48,6 +48,17 @@ public class User {
     @Column(name = "email_verified")
     private Boolean emailVerified = false;
 
+    @Builder.Default
+    @Column(name = "has_local_password")
+    private Boolean hasLocalPassword = true;
+
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
+    @Builder.Default
+    @Column(name = "is_google_linked")
+    private Boolean isGoogleLinked = false;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

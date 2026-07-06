@@ -23,7 +23,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.UUID;
+
+import java.util.Map;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
@@ -38,12 +47,16 @@ public class AuthService {
     private final PasswordResetRepository passwordResetRepository;
     private final EmailService emailService;
     private final StringRedisTemplate redisTemplate;
+    private final RateLimitService rateLimitService;
 
     @Value("${app.jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
 
-    @Value("${app.email-verification.required}")
+    @Value("${app.email-verification.required:false}")
     private boolean emailVerificationRequired;
+
+    @Value("${app.oauth2.google.client-id:}")
+    private String googleClientId;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -62,6 +75,9 @@ public class AuthService {
         user = userRepository.save(user);
 
         if (emailVerificationRequired) {
+            // Apply daily email sending limit (3 emails per 24 hours)
+            rateLimitService.checkRateLimit("email-sends:" + request.getEmail().toLowerCase().trim(), 3, 86400, "Too many requests. Please try again after 24 hours.");
+
             // Generate verification code and token
             emailVerificationRepository.deleteByEmail(user.getEmail());
             emailVerificationRepository.flush();
@@ -128,7 +144,146 @@ public class AuthService {
                 .createdAt(user.getCreatedAt())
                 .accessToken(accessToken)
                 .role(user.getRole())
+                .hasLocalPassword(user.getHasLocalPassword())
+                .avatarUrl(user.getAvatarUrl())
+                .isGoogleLinked(user.getIsGoogleLinked())
                 .build();
+    }
+
+    @Transactional
+    public AuthResponse googleLogin(String credential) {
+        if (googleClientId == null || googleClientId.isEmpty()) {
+            throw new IllegalStateException("Google Sign-In is not configured on the server.");
+        }
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(credential); // The credential here is the access_token
+            HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+
+            Map<String, Object> payload = response.getBody();
+            if (payload == null) {
+                throw new BadCredentialsException("Invalid Google access token.");
+            }
+
+            String email = (String) payload.get("email");
+            String name = (String) payload.get("name");
+            String picture = (String) payload.get("picture");
+            
+            if (email == null) {
+                throw new BadCredentialsException("Email not provided by Google.");
+            }
+            
+            email = email.toLowerCase().trim();
+
+            User user = userRepository.findByEmail(email).orElse(null);
+            
+            if (user == null) {
+                // Register new user
+                user = User.builder()
+                        .email(email)
+                        // Assign a random password since they login via Google
+                        .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .fullName(name != null ? name.trim() : "")
+                        .role("USER")
+                        .emailVerified(true) // Google verified
+                        .hasLocalPassword(false)
+                        .avatarUrl(picture)
+                        .isGoogleLinked(true)
+                        .build();
+                user = userRepository.save(user);
+            } else {
+                // Link account
+                boolean updated = false;
+                if (!user.getIsActive()) {
+                    throw new BadCredentialsException("Account is deactivated.");
+                }
+                if (Boolean.FALSE.equals(user.getEmailVerified())) {
+                    // Since Google verified it, let's mark our DB as verified
+                    user.setEmailVerified(true);
+                    updated = true;
+                }
+                if (picture != null && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
+                    user.setAvatarUrl(picture);
+                    updated = true;
+                }
+                if (!Boolean.TRUE.equals(user.getIsGoogleLinked())) {
+                    user.setIsGoogleLinked(true);
+                    updated = true;
+                }
+                if (updated) {
+                    user = userRepository.save(user);
+                }
+            }
+
+            String accessToken = tokenProvider.generateAccessToken(
+                    user.getId(), user.getEmail(), user.getRole());
+
+            return AuthResponse.builder()
+                    .userId(user.getId().toString())
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .createdAt(user.getCreatedAt())
+                    .accessToken(accessToken)
+                    .role(user.getRole())
+                    .hasLocalPassword(user.getHasLocalPassword())
+                    .avatarUrl(user.getAvatarUrl())
+                    .isGoogleLinked(user.getIsGoogleLinked())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Google authentication failed", e);
+            throw new BadCredentialsException("Google authentication failed.");
+        }
+    }
+
+    @Transactional
+    public void linkGoogleAccount(UUID userId, String credential) {
+        if (googleClientId == null || googleClientId.isEmpty()) {
+            throw new IllegalStateException("Google Sign-In is not configured on the server.");
+        }
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(credential);
+            HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+
+            Map<String, Object> payload = response.getBody();
+            if (payload == null) {
+                throw new BadCredentialsException("Invalid Google access token.");
+            }
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BadCredentialsException("User not found."));
+
+            String picture = (String) payload.get("picture");
+            
+            user.setIsGoogleLinked(true);
+            user.setEmailVerified(true);
+            if (picture != null && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
+                user.setAvatarUrl(picture);
+            }
+            
+            userRepository.save(user);
+        } catch (Exception e) {
+            log.error("Google account linking failed", e);
+            throw new BadCredentialsException("Google account linking failed.");
+        }
     }
 
     @Transactional
@@ -227,25 +382,8 @@ public class AuthService {
     public void resendVerification(String email) {
         String normalizedEmail = email.toLowerCase().trim();
 
-        // Rate limiting check: max 3 resends in 24 hours
-        try {
-            String key = "rate-limit:resend-verification:" + normalizedEmail;
-            String currentCountStr = redisTemplate.opsForValue().get(key);
-            if (currentCountStr != null) {
-                int currentCount = Integer.parseInt(currentCountStr);
-                if (currentCount >= 3) {
-                    throw new IllegalArgumentException(
-                            "Too many verification attempts. You can only request resending the verification email 3 times per day.");
-                }
-                redisTemplate.opsForValue().increment(key);
-            } else {
-                redisTemplate.opsForValue().set(key, "1", 24, java.util.concurrent.TimeUnit.HOURS);
-            }
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            log.warn("Redis connection failed. Skipping rate-limiting check.", e);
-        }
+        // Rate limiting check: max 3 emails in 24 hours
+        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400, "Too many requests. Please try again after 24 hours.");
 
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
@@ -286,23 +424,7 @@ public class AuthService {
         }
 
         // Rate limiting check: max 3 requests in 24 hours per email
-        try {
-            String key = "rate-limit:forgot-password:" + normalizedEmail;
-            String currentCountStr = redisTemplate.opsForValue().get(key);
-            if (currentCountStr != null) {
-                int currentCount = Integer.parseInt(currentCountStr);
-                if (currentCount >= 3) {
-                    throw new IllegalArgumentException("Too many password reset attempts.");
-                }
-                redisTemplate.opsForValue().increment(key);
-            } else {
-                redisTemplate.opsForValue().set(key, "1", 24, java.util.concurrent.TimeUnit.HOURS);
-            }
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            log.warn("Redis connection failed. Skipping rate-limiting check.", e);
-        }
+        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400, "Too many requests. Please try again after 24 hours.");
 
         // Delete old password reset record for this email and flush
         passwordResetRepository.deleteByEmail(normalizedEmail);

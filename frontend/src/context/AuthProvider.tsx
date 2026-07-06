@@ -14,7 +14,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = await refreshAccessToken();
         if (token) {
           try {
-            const response = await api.get<{ userId: string; fullName: string; email: string; createdAt?: string; role?: string }>('/users/me');
+            const response = await api.get<{ userId: string; fullName: string; email: string; createdAt?: string; role?: string; hasLocalPassword?: boolean; avatarUrl?: string; isGoogleLinked?: boolean }>('/users/me');
             const freshUser = response.data;
             setUser(freshUser);
             localStorage.setItem('budgetsetu_user_profile', JSON.stringify(freshUser));
@@ -50,14 +50,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post<{ accessToken: string; userId: string; fullName: string; email: string; createdAt?: string; role?: string }>(
+    const response = await api.post<{ accessToken: string; userId: string; fullName: string; email: string; createdAt?: string; role?: string; hasLocalPassword?: boolean; avatarUrl?: string; isGoogleLinked?: boolean }>(
       '/auth/login',
       { email, password }
     );
-    const { accessToken, userId, fullName, email: userEmail, createdAt, role } = response.data;
+    const { accessToken, userId, fullName, email: userEmail, createdAt, role, hasLocalPassword, avatarUrl, isGoogleLinked } = response.data;
     
     setAccessTokenInMemory(accessToken);
-    const loggedInUser = { userId, fullName, email: userEmail, createdAt, role };
+    const loggedInUser = { userId, fullName, email: userEmail, createdAt, role, hasLocalPassword, avatarUrl, isGoogleLinked };
+    setUser(loggedInUser);
+    localStorage.setItem('budgetsetu_user_profile', JSON.stringify(loggedInUser));
+  };
+
+  const googleLogin = async (credential: string) => {
+    const response = await api.post<{ accessToken: string; userId: string; fullName: string; email: string; createdAt?: string; role?: string; hasLocalPassword?: boolean; avatarUrl?: string; isGoogleLinked?: boolean }>(
+      '/auth/google',
+      { credential }
+    );
+    const { accessToken, userId, fullName, email: userEmail, createdAt, role, hasLocalPassword, avatarUrl, isGoogleLinked } = response.data;
+    
+    setAccessTokenInMemory(accessToken);
+    const loggedInUser = { userId, fullName, email: userEmail, createdAt, role, hasLocalPassword, avatarUrl, isGoogleLinked };
     setUser(loggedInUser);
     localStorage.setItem('budgetsetu_user_profile', JSON.stringify(loggedInUser));
   };
@@ -95,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, forgotPassword, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, googleLogin, register, forgotPassword, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

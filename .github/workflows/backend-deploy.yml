@@ -117,6 +117,12 @@ jobs:
             echo "Pulling latest image..."
             docker pull -q "$DOCKER_IMAGE"
             
+            # If an existing container with the same name exists, stop and remove it first
+            if docker ps -a --filter "name=budget-setu" --format "{{.ID}}" | grep -q .; then
+              echo "Found existing container 'budget-setu' — stopping and removing..."
+              docker rm -f budget-setu || true
+            fi
+
             # Start new container
             echo "Starting new container..."
             docker run -d \

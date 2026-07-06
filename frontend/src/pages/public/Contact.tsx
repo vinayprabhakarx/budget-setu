@@ -21,7 +21,9 @@ export const Contact: React.FC = () => {
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!fullName.trim()) errs.fullName = "Name is required";
-    if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
+    if (!email.trim()) {
+      errs.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
       errs.email = "Email format is invalid";
     }
     if (!message.trim()) errs.message = "Message cannot be empty";
@@ -61,195 +63,212 @@ export const Contact: React.FC = () => {
 
   return (
     <PublicLayout>
-      <div className="relative overflow-hidden">
-        {/* Shared ambient glow token */}
-        <div className="ambient-glow" />
+      <div className="relative overflow-hidden py-24 md:py-32">
+        {/* Animated background glow */}
+        <div className="ambient-glow-animated" />
 
-        <div className="max-w-7xl mx-auto px-6 py-20 md:py-28 space-y-20 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-16">
           {/* Header Hero Section */}
-          <div className="space-y-3 text-center">
-            <h1 className="font-display text-text-primary text-[2.75rem] md:text-[4rem] tracking-tight">
-              Get in Touch
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
+              Get in Touch.
             </h1>
-            <p className="text-text-secondary text-body-md max-w-2xl mx-auto">
+            <p className="text-text-secondary text-body-lg leading-relaxed">
               Have questions about statement formats, bug reports, or feature
-              ideas? Fill out the form or reach out directly.
+              ideas? Fill out the form below or reach out to us directly.
             </p>
           </div>
 
-          {/* Double Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
-            {/* Left Column: Social Connection Links grouped under ONE card (Takes 2/5 width) */}
-            <div className="md:col-span-2 card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-6 self-start text-center md:text-left shadow-sm hover:border-brand/40 transition-all duration-300 hover:shadow-lg">
-              <div>
-                <h3 className="font-display text-text-primary text-heading-md tracking-tight">
-                  Connect Directly
-                </h3>
-                <p className="text-text-secondary text-body-sm leading-relaxed mt-1">
-                  Prefer immediate platforms? Drop a line on any of these
-                  channels.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 pt-2 justify-center md:justify-start">
-                {/* GitHub Profile */}
-                <a
-                  href="https://github.com/vinayprabhakarx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-11 w-11 rounded-md border border-border/60 hover:border-brand/40 bg-bg-surface/30 hover:bg-brand-subtle/10 text-text-secondary hover:text-brand flex items-center justify-center transition-all duration-300 group"
-                  title="GitHub Profile"
-                >
-                  <GithubIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </a>
-
-                {/* Website */}
-                <a
-                  href="https://vinayprabhakar.dev"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-11 w-11 rounded-md border border-border/60 hover:border-brand/40 bg-bg-surface/30 hover:bg-brand-subtle/10 text-text-secondary hover:text-brand flex items-center justify-center transition-all duration-300 group"
-                  title="Personal Website"
-                >
-                  <Globe className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </a>
-
-                {/* LinkedIn */}
-                <a
-                  href="https://linkedin.com/in/vinayprabhakarx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-11 w-11 rounded-md border border-border/60 hover:border-brand/40 bg-bg-surface/30 hover:bg-brand-subtle/10 text-text-secondary hover:text-brand flex items-center justify-center transition-all duration-300 group"
-                  title="LinkedIn"
-                >
-                  <LinkedinIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </a>
-              </div>
-            </div>
-
-            {/* Right Column: Interactive Contact Form (Takes 3/5 width) */}
-            <div className="md:col-span-3 card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 md:p-10 self-start shadow-sm hover:border-brand/40 transition-all duration-300 hover:shadow-lg">
-              {success ? (
-                <div className="text-center py-12 space-y-5">
-                  <div className="mx-auto h-14 w-14 rounded-full bg-income-bg text-income flex items-center justify-center">
-                    <CheckCircle2 className="h-8 w-8" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-display text-text-primary text-heading-lg">
-                      Message Submitted
-                    </h3>
-                    <p className="text-text-secondary text-body-sm max-w-sm mx-auto leading-relaxed">
-                      Thank you! Your message has been received. We will get
-                      back to you shortly at the email address provided.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSuccess(false)}
-                    className="btn btn-secondary btn-md mt-6"
-                  >
-                    Send Another Message
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <div className="space-y-1">
-                      <label className="block text-body-sm font-semibold text-text-secondary">
-                        Your Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Arjun Sharma"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className={`input ${fieldErrors.fullName ? "input-error" : ""}`}
-                        disabled={loading}
-                      />
-                      {fieldErrors.fullName && (
-                        <p className="text-destructive text-body-xs mt-1">
-                          {fieldErrors.fullName}
-                        </p>
-                      )}
+          {/* Asymmetrical 60/40 Split View */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+            
+            {/* Left Column (60%): Interactive Glassmorphism Form */}
+            <div className="lg:col-span-3 card bg-bg-surface/60 backdrop-blur-2xl border border-white/5 p-8 md:p-12 shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-linear-to-br from-brand/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              
+              <div className="relative z-10">
+                {success ? (
+                  <div className="text-center py-16 space-y-6">
+                    <div className="mx-auto h-20 w-20 rounded-full bg-success/10 text-success flex items-center justify-center animate-fade-up-1">
+                      <CheckCircle2 className="h-10 w-10" />
                     </div>
-
-                    {/* Email Address */}
-                    <div className="space-y-1">
-                      <label className="block text-body-sm font-semibold text-text-secondary">
-                        Email Address (optional)
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="arjun@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`input ${fieldErrors.email ? "input-error" : ""}`}
-                        disabled={loading}
-                      />
-                      {fieldErrors.email && (
-                        <p className="text-destructive text-body-xs mt-1">
-                          {fieldErrors.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Topic Select */}
-                  <div className="space-y-1">
-                    <label className="block text-body-sm font-semibold text-text-secondary">
-                      Topic of Discussion
-                    </label>
-                    <Select
-                      value={topic}
-                      onChange={setTopic}
-                      disabled={loading}
-                      options={[
-                        { value: "general", label: "General Inquiry" },
-                        { value: "bug", label: "Report a Bug / Issue" },
-                        { value: "feature", label: "Request a Feature" },
-                        { value: "feedback", label: "Product Feedback" },
-                      ]}
-                    />
-                  </div>
-
-                  {/* Message */}
-                  <div className="space-y-1">
-                    <label className="block text-body-sm font-semibold text-text-secondary justify-between">
-                      <span>Your Message</span>
-                      {fieldErrors.message && (
-                        <span className="text-destructive font-normal text-body-xs">
-                          (* Message cannot be empty)
-                        </span>
-                      )}
-                    </label>
-                    <textarea
-                      placeholder="Tell us what you're thinking or describe the issue in detail..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      rows={5}
-                      className={`input min-h-36 resize-y ${fieldErrors.message ? "input-error" : ""}`}
-                      disabled={loading}
-                    />
-                    {fieldErrors.message && (
-                      <p className="text-destructive text-body-xs mt-1">
-                        {fieldErrors.message}
+                    <div className="space-y-3 animate-fade-up-2">
+                      <h3 className="font-display text-text-primary text-3xl">
+                        Message Sent
+                      </h3>
+                      <p className="text-text-secondary text-body-lg max-w-md mx-auto leading-relaxed">
+                        Thank you for reaching out! We've received your message and will get back to you shortly.
                       </p>
-                    )}
+                    </div>
+                    <button
+                      onClick={() => setSuccess(false)}
+                      className="btn btn-secondary btn-lg mt-8 animate-fade-up-3"
+                    >
+                      Send Another Message
+                    </button>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                      {/* Full Name */}
+                      <div className="space-y-2 group/input">
+                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                          Your Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Arjun Sharma"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className={`input w-full bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.fullName ? "border-destructive/50 focus:border-destructive" : ""}`}
+                          disabled={loading}
+                        />
+                        {fieldErrors.fullName && (
+                          <p className="text-destructive text-body-xs mt-1 animate-fade-up-1">
+                            {fieldErrors.fullName}
+                          </p>
+                        )}
+                      </div>
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn btn-primary w-full py-3 mt-2 flex items-center justify-center gap-2"
-                  >
-                    <span>
-                      {loading ? "Submitting message..." : "Send Message"}
-                    </span>
-                    {!loading && <ArrowRight className="h-4 w-4" />}
-                  </button>
-                </form>
-              )}
+                      {/* Email Address */}
+                      <div className="space-y-2 group/input">
+                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="arjun@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className={`input w-full bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.email ? "border-destructive/50 focus:border-destructive" : ""}`}
+                          disabled={loading}
+                        />
+                        {fieldErrors.email && (
+                          <p className="text-destructive text-body-xs mt-1 animate-fade-up-1">
+                            {fieldErrors.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Topic Select */}
+                    <div className="space-y-2 group/input">
+                      <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                        Topic of Discussion
+                      </label>
+                      <Select
+                        value={topic}
+                        onChange={setTopic}
+                        disabled={loading}
+                        options={[
+                          { value: "general", label: "General Inquiry" },
+                          { value: "bug", label: "Report a Bug / Issue" },
+                          { value: "feature", label: "Request a Feature" },
+                          { value: "feedback", label: "Product Feedback" },
+                        ]}
+                      />
+                    </div>
+
+                    {/* Message */}
+                    <div className="space-y-2 group/input">
+                      <div className="flex justify-between items-end">
+                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                          Your Message
+                        </label>
+                        {fieldErrors.message && (
+                          <span className="text-destructive font-medium text-xs animate-fade-up-1">
+                            * Message required
+                          </span>
+                        )}
+                      </div>
+                      <textarea
+                        placeholder="Tell us what you're thinking or describe the issue in detail..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        rows={6}
+                        className={`input w-full min-h-[150px] resize-y bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.message ? "border-destructive/50 focus:border-destructive" : ""}`}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="btn btn-primary btn-lg w-full flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform duration-300 shadow-[0_0_20px_rgba(var(--color-brand),0.3)]"
+                    >
+                      <span>
+                        {loading ? "Encrypting & Sending..." : "Send Message"}
+                      </span>
+                      {!loading && <ArrowRight className="h-5 w-5" />}
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
+
+            {/* Right Column (40%): Social Proof & Interactive Cards */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              <div className="card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 flex flex-col gap-6 hover:-translate-y-1 transition-transform duration-500 hover:shadow-xl hover:shadow-brand/5">
+                <div>
+                  <h3 className="font-display text-text-primary text-2xl mb-2">
+                    Direct Channels
+                  </h3>
+                  <p className="text-text-secondary text-body-sm">
+                    Prefer immediate platforms? Drop a line directly to the developer.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <a
+                    href="https://github.com/vinayprabhakarx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-bg-base/50 hover:bg-bg-surface hover:border-brand/30 transition-colors group"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-brand-subtle text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <GithubIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-text-primary">GitHub</div>
+                      <div className="text-xs text-text-secondary">@vinayprabhakarx</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://linkedin.com/in/vinayprabhakarx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-bg-base/50 hover:bg-bg-surface hover:border-brand/30 transition-colors group"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-brand-subtle text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <LinkedinIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-text-primary">LinkedIn</div>
+                      <div className="text-xs text-text-secondary">Connect Professionally</div>
+                    </div>
+                  </a>
+                  
+                  <a
+                    href="https://vinayprabhakar.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-bg-base/50 hover:bg-bg-surface hover:border-brand/30 transition-colors group"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-brand-subtle text-brand flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-text-primary">Website</div>
+                      <div className="text-xs text-text-secondary">vinayprabhakar.dev</div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </div>
       </div>

@@ -295,10 +295,20 @@ export const Terms: React.FC = () => {
           </div>
         </section>
 
-        {/* 10. Changes to These Terms */}
+        {/* 10. Service Modifications & Future Pricing */}
         <section className="space-y-4">
           <h2 className="font-display text-text-primary text-heading-lg tracking-tight">
-            10. Changes to These Terms
+            10. Service Modifications & Future Pricing
+          </h2>
+          <p className="text-text-secondary text-body-md leading-relaxed">
+            While BudgetSetu is currently offered for free, we reserve the right to modify, suspend, or discontinue any aspect of the service at any time. We also reserve the right to introduce subscription fees, pricing tiers, or paywalls for certain features in the future. We will provide reasonable advance notice of any pricing changes, and you will have the opportunity to export your data or close your account if you do not agree to the new pricing.
+          </p>
+        </section>
+
+        {/* 11. Changes to These Terms */}
+        <section className="space-y-4">
+          <h2 className="font-display text-text-primary text-heading-lg tracking-tight">
+            11. Changes to These Terms
           </h2>
           <p className="text-text-secondary text-body-md leading-relaxed">
             We may revise these Terms from time to time. We will post the
@@ -310,10 +320,10 @@ export const Terms: React.FC = () => {
           </p>
         </section>
 
-        {/* 11. Governing Law & Jurisdiction */}
+        {/* 12. Governing Law & Jurisdiction */}
         <section className="space-y-4">
           <h2 className="font-display text-text-primary text-heading-lg tracking-tight">
-            11. Governing Law & Jurisdiction
+            12. Governing Law & Jurisdiction
           </h2>
           <p className="text-text-secondary text-body-md leading-relaxed">
             These Terms are governed by and construed in accordance with the
@@ -324,10 +334,10 @@ export const Terms: React.FC = () => {
           </p>
         </section>
 
-        {/* 12. Severability & Entire Agreement */}
+        {/* 13. Severability & Entire Agreement */}
         <section className="space-y-4">
           <h2 className="font-display text-text-primary text-heading-lg tracking-tight">
-            12. Severability & Entire Agreement
+            13. Severability & Entire Agreement
           </h2>
           <p className="text-text-secondary text-body-md leading-relaxed">
             If any provision of these Terms is found to be invalid or

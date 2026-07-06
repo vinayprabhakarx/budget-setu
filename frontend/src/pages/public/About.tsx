@@ -15,7 +15,7 @@ export const About: React.FC = () => {
           <section className="max-w-3xl mx-auto text-center space-y-8">
             <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
               Privacy is <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-brand to-brand-hover">
+              <span className="text-brand">
                 Not a Luxury.
               </span>
             </h1>

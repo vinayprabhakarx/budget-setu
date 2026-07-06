@@ -105,8 +105,8 @@
   --ease-exit:      cubic-bezier(0.4, 0, 1, 1);
 
   /* ── Ambient Glow ──────────────────────────────────────── */
-  --glow-ambient-rgb:      46 196 182;
-  --glow-ambient-opacity:  0.06;
+  --glow-ambient-rgb:      255 255 255;
+  --glow-ambient-opacity:  0.03;
   --glow-ambient-stop:     75%;
   --glow-ambient-height:   32rem;
 
@@ -146,12 +146,12 @@
   --color-text-link:       #1A5C4A;   /* Dark teal — links */
 
   /* ── Brand (Primary Interaction) ──────────────────────── */
-  --color-brand:           #1A5C4A;   /* Primary button bg, links */
-  --color-brand-hover:     #154D3E;   /* Hover state */
-  --color-brand-active:    #0F3D30;   /* Active/pressed state */
-  --color-brand-subtle:    #E6F0EE;   /* Very light teal — focus ring, badge bg */
-  --color-brand-muted:     #C5DDD8;   /* Light teal — subtle highlights */
-  --color-brand-text:      #FFFFFF;   /* Text on brand-colored background */
+  --color-brand:           #1A1A1A;   /* Near Black */
+  --color-brand-hover:     #333333;   /* Dark Grey */
+  --color-brand-active:    #000000;   /* Pure Black */
+  --color-brand-subtle:    #F5F5F5;   /* Very Light Grey */
+  --color-brand-muted:     #E0E0E0;   /* Light Grey */
+  --color-brand-text:      #FFFFFF;
 
   /* ── Semantic: Income ──────────────────────────────────── */
   --color-income:          #2A6A45;   /* Muted forest green — positive amounts */
@@ -208,13 +208,13 @@
    ============================================================= */
 [data-theme="dark"] {
   /* ── Backgrounds ───────────────────────────────────────── */
-  --color-bg-base:         #141312;   /* Near-black — app background */
-  --color-bg-surface:      #1E1D1B;   /* Dark warm grey — cards, panels */
-  --color-bg-elevated:     #262420;   /* Slightly lighter — modals, dropdowns */
-  --color-bg-subtle:       #252320;   /* Hover states, dividers */
-  --color-bg-muted:        #302E2B;   /* Disabled states, skeletons */
+  --color-bg-base:         #0A0A0A;   /* Deep carbon black — app background */
+  --color-bg-surface:      #141414;   /* Very dark grey — cards, panels */
+  --color-bg-elevated:     #1F1F1F;   /* Slightly lighter — modals, dropdowns */
+  --color-bg-subtle:       #292929;   /* Hover states, dividers */
+  --color-bg-muted:        #333333;   /* Disabled states, skeletons */
   --color-bg-inverse:      #F0EEEC;   /* Off-white — tooltips on dark bg */
-  --color-bg-overlay:      rgba(0, 0, 0, 0.65);     /* Modal backdrop */
+  --color-bg-overlay:      rgba(0, 0, 0, 0.75);     /* Modal backdrop */
 
   /* ── Text ──────────────────────────────────────────────── */
   --color-text-primary:    #EDEAE7;   /* Off-white — headings, body */
@@ -225,12 +225,12 @@
   --color-text-link:       #6BBAA8;   /* Light teal — links in dark mode */
 
   /* ── Brand (Primary Interaction) ──────────────────────── */
-  --color-brand:           #4E9E88;   /* Lighter teal — visible on dark bg */
-  --color-brand-hover:     #5CB5A0;
-  --color-brand-active:    #3D8A75;
-  --color-brand-subtle:    #1A3832;   /* Very dark teal — focus ring bg */
-  --color-brand-muted:     #2A5548;   /* Muted teal — subtle highlights */
-  --color-brand-text:      #0C1F1A;   /* Dark text on brand button */
+  --color-brand:           #F5F5F5;   /* Very Light Grey / Off White */
+  --color-brand-hover:     #FFFFFF;   /* Pure White */
+  --color-brand-active:    #E0E0E0;   /* Light Grey */
+  --color-brand-subtle:    #2A2A2A;   /* Dark Grey */
+  --color-brand-muted:     #404040;   /* Medium Grey */
+  --color-brand-text:      #1A1A1A;   /* Dark Text */
 
   /* ── Semantic: Income ──────────────────────────────────── */
   --color-income:          #5AAF7A;   /* Muted light green */

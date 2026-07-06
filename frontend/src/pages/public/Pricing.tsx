@@ -28,7 +28,7 @@ export const Pricing: React.FC = () => {
             <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
               100% Free.
               <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-brand to-brand-hover">
+              <span className="text-brand">
                 For Everyone.
               </span>
             </h1>

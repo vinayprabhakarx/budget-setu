@@ -26,7 +26,7 @@ export const Hero: React.FC = () => {
               <h1 className="font-display text-text-primary text-[3rem] md:text-[5rem] leading-[1.1] tracking-tight">
                 Financial Clarity,
                 <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-brand via-income to-brand-hover">
+                <span className="text-brand">
                   Without the Clutter.
                 </span>
               </h1>
@@ -56,7 +56,7 @@ export const Hero: React.FC = () => {
 
             {/* Right Column: CSS App Mockup */}
             <div className="relative hidden lg:block">
-              <div className="absolute -inset-4 bg-linear-to-tr from-brand/10 to-income/10 blur-2xl rounded-full opacity-50" />
+              <div className="absolute -inset-4 bg-brand/15 blur-2xl rounded-full opacity-50" />
               <div className="card bg-bg-surface/80 backdrop-blur-md border border-border/80 p-6 rounded-2xl shadow-2xl relative z-10">
                 {/* Mockup Header */}
                 <div className="flex justify-between items-center mb-8 border-b border-border/50 pb-4">

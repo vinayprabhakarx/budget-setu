@@ -262,7 +262,7 @@ export const Login: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => loginWithGoogle()}
-                      className="btn btn-secondary w-full py-3 flex items-center justify-center gap-2 hover:bg-surface-hover transition-colors"
+                      className="btn btn-primary w-full py-3 flex items-center justify-center gap-2 transition-colors"
                     >
                       <GoogleLogo className="w-5 h-5" />
                       {isRegistering

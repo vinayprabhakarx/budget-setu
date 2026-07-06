@@ -29,7 +29,7 @@ public class MailService {
         return resendApiKey != null && !resendApiKey.trim().isEmpty();
     }
 
-    public boolean sendEmail(String to, String subject, String body) {
+    public boolean sendEmail(String to, String subject, String textBody, String htmlBody) {
         if (!isConfigured()) {
             log.warn("Resend API key (RESEND_API_KEY) is not configured. Email to {} with subject '{}' was suppressed.",
                     to, subject);
@@ -48,9 +48,13 @@ public class MailService {
             payload.put("from", fromEmail);
             payload.put("to", Collections.singletonList(to));
             payload.put("subject", subject);
-            payload.put("text", body);
-            payload.put("html", "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">" +
-                    body.replace("\n", "<br/>") + "</div>");
+            payload.put("text", textBody);
+            if (htmlBody != null && !htmlBody.isEmpty()) {
+                payload.put("html", htmlBody);
+            } else {
+                payload.put("html", "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">" +
+                        textBody.replace("\n", "<br/>") + "</div>");
+            }
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             String url = "https://api.resend.com/emails";

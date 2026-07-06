@@ -1,29 +1,31 @@
-# Single-stage build and runtime Dockerfile for Spring Boot backend
-FROM maven:3.9-eclipse-temurin-25
-
+# Multi-stage build: compiles with full JDK+Maven, ships only JRE+jar
+FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies for caching
+# Copy pom.xml first so dependency layer is cached separately from source
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and compile inside container (no local JAR needed)
 COPY src ./src
-RUN mvn clean package -DskipTests && \
-    cp target/*.jar app.jar && \
-    mkdir -p /app/logs
+RUN mvn clean package -DskipTests
 
-# Set environment variables
+# ---- Runtime stage ----
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+RUN mkdir -p /app/logs && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app/target/*.jar app.jar
+
 ENV SPRING_PROFILES_ACTIVE=prod \
     PORT=8080 \
     JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseG1GC"
 
-# Expose port
 EXPOSE 8080
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/api/health || exit 1
 
-# Run the application (shell form to expand JAVA_OPTS)
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,0 +1,88 @@
+name: Frontend Deploy
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-deploy.yml"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "frontend/**"
+defaults:
+  run:
+    working-directory: frontend
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: frontend/.bun-version
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build production bundle
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+        run: bun run build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 1
+
+  deploy-cloudflare:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: frontend/.bun-version
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "3"
+          command: deploy
+          workingDirectory: frontend
+
+  notify:
+    needs: [build, deploy-cloudflare]
+    runs-on: ubuntu-latest
+    name: Notify Status
+    if: always()
+    steps:
+      - name: Determine status
+        run: |
+          if [ "${{ needs.build.result }}" == "failure" ]; then
+            echo "Frontend build failed!"
+            exit 1
+          fi
+          if [ "${{ needs.deploy-cloudflare.result }}" == "failure" ]; then
+            echo "Cloudflare deployment failed!"
+            exit 1
+          fi
+          echo "Frontend pipeline completed successfully!"

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.UUID;
 
 import java.util.Map;
@@ -76,7 +75,8 @@ public class AuthService {
 
         if (emailVerificationRequired) {
             // Apply daily email sending limit (3 emails per 24 hours)
-            rateLimitService.checkRateLimit("email-sends:" + request.getEmail().toLowerCase().trim(), 3, 86400, "Too many requests. Please try again after 24 hours.");
+            rateLimitService.checkRateLimit("email-sends:" + request.getEmail().toLowerCase().trim(), 3, 86400,
+                    "Too many requests. Please try again after 24 hours.");
 
             // Generate verification code and token
             emailVerificationRepository.deleteByEmail(user.getEmail());
@@ -166,8 +166,8 @@ public class AuthService {
                     "https://www.googleapis.com/oauth2/v3/userinfo",
                     HttpMethod.GET,
                     entity,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
+                    new ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             Map<String, Object> payload = response.getBody();
             if (payload == null) {
@@ -177,15 +177,15 @@ public class AuthService {
             String email = (String) payload.get("email");
             String name = (String) payload.get("name");
             String picture = (String) payload.get("picture");
-            
+
             if (email == null) {
                 throw new BadCredentialsException("Email not provided by Google.");
             }
-            
+
             email = email.toLowerCase().trim();
 
             User user = userRepository.findByEmail(email).orElse(null);
-            
+
             if (user == null) {
                 // Register new user
                 user = User.builder()
@@ -260,8 +260,8 @@ public class AuthService {
                     "https://www.googleapis.com/oauth2/v3/userinfo",
                     HttpMethod.GET,
                     entity,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
+                    new ParameterizedTypeReference<Map<String, Object>>() {
+                    });
 
             Map<String, Object> payload = response.getBody();
             if (payload == null) {
@@ -272,13 +272,13 @@ public class AuthService {
                     .orElseThrow(() -> new BadCredentialsException("User not found."));
 
             String picture = (String) payload.get("picture");
-            
+
             user.setIsGoogleLinked(true);
             user.setEmailVerified(true);
             if (picture != null && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
                 user.setAvatarUrl(picture);
             }
-            
+
             userRepository.save(user);
         } catch (Exception e) {
             log.error("Google account linking failed", e);
@@ -383,7 +383,8 @@ public class AuthService {
         String normalizedEmail = email.toLowerCase().trim();
 
         // Rate limiting check: max 3 emails in 24 hours
-        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400, "Too many requests. Please try again after 24 hours.");
+        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400,
+                "Too many requests. Please try again after 24 hours.");
 
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
@@ -424,7 +425,8 @@ public class AuthService {
         }
 
         // Rate limiting check: max 3 requests in 24 hours per email
-        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400, "Too many requests. Please try again after 24 hours.");
+        rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400,
+                "Too many requests. Please try again after 24 hours.");
 
         // Delete old password reset record for this email and flush
         passwordResetRepository.deleteByEmail(normalizedEmail);

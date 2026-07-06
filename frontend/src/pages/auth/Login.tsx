@@ -73,10 +73,16 @@ export const Login: React.FC = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // All 5 password requirements must be met before allowing register submit
+  const passwordMeetsAllCriteria =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[!@#$%^&*(),.?":{}|<>\-_]/.test(password);
 
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -89,17 +95,6 @@ export const Login: React.FC = () => {
   const handlePasswordBlur = () => {
     const err = validatePassword(password);
     setFieldErrors((prev) => ({ ...prev, password: err || "" }));
-  };
-
-  const handleConfirmPasswordBlur = () => {
-    if (confirmPassword && password !== confirmPassword) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        confirmPassword: "Passwords do not match",
-      }));
-    } else {
-      setFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
-    }
   };
 
   const validate = () => {
@@ -118,11 +113,6 @@ export const Login: React.FC = () => {
         errs.password = "Password must be at least 6 characters";
       }
       if (isRegistering) {
-        if (!confirmPassword) {
-          errs.confirmPassword = "Confirm Password is required";
-        } else if (confirmPassword !== password) {
-          errs.confirmPassword = "Passwords do not match";
-        }
         if (!acceptedTerms) {
           errs.acceptedTerms =
             "You must agree to the Terms of Service and Privacy Policy to create an account";
@@ -192,8 +182,8 @@ export const Login: React.FC = () => {
 
   return (
     <PublicLayout>
-      <div className="grow flex items-center justify-center py-12 md:py-20 px-4">
-        <div className="card w-full max-w-120 p-8 space-y-6">
+      <div className="grow flex items-center justify-center py-4 px-4">
+        <div className="card w-full max-w-120 p-6 space-y-4">
           <div className="text-center space-y-2">
             <h1 className="font-display text-text-primary text-3xl md:text-4xl leading-tight flex items-center justify-center gap-2">
               BudgetSetu
@@ -369,49 +359,6 @@ export const Login: React.FC = () => {
                       <PasswordStrengthMeter password={password} />
                     )}
                   </div>
-
-                  {isRegistering && (
-                    <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Confirm Password
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                          <Lock className="h-5 w-5" />
-                        </div>
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          onBlur={handleConfirmPasswordBlur}
-                          autoComplete="new-password"
-                          className={`input pl-10! pr-10! ${fieldErrors.confirmPassword ? "input-error" : ""}`}
-                          disabled={loading}
-                        />
-                        {confirmPassword.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                          >
-                            {showConfirmPassword ? (
-                              <EyeOff className="h-5 w-5" />
-                            ) : (
-                              <Eye className="h-5 w-5" />
-                            )}
-                          </button>
-                        )}
-                      </div>
-                      {fieldErrors.confirmPassword && (
-                        <p className="text-destructive text-body-sm mt-1">
-                          {fieldErrors.confirmPassword}
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </>
               )}
 
@@ -477,8 +424,8 @@ export const Login: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={loading}
-                className="btn btn-primary w-full py-3 mt-2 flex items-center justify-center"
+                disabled={loading || (isRegistering && !passwordMeetsAllCriteria)}
+                className="btn btn-primary w-full py-3 mt-2 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               >
                 {loading ? (
                   <>
@@ -510,7 +457,6 @@ export const Login: React.FC = () => {
                   } else {
                     setIsRegistering(!isRegistering);
                   }
-                  setConfirmPassword("");
                   setFieldErrors({});
                 }}
                 className="text-brand hover:text-brand-hover text-body-sm font-medium transition-colors cursor-pointer"

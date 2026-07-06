@@ -70,12 +70,14 @@ export const About: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                  <Layers className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-text-primary text-heading-lg">
+                    Monochrome First
+                  </h3>
                 </div>
-                <h3 className="font-display text-text-primary text-heading-lg">
-                  Monochrome First
-                </h3>
                 <p className="text-text-secondary text-body-sm leading-relaxed">
                   We believe financial data is noisy enough on its own.
                   BudgetSetu uses a strict monochrome-based layout where color
@@ -85,12 +87,14 @@ export const About: React.FC = () => {
               </div>
 
               <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                  <ShieldCheck className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-text-primary text-heading-lg">
+                    Security, Privacy &amp; Deletion
+                  </h3>
                 </div>
-                <h3 className="font-display text-text-primary text-heading-lg">
-                  Security, Privacy & Deletion
-                </h3>
                 <p className="text-text-secondary text-body-sm leading-relaxed">
                   Your data is strictly yours. Behind the UI, strict
                   authenticated, token-based access controls at the application
@@ -104,12 +108,14 @@ export const About: React.FC = () => {
               </div>
 
               <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                  <Eye className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                    <Eye className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-text-primary text-heading-lg">
+                    Zero Third-Party Trackers
+                  </h3>
                 </div>
-                <h3 className="font-display text-text-primary text-heading-lg">
-                  Zero Third-Party Trackers
-                </h3>
                 <p className="text-text-secondary text-body-sm leading-relaxed">
                   We do not include Google Analytics, Facebook SDKs, or Hotjar
                   scripts. We don't want to track your clicks or watch your
@@ -119,12 +125,14 @@ export const About: React.FC = () => {
               </div>
 
               <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                  <HeartHandshake className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                    <HeartHandshake className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display text-text-primary text-heading-lg">
+                    Open Utility
+                  </h3>
                 </div>
-                <h3 className="font-display text-text-primary text-heading-lg">
-                  Open Utility
-                </h3>
                 <p className="text-text-secondary text-body-sm leading-relaxed">
                   BudgetSetu is a community-first utility. By making it free to
                   use, we set a new standard for developer transparency and

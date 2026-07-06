@@ -131,12 +131,14 @@ export const Hero: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Card 1 */}
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-              <FileText className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                Statement Parsing
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              Statement Parsing
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               Drag-and-drop bank PDFs/CSVs. BudgetSetu auto-discovers bank
               details, parses data in seconds, and natively prompts you to
@@ -155,12 +157,14 @@ export const Hero: React.FC = () => {
 
           {/* Card 2 */}
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-              <RefreshCw className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                <RefreshCw className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                Auto Cash &amp; Accounts
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              Auto Cash & Accounts
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               Sign up and immediately receive a default Cash Wallet account to
               log manual spending. The system dynamically creates or resolves
@@ -170,12 +174,14 @@ export const Hero: React.FC = () => {
 
           {/* Card 3 */}
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-              <Shield className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                <Shield className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                Secure Calculations
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              Secure Calculations
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               Dynamically calculates current balances, prioritizing statement
               closing balances or manual starting balances on dates you specify.
@@ -263,12 +269,14 @@ export const Hero: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-expense/10 text-expense flex items-center justify-center shadow-sm">
-              <Shield className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-expense/10 text-expense flex items-center justify-center shadow-sm shrink-0">
+                <Shield className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                Data Security
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              Data Security
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               All database data is encrypted at rest using industry-standard
               AES-256 encryption. Access is enforced through authenticated,
@@ -278,12 +286,14 @@ export const Hero: React.FC = () => {
           </div>
 
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center shadow-sm">
-              <FileText className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center shadow-sm shrink-0">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                Strict Privacy Policy
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              Strict Privacy Policy
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               We do not sell your data to third parties. We do not use
               advertising networks or trackers. This application exists solely
@@ -293,12 +303,14 @@ export const Hero: React.FC = () => {
           </div>
 
           <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-5 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 hover:shadow-lg">
-            <div className="h-12 w-12 rounded-lg bg-income/10 text-income flex items-center justify-center shadow-sm">
-              <Trash2 className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-lg bg-income/10 text-income flex items-center justify-center shadow-sm shrink-0">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <h3 className="font-display text-text-primary text-heading-lg">
+                1-Click Deletion
+              </h3>
             </div>
-            <h3 className="font-display text-text-primary text-heading-lg">
-              1-Click Deletion
-            </h3>
             <p className="text-text-secondary text-body-sm leading-relaxed">
               Uploaded bank statements are permanently auto-deleted from the
               server within 24 hours. Furthermore, you have a one-click option

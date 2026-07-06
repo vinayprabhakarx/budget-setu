@@ -18,6 +18,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const authLinkTo = isLoginPage ? "/register" : "/login";
   const authLinkText = isLoginPage ? "Sign Up" : "Sign In";
 
+  const isAuthPage = ["/login", "/register"].some((p) => location.pathname === p);
+
   const navLinks = [
     { name: "About", path: "/about" },
     { name: "Pricing", path: "/pricing" },
@@ -43,7 +45,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary flex flex-col transition-colors duration-300">
+    <div
+      className="bg-bg-base text-text-primary flex flex-col transition-colors duration-300"
+      style={isAuthPage ? { height: "100dvh", overflow: "hidden" } : { minHeight: "100vh" }}
+    >
       {/* Premium Glassmorphic Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-bg-surface/85 backdrop-blur-md">
         <div className="w-full mx-auto px-6 md:px-12 lg:px-24 h-16 flex items-center justify-between">
@@ -157,12 +162,15 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Page Content */}
-      <main className="grow flex flex-col min-h-[calc(100vh-4rem)]">
+      <main
+        className="flex flex-col"
+        style={isAuthPage ? { flex: "1 1 0", overflowY: "auto" } : { flexGrow: 1, minHeight: "calc(100vh - 4rem)" }}
+      >
         {children}
       </main>
 
-      {/* Structured Corporate Footer */}
-      <footer className="bg-bg-surface border-t border-border mt-auto py-12 md:py-16">
+      {/* Structured Corporate Footer — hidden on auth pages */}
+      {!isAuthPage && <footer className="bg-bg-surface border-t border-border mt-auto py-12 md:py-16">
         <div className="w-full mx-auto px-6 md:px-12 lg:px-24 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10 lg:gap-20">
           {/* Column 1: Brand & Description */}
           <div className="space-y-4 col-span-2 md:col-span-2">
@@ -258,7 +266,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
             </a>
           </div>
         </div>
-      </footer>
+      </footer>}
     </div>
   );
 };

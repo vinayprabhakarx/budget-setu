@@ -146,23 +146,23 @@ export const DataDeletion: React.FC = () => {
             3. This Action Is Permanent
           </h2>
           <div className="text-text-secondary text-body-md space-y-4 leading-relaxed">
-            <div className="card border-destructive/20 bg-destructive-bg/10 p-5 flex items-start gap-4">
-              <Trash2 className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
-              <div className="space-y-1">
+            <div className="card border-destructive/20 bg-destructive-bg/10 p-5 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-destructive shrink-0" />
                 <h4 className="text-destructive text-body-md font-semibold">
                   No Recovery After Deletion
                 </h4>
-                <p className="text-body-sm text-text-secondary leading-relaxed">
-                  Once your account is deleted, your data is removed from our
-                  active systems immediately and there is no self-service or
-                  support option to restore it. Routine, encrypted backups of
-                  our database, retained for a limited period for disaster
-                  recovery, may take a short time to fully purge after deletion;
-                  these backups are not accessed for any purpose other than
-                  restoring service in the event of a system failure, and are
-                  not used to recover an individually deleted account.
-                </p>
               </div>
+              <p className="text-body-sm text-text-secondary leading-relaxed">
+                Once your account is deleted, your data is removed from our
+                active systems immediately and there is no self-service or
+                support option to restore it. Routine, encrypted backups of
+                our database, retained for a limited period for disaster
+                recovery, may take a short time to fully purge after deletion;
+                these backups are not accessed for any purpose other than
+                restoring service in the event of a system failure, and are
+                not used to recover an individually deleted account.
+              </p>
             </div>
             <p>
               If you are unsure, use the <strong>Backup</strong> option in

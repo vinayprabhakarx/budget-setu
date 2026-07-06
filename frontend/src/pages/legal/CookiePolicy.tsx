@@ -69,10 +69,12 @@ export const CookiePolicy: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Cookie 1 */}
               <div className="card space-y-2.5">
-                <ShieldCheck className="h-5 w-5 text-brand" />
-                <h3 className="text-text-primary text-body-md font-semibold">
-                  Secure Refresh Token
-                </h3>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-brand shrink-0" />
+                  <h3 className="text-text-primary text-body-md font-semibold">
+                    Secure Refresh Token
+                  </h3>
+                </div>
                 <p className="text-body-sm text-text-secondary leading-relaxed">
                   <strong>
                     Type: Cookie (HttpOnly, Secure, SameSite=Strict)
@@ -90,10 +92,12 @@ export const CookiePolicy: React.FC = () => {
               </div>
               {/* Cookie 2 */}
               <div className="card space-y-2.5">
-                <Settings className="h-5 w-5 text-brand" />
-                <h3 className="text-text-primary text-body-md font-semibold">
-                  UI Preferences
-                </h3>
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-brand shrink-0" />
+                  <h3 className="text-text-primary text-body-md font-semibold">
+                    UI Preferences
+                  </h3>
+                </div>
                 <p className="text-body-sm text-text-secondary leading-relaxed">
                   <strong>Type: Local Storage</strong>
                   <br />

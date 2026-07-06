@@ -87,12 +87,14 @@ export const Pricing: React.FC = () => {
           {/* Why Free Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto pt-6">
             <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-              <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                <Heart className="h-5 w-5" />
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                  <Heart className="h-5 w-5" />
+                </div>
+                <h3 className="font-display text-text-primary text-heading-lg">
+                  Open Source &amp; Public Utility
+                </h3>
               </div>
-              <h3 className="font-display text-text-primary text-heading-lg">
-                Open Source & Public Utility
-              </h3>
               <p className="text-text-secondary text-body-sm leading-relaxed">
                 We believe financial management should not be locked behind
                 payment gateways or sold to advertisers. BudgetSetu was built to
@@ -102,12 +104,14 @@ export const Pricing: React.FC = () => {
             </div>
 
             <div className="card backdrop-blur-md bg-bg-surface/40 border-border/80 p-8 space-y-4 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg transition-all duration-300">
-              <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm">
-                <Shield className="h-5 w-5" />
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-md bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <h3 className="font-display text-text-primary text-heading-lg">
+                  Strict Privacy Principles
+                </h3>
               </div>
-              <h3 className="font-display text-text-primary text-heading-lg">
-                Strict Privacy Principles
-              </h3>
               <p className="text-text-secondary text-body-sm leading-relaxed">
                 Because BudgetSetu is free and does not monetize, we have no
                 incentive to mine or sell your statement data. All data is

@@ -184,10 +184,12 @@ export const Privacy: React.FC = () => {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="card space-y-2.5">
-                <Lock className="h-5 w-5 text-brand" />
-                <h3 className="text-text-primary text-body-md font-semibold">
-                  Data Security
-                </h3>
+                <div className="flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-brand shrink-0" />
+                  <h3 className="text-text-primary text-body-md font-semibold">
+                    Data Security
+                  </h3>
+                </div>
                 <p className="text-body-sm leading-relaxed">
                   All database data is encrypted at rest using industry-standard
                   AES-256 encryption. Access to your account, financial
@@ -200,10 +202,12 @@ export const Privacy: React.FC = () => {
               </div>
 
               <div className="card space-y-2.5">
-                <Trash2 className="h-5 w-5 text-brand" />
-                <h3 className="text-text-primary text-body-md font-semibold">
-                  File Encryption & Deletion
-                </h3>
+                <div className="flex items-center gap-2">
+                  <Trash2 className="h-5 w-5 text-brand shrink-0" />
+                  <h3 className="text-text-primary text-body-md font-semibold">
+                    File Encryption &amp; Deletion
+                  </h3>
+                </div>
                 <p className="text-body-sm leading-relaxed">
                   Uploaded statement files are encrypted immediately upon
                   receipt using a key that is not accessible to our system
@@ -338,24 +342,24 @@ export const Privacy: React.FC = () => {
               exercise your rights in the event of your death or incapacity, and
               the right to grievance redressal as described below.
             </p>
-            <div className="card border-destructive/20 bg-destructive-bg/10 p-5 flex items-start gap-4">
-              <Trash2 className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
-              <div className="space-y-1">
+            <div className="card border-destructive/20 bg-destructive-bg/10 p-5 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-destructive shrink-0" />
                 <h4 className="text-destructive text-body-md font-semibold">
                   Account Deletion
                 </h4>
-                <p className="text-body-sm text-text-secondary leading-relaxed">
-                  Deleting your account permanently removes your transactions,
-                  accounts, budgets, goals, and login credentials from our
-                  active systems. Since raw statement files are not retained
-                  after processing, no separate copy of your uploaded files
-                  persists. Please note that routine, encrypted backups of our
-                  database (retained for a limited period for disaster recovery)
-                  may take a short time to fully purge after deletion; these
-                  backups are not accessed for any purpose other than restoring
-                  service in the event of a failure.
-                </p>
               </div>
+              <p className="text-body-sm text-text-secondary leading-relaxed">
+                Deleting your account permanently removes your transactions,
+                accounts, budgets, goals, and login credentials from our
+                active systems. Since raw statement files are not retained
+                after processing, no separate copy of your uploaded files
+                persists. Please note that routine, encrypted backups of our
+                database (retained for a limited period for disaster recovery)
+                may take a short time to fully purge after deletion; these
+                backups are not accessed for any purpose other than restoring
+                service in the event of a failure.
+              </p>
             </div>
             <p>
               You can initiate self-service deletion from the{" "}

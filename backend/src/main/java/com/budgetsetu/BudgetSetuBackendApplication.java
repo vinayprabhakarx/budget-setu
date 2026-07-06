@@ -6,11 +6,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.TimeZone;
+import jakarta.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
 public class BudgetSetuBackendApplication {
+
+	@PostConstruct
+	public void init() {
+		// Strictly enforce Indian Standard Time globally across the entire app
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
+	}
 
 	static {
 		loadEnv();

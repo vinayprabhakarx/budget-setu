@@ -216,8 +216,6 @@ public class AuthService {
         user.setEmailVerified(true);
         userRepository.save(user);
 
-        emailVerificationRepository.delete(verification);
-
         try {
             redisTemplate.delete("rate-limit:resend-verification:" + email.toLowerCase().trim());
         } catch (Exception e) {

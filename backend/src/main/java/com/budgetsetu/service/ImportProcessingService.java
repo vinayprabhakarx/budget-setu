@@ -58,8 +58,9 @@ public class ImportProcessingService {
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userId, null,
                         java.util.List.of()));
+        StatementImport statementImport = null;
         try {
-            StatementImport statementImport = statementImportRepository.findById(importId).orElse(null);
+            statementImport = statementImportRepository.findById(importId).orElse(null);
             if (statementImport == null) {
                 return;
             }
@@ -266,6 +267,15 @@ public class ImportProcessingService {
         } finally {
             progressTracker.clearProgress(importId);
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            
+            // Instantly delete the file from disk, fulfilling the immediate deletion requirement
+            if (statementImport != null && statementImport.getFileUrl() != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(java.nio.file.Path.of(statementImport.getFileUrl()));
+                } catch (Exception ignored) {
+                    log.warn("Failed to delete ephemeral file for import: " + importId);
+                }
+            }
         }
     }
 

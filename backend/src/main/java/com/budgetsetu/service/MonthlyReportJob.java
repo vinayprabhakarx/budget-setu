@@ -28,6 +28,9 @@ public class MonthlyReportJob {
     private final CategoryRepository categoryRepository;
     private final MailService mailService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Scheduled(cron = "0 0 9 1 * ?") // 1st day of every month at 9 AM
     @Transactional
     public void run() {
@@ -100,7 +103,21 @@ public class MonthlyReportJob {
                             netSavings.setScale(2, RoundingMode.HALF_UP).toString(),
                             categorySummary.toString());
 
-                    mailService.sendEmail(user.getEmail(), subject, body);
+                    String htmlBody = com.budgetsetu.email.EmailTemplateBuilder.buildActionEmail(
+                            subject,
+                            "Your Monthly Summary is Here! 📊",
+                            "Here is your financial summary for " + monthName + " " + year + ":\n\n" +
+                            "• <strong>Total Income:</strong> " + income.setScale(2, RoundingMode.HALF_UP).toString() + "\n" +
+                            "• <strong>Total Expenses:</strong> " + expense.setScale(2, RoundingMode.HALF_UP).toString() + "\n" +
+                            "• <strong>Net Savings:</strong> " + netSavings.setScale(2, RoundingMode.HALF_UP).toString() + "\n" +
+                            categorySummary.toString().replace("\n", "<br/>") + "\n\n" +
+                            "Keep tracking your finances to reach your financial goals!",
+                            "View Dashboard",
+                            frontendUrl,
+                            "You received this email because you are subscribed to monthly reports."
+                    );
+
+                    mailService.sendEmail(user.getEmail(), subject, body, htmlBody);
                 } catch (Exception e) {
                     log.error("Failed to generate monthly report for user: {}", user.getEmail(), e);
                 }

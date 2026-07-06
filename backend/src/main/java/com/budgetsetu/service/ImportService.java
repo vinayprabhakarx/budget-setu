@@ -254,17 +254,23 @@ public class ImportService {
         String accountType = discovery.accountType();
 
         final String finalBankName = bankName;
-        return accountRepository
-                .findByUserIdAndBankNameAndAccountNumberAndAccountType(userId, finalBankName, accountNumber,
-                        accountType)
-                .orElseGet(() -> accountRepository.save(Account.builder()
-                        .userId(userId)
-                        .bankName(finalBankName)
-                        .accountNumber(accountNumber)
-                        .accountType(accountType)
-                        .balance(java.math.BigDecimal.ZERO)
-                        .isActive(true)
-                        .build()));
+        java.util.List<Account> existingAccounts = accountRepository.findByUserId(userId);
+        for (Account a : existingAccounts) {
+            if (java.util.Objects.equals(a.getBankName(), finalBankName) 
+                && java.util.Objects.equals(a.getAccountNumber(), accountNumber)
+                && java.util.Objects.equals(a.getAccountType(), accountType)) {
+                return a;
+            }
+        }
+
+        return accountRepository.save(Account.builder()
+                .userId(userId)
+                .bankName(finalBankName)
+                .accountNumber(accountNumber)
+                .accountType(accountType)
+                .balance(java.math.BigDecimal.ZERO)
+                .isActive(true)
+                .build());
     }
 
     private String extractAccountNumber(String text, String sourceName) {
@@ -694,14 +700,33 @@ public class ImportService {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Please upload a non-empty statement file.");
         }
-        if (file.getSize() > 20L * 1024 * 1024) {
-            throw new IllegalArgumentException("This file is too large. Please upload files under 20MB.");
+        if (file.getSize() > 10L * 1024 * 1024) {
+            throw new IllegalArgumentException("This file is too large. Please upload files under 10MB.");
         }
         String contentType = file.getContentType();
+        
+        try {
+            org.apache.tika.Tika tika = new org.apache.tika.Tika();
+            String detectedType = tika.detect(file.getInputStream());
+            
+            // Allow text/plain as CSV/HTML often detect as text/plain. Allow zip as xlsx is a zip and we support zip uploads.
+            boolean allowedDetected = ALLOWED_CONTENT_TYPES.contains(detectedType) 
+                || detectedType.equals("text/plain") 
+                || detectedType.equals("application/zip")
+                || detectedType.equals("application/x-tika-ooxml")
+                || detectedType.equals("application/x-tika-msoffice");
+                
+            if (!allowedDetected) {
+                throw new IllegalArgumentException("Invalid file content type detected: " + detectedType + ". Only PDF, CSV, Excel, and HTML are supported.");
+            }
+        } catch (java.io.IOException e) {
+            throw new IllegalArgumentException("Could not read file for validation.");
+        }
+
         String fileName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
         boolean allowedExtension = fileName.endsWith(".pdf") || fileName.endsWith(".csv")
                 || fileName.endsWith(".xls") || fileName.endsWith(".xlsx")
-                || fileName.endsWith(".html") || fileName.endsWith(".htm");
+                || fileName.endsWith(".html") || fileName.endsWith(".htm") || fileName.endsWith(".zip");
         if ((contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) && !allowedExtension) {
             throw new IllegalArgumentException("Only PDF, CSV, Excel, and HTML files are supported.");
         }

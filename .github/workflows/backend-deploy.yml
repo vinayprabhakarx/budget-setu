@@ -104,12 +104,7 @@ jobs:
               echo "❌ ERROR: /home/ubuntu/budget-setu/.env.production is missing on server! Cannot launch container securely."
               exit 1
             fi
-            
-            # Stop and remove old container
-            echo "Stopping old container before image pull..."
-            docker stop budget-setu budgetsetu-backend || true
-            docker rm budget-setu budgetsetu-backend || true
-            docker system prune -af || true
+
             
             # Configure Docker daemon for 1GB RAM Oracle Free Tier
             if [ ! -f /etc/docker/daemon.json ] || ! grep -q "max-concurrent-downloads" /etc/docker/daemon.json 2>/dev/null; then

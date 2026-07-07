@@ -208,76 +208,80 @@
    ============================================================= */
 [data-theme="dark"] {
   /* ── Backgrounds ───────────────────────────────────────── */
-  --color-bg-base:         #0A0A0A;   /* Deep carbon black — app background */
-  --color-bg-surface:      #141414;   /* Very dark grey — cards, panels */
-  --color-bg-elevated:     #1F1F1F;   /* Slightly lighter — modals, dropdowns */
-  --color-bg-subtle:       #292929;   /* Hover states, dividers */
-  --color-bg-muted:        #333333;   /* Disabled states, skeletons */
-  --color-bg-inverse:      #F0EEEC;   /* Off-white — tooltips on dark bg */
-  --color-bg-overlay:      rgba(0, 0, 0, 0.75);     /* Modal backdrop */
+  --color-bg-base:         #000000;   /* Pure black */
+  --color-bg-surface:      #0A0A0B;   /* Very dark grey for cards */
+  --color-bg-elevated:     #121214;   /* Dropdowns/modals */
+  --color-bg-subtle:       #18181B;   /* Zinc-900 for hover */
+  --color-bg-muted:        #27272A;   /* Zinc-800 */
+  --color-bg-inverse:      #FAFAFA;   /* Zinc-50 */
+  --color-bg-overlay:      rgba(0, 0, 0, 0.8);
 
   /* ── Text ──────────────────────────────────────────────── */
-  --color-text-primary:    #EDEAE7;   /* Off-white — headings, body */
-  --color-text-secondary:  #A09A94;   /* Warm grey — labels, subtext */
-  --color-text-muted:      #6B6560;   /* Darker grey — placeholders */
-  --color-text-disabled:   #4A4642;   /* Darker still — disabled */
-  --color-text-inverse:    #141312;   /* Near-black — on light surfaces */
-  --color-text-link:       #6BBAA8;   /* Light teal — links in dark mode */
+  --color-text-primary:    #FFFFFF;   /* Pure white */
+  --color-text-secondary:  #A1A1AA;   /* Zinc-400 */
+  --color-text-muted:      #71717A;   /* Zinc-500 */
+  --color-text-disabled:   #52525B;   /* Zinc-600 */
+  --color-text-inverse:    #000000;   /* Pure black */
+  --color-text-link:       #60A5FA;   /* Blue-400 */
 
   /* ── Brand (Primary Interaction) ──────────────────────── */
-  --color-brand:           #F5F5F5;   /* Very Light Grey / Off White */
-  --color-brand-hover:     #FFFFFF;   /* Pure White */
-  --color-brand-active:    #E0E0E0;   /* Light Grey */
-  --color-brand-subtle:    #2A2A2A;   /* Dark Grey */
-  --color-brand-muted:     #404040;   /* Medium Grey */
-  --color-brand-text:      #1A1A1A;   /* Dark Text */
+  --color-brand:           #FFFFFF;   /* White for primary buttons */
+  --color-brand-hover:     #E4E4E7;   /* Zinc-200 */
+  --color-brand-active:    #D4D4D8;   /* Zinc-300 */
+  --color-brand-subtle:    #27272A;   /* Zinc-800 */
+  --color-brand-muted:     #3F3F46;   /* Zinc-700 */
+  --color-brand-text:      #000000;   /* Black text on primary */
 
   /* ── Semantic: Income ──────────────────────────────────── */
-  --color-income:          #5AAF7A;   /* Muted light green */
-  --color-income-bg:       #162A1E;   /* Dark green bg */
-  --color-income-text:     #7DC89A;   /* Lighter green text */
+  --color-income:          #10B981;   /* Emerald-500 */
+  --color-income-bg:       rgba(16, 185, 129, 0.1);
+  --color-income-text:     #34D399;   /* Emerald-400 */
 
   /* ── Semantic: Expense ─────────────────────────────────── */
-  --color-expense:         #C47070;   /* Muted light red */
-  --color-expense-bg:      #2A1818;   /* Dark red bg */
-  --color-expense-text:    #D88F8F;   /* Lighter red text */
+  --color-expense:         #F43F5E;   /* Rose-500 */
+  --color-expense-bg:      rgba(244, 63, 94, 0.1);
+  --color-expense-text:    #FB7185;   /* Rose-400 */
 
   /* ── Semantic: Warning ─────────────────────────────────── */
-  --color-warning:         #C4A050;   /* Muted light amber */
-  --color-warning-bg:      #2A2210;   /* Dark amber bg */
-  --color-warning-text:    #D4B870;
+  --color-warning:         #F59E0B;   /* Amber-500 */
+  --color-warning-bg:      rgba(245, 158, 11, 0.1);
+  --color-warning-text:    #FBBF24;   /* Amber-400 */
 
   /* ── Semantic: Success ─────────────────────────────────── */
-  --color-success:         #5AAF7A;
-  --color-success-bg:      #162A1E;
-  --color-success-text:    #7DC89A;
+  --color-success:         #10B981;
+  --color-success-bg:      rgba(16, 185, 129, 0.1);
+  --color-success-text:    #34D399;
 
   /* ── Semantic: Info ────────────────────────────────────── */
-  --color-info:            #6A9AC4;   /* Muted light blue */
-  --color-info-bg:         #141E2A;
-  --color-info-text:       #88B4D8;
+  --color-info:            #3B82F6;   /* Blue-500 */
+  --color-info-bg:         rgba(59, 130, 246, 0.1);
+  --color-info-text:       #60A5FA;   /* Blue-400 */
 
   /* ── Semantic: Destructive ─────────────────────────────── */
-  --color-destructive:     #C47070;
-  --color-destructive-bg:  #2A1818;
-  --color-destructive-text:#D88F8F;
+  --color-destructive:     #F43F5E;
+  --color-destructive-bg:  rgba(244, 63, 94, 0.1);
+  --color-destructive-text:#FB7185;
 
   /* ── Borders ───────────────────────────────────────────── */
-  --color-border:          #2E2C29;   /* Default border — subtle on dark */
-  --color-border-strong:   #403D39;   /* Stronger border — focused inputs */
-  --color-border-muted:    #242220;   /* Very subtle — table row dividers */
-  --color-border-inverse:  #D4D0CB;   /* Border on light surfaces */
+  --color-border:          #27272A;   /* Zinc-800 */
+  --color-border-strong:   #3F3F46;   /* Zinc-700 */
+  --color-border-muted:    #18181B;   /* Zinc-900 */
+  --color-border-inverse:  #E4E4E7;   /* Zinc-200 */
 
   /* ── Shadows ───────────────────────────────────────────── */
-  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow-md:  0 3px 10px rgba(0, 0, 0, 0.35);
-  --shadow-lg:  0 6px 20px rgba(0, 0, 0, 0.45);
-  --shadow-xl:  0 12px 40px rgba(0, 0, 0, 0.55);
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.5);
 
   /* ── Focus Ring ─────────────────────────────────────────── */
-  --focus-ring: 0 0 0 3px var(--color-brand-subtle);
+  --focus-ring: 0 0 0 2px var(--color-bg-base), 0 0 0 4px var(--color-brand-muted);
 
   /* ── Scrollbar ──────────────────────────────────────────── */
-  --color-scrollbar-track:  var(--color-bg-surface);
+  --color-scrollbar-track:  var(--color-bg-base);
   --color-scrollbar-thumb:  var(--color-bg-muted);
+  
+  /* ── Ambient Glow (Vibrant Blue/Purple instead of muddy) ── */
+  --glow-ambient-rgb:       59 130 246; /* Blue-500 */
+  --glow-ambient-opacity:   0.08;
 }

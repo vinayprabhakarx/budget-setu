@@ -102,11 +102,12 @@ public class ImportProcessingService {
                 List<ParsedRow> parsedRows = new ArrayList<>();
                 List<ImportLog.ImportEvent> events = new ArrayList<>();
 
+                int fallbackYear = extractFallbackYear(statementImport.getFileName());
                 int total = rawRows.size();
                 int processed = 0;
                 for (Map<String, String> row : rawRows) {
                     ParsedRow parsed = parseRow(row, account.getId(), statementImport.getUserId(), merchantRules,
-                            availableCategories, uncategorized);
+                            availableCategories, uncategorized, fallbackYear);
                     parsedRows.add(parsed);
                     candidateFingerprints.add(parsed.fingerprint());
                     processed++;
@@ -284,10 +285,11 @@ public class ImportProcessingService {
             UUID userId,
             List<MerchantRule> merchantRules,
             List<Category> categories,
-            Category uncategorized) {
+            Category uncategorized,
+            int fallbackYear) {
         try {
             String rawRow = row.getOrDefault("raw_row", row.toString());
-            LocalDate transactionDate = parseDate(row);
+            LocalDate transactionDate = parseDate(row, fallbackYear);
             AmountInfo amountInfo = parseAmount(row);
 
             String explicitType = firstNonBlank(row, "transaction_type", "type", "dr_cr", "drcr", "pay_collect");
@@ -472,7 +474,23 @@ public class ImportProcessingService {
                         }));
     }
 
-    private LocalDate parseDate(Map<String, String> row) {
+    private int extractFallbackYear(String fileName) {
+        if (fileName == null) {
+            return LocalDate.now().getYear();
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(20\\d{2})").matcher(fileName);
+        if (m.find()) {
+            try {
+                int year = Integer.parseInt(m.group(1));
+                if (year <= LocalDate.now().getYear() + 1 && year > 2000) {
+                    return year;
+                }
+            } catch (Exception ignored) {}
+        }
+        return LocalDate.now().getYear();
+    }
+
+    private LocalDate parseDate(Map<String, String> row, int fallbackYear) {
         String rawDate = firstNonBlank(row, "date", "transaction_date", "txn_date", "value_date");
         if (rawDate == null) {
             throw new IllegalArgumentException("Missing transaction date.");
@@ -487,7 +505,12 @@ public class ImportProcessingService {
                 DateTimeFormatter.ofPattern("dd-MM-yyyy"),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy"),
                 DateTimeFormatter.ofPattern("d/M/uuuu"),
-                DateTimeFormatter.ofPattern("d-M-uuuu"));
+                DateTimeFormatter.ofPattern("d-M-uuuu"),
+                DateTimeFormatter.ofPattern("dd/MM/yy"),
+                DateTimeFormatter.ofPattern("dd-MM-yy"),
+                DateTimeFormatter.ofPattern("dd.MM.yy"),
+                DateTimeFormatter.ofPattern("d/M/yy"),
+                DateTimeFormatter.ofPattern("d-M-yy"));
         for (DateTimeFormatter formatter : formatters) {
             try {
                 return LocalDate.parse(cleanedDate, formatter);
@@ -502,7 +525,13 @@ public class ImportProcessingService {
                 "dd MMM yyyy",
                 "d MMM yyyy",
                 "dd-MMM-yyyy",
-                "d-MMM-yyyy");
+                "d-MMM-yyyy",
+                "dd MMM, yy",
+                "d MMM, yy",
+                "dd MMM yy",
+                "d MMM yy",
+                "dd-MMM-yy",
+                "d-MMM-yy");
         for (String pattern : monthYearPatterns) {
             try {
                 DateTimeFormatter fmt = new java.time.format.DateTimeFormatterBuilder()
@@ -515,13 +544,13 @@ public class ImportProcessingService {
         }
 
         // 3. Try monthly names without year formatters (case-insensitive), defaulting
-        // to current year (2026)
+        // to extracted fallback year
         List<String> monthOnlyPatterns = List.of(
                 "dd MMM",
                 "d MMM",
                 "dd-MMM",
                 "d-MMM");
-        int defaultYear = LocalDate.now().getYear();
+        int defaultYear = fallbackYear;
         for (String pattern : monthOnlyPatterns) {
             try {
                 DateTimeFormatter fmt = new java.time.format.DateTimeFormatterBuilder()

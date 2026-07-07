@@ -544,21 +544,50 @@ public class ImportProcessingService {
         }
 
         // 3. Try monthly names without year formatters (case-insensitive), defaulting
-        // to extracted fallback year
+        // to extracted fallback year or bounding it by the statement date range
         List<String> monthOnlyPatterns = List.of(
                 "dd MMM",
                 "d MMM",
                 "dd-MMM",
                 "d-MMM");
-        int defaultYear = fallbackYear;
+        
+        LocalDate statementStart = null;
+        LocalDate statementEnd = null;
+        try {
+            if (row.containsKey("statement_start_date") && row.containsKey("statement_end_date")) {
+                statementStart = LocalDate.parse(row.get("statement_start_date"));
+                statementEnd = LocalDate.parse(row.get("statement_end_date"));
+            }
+        } catch (Exception ignored) {}
+
         for (String pattern : monthOnlyPatterns) {
             try {
                 DateTimeFormatter fmt = new java.time.format.DateTimeFormatterBuilder()
                         .parseCaseInsensitive()
                         .appendPattern(pattern)
-                        .parseDefaulting(java.time.temporal.ChronoField.YEAR, defaultYear)
                         .toFormatter(Locale.ENGLISH);
-                return LocalDate.parse(cleanedDate, fmt);
+                
+                // Parse it just to get Month and Day
+                java.time.temporal.TemporalAccessor parsedAccessor = fmt.parse(cleanedDate);
+                int month = parsedAccessor.get(java.time.temporal.ChronoField.MONTH_OF_YEAR);
+                int day = parsedAccessor.get(java.time.temporal.ChronoField.DAY_OF_MONTH);
+                
+                if (statementStart != null && statementEnd != null) {
+                    for (int year = statementStart.getYear(); year <= statementEnd.getYear(); year++) {
+                        try {
+                            LocalDate testDate = LocalDate.of(year, month, day);
+                            if ((testDate.isEqual(statementStart) || testDate.isAfter(statementStart)) && 
+                                (testDate.isEqual(statementEnd) || testDate.isBefore(statementEnd))) {
+                                return testDate;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+                
+                // Fallback to default year if range logic fails or isn't available
+                try {
+                    return LocalDate.of(fallbackYear, month, day);
+                } catch (Exception ignored) {}
             } catch (DateTimeParseException ignored) {
             }
         }

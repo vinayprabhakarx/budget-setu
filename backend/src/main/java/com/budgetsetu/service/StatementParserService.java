@@ -43,8 +43,8 @@ public class StatementParserService {
         String extractedText = "";
         boolean needsExtraction = bankKey == null || bankKey.isBlank() || bankKey.equalsIgnoreCase("AUTO");
 
-        if (needsExtraction) {
-            if (lowerSource.contains("pdf") || lowerFileName.endsWith(".pdf")) {
+        // Always extract text to find the statement year
+        if (lowerSource.contains("pdf") || lowerFileName.endsWith(".pdf")) {
                 try (PDDocument document = password == null || password.isEmpty() ? Loader.loadPDF(fileBytes)
                         : Loader.loadPDF(fileBytes, password)) {
                     extractedText = new PDFTextStripper().getText(document);
@@ -78,6 +78,11 @@ public class StatementParserService {
             } else {
                 extractedText = new String(fileBytes, StandardCharsets.UTF_8);
             }
+
+        java.time.LocalDate[] dateRange = com.budgetsetu.parser.ParserUtil.extractDateRangeFromHeader(extractedText);
+        String statementYear = null;
+        if (dateRange != null && dateRange[0].getYear() == dateRange[1].getYear()) {
+            statementYear = String.valueOf(dateRange[0].getYear());
         }
 
         BankStatementParser specificParser = null;
@@ -94,17 +99,20 @@ public class StatementParserService {
                 List<Map<String, String>> result = specificParser.parse(new ByteArrayInputStream(fileBytes), fileName,
                         password);
 
+                if (result != null && !result.isEmpty()) {
+                    injectStatementYear(result, statementYear);
+                    injectDateRange(result, dateRange);
+                    return result;
+                }
+                
                 // If a specific bank was chosen, return exactly what it produced (no fallback
                 // to generic)
                 if (!isAutoMode) {
+                    injectStatementYear(result, statementYear);
+                    injectDateRange(result, dateRange);
                     return result;
                 }
 
-                // In AUTO mode, only return if we actually found transactions, otherwise fall
-                // back to generic
-                if (result != null && !result.isEmpty()) {
-                    return result;
-                }
             } catch (Exception ex) {
                 if (!isAutoMode) {
                     throw new RuntimeException("Explicitly selected parser failed to process file", ex);
@@ -114,20 +122,41 @@ public class StatementParserService {
         }
 
         // Generic fallback
+        List<Map<String, String>> genericResult = null;
         if (lowerSource.contains("pdf") || lowerFileName.endsWith(".pdf")) {
-            return pdfParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
+            genericResult = pdfParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
+        } else if (lowerSource.contains("xls") || lowerFileName.endsWith(".xls") || lowerFileName.endsWith(".xlsx")) {
+            genericResult = excelParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
+        } else if (lowerSource.contains("html") || lowerFileName.endsWith(".html") || lowerFileName.endsWith(".htm")) {
+            genericResult = htmlParser.parse(new ByteArrayInputStream(fileBytes), fileName);
+        } else if (lowerSource.contains("csv") || lowerFileName.endsWith(".csv")) {
+            genericResult = csvParser.parse(new ByteArrayInputStream(fileBytes), fileName);
         }
-        if (lowerSource.contains("xls") || lowerFileName.endsWith(".xls") || lowerFileName.endsWith(".xlsx")) {
-            return excelParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
-        }
-        if (lowerSource.contains("html") || lowerFileName.endsWith(".html") || lowerFileName.endsWith(".htm")) {
-            return htmlParser.parse(new ByteArrayInputStream(fileBytes), fileName);
-        }
-        if (lowerSource.contains("csv") || lowerFileName.endsWith(".csv")) {
-            return csvParser.parse(new ByteArrayInputStream(fileBytes), fileName);
+
+        if (genericResult != null) {
+            injectStatementYear(genericResult, statementYear);
+            injectDateRange(genericResult, dateRange);
+            return genericResult;
         }
 
         throw new IllegalArgumentException("Only PDF, CSV, Excel, and HTML files are supported.");
+    }
+
+    private void injectDateRange(List<Map<String, String>> rows, java.time.LocalDate[] dateRange) {
+        if (dateRange != null && rows != null) {
+            for (Map<String, String> row : rows) {
+                row.putIfAbsent("statement_start_date", dateRange[0].toString());
+                row.putIfAbsent("statement_end_date", dateRange[1].toString());
+            }
+        }
+    }
+
+    private void injectStatementYear(List<Map<String, String>> rows, String year) {
+        if (year != null && rows != null) {
+            for (Map<String, String> row : rows) {
+                row.putIfAbsent("statement_year", year);
+            }
+        }
     }
 
     public List<Map<String, String>> parse(InputStream inputStream, String fileName, String source, String password) {

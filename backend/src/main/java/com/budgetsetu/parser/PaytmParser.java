@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class PaytmParser extends BaseBankParser {
 
     private static final Pattern DATE_LEAD = Pattern
-            .compile("^\\s*(\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,]*\\d{2,4})?|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
+            .compile("^\\s*(\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,']*\\d{2,4}(?!:))?|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
     private static final Pattern PAYTM_AMOUNT = Pattern.compile("([+-])\\s*Rs\\.\\s*([\\d,.]+)");
 
     @Override
@@ -30,6 +30,9 @@ public class PaytmParser extends BaseBankParser {
                 continue;
 
             String dateStr = dateMatcher.group(1);
+            if (fullText.contains("Total Money Paid") || fullText.contains("Total Money Received")) {
+                continue;
+            }
             Matcher amtMatcher = PAYTM_AMOUNT.matcher(fullText);
 
             if (amtMatcher.find()) {

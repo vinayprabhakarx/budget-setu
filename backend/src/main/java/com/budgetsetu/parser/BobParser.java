@@ -56,6 +56,9 @@ public class BobParser extends BaseBankParser {
                 txn.put("transaction_type", "DEBIT");
                 txn.put("amount", amount);
                 txn.put("withdrawal_amount", amount);
+                if (wdl.groupCount() >= 5 && wdl.group(5) != null) {
+                    txn.put("value_date", ParserUtil.normalizeDate(wdl.group(5)));
+                }
             } else if (dep.find()) {
                 String amount = dep.group(1).replace(",", "");
                 txn.put("balance", dep.group(2).replace(",", ""));
@@ -63,6 +66,9 @@ public class BobParser extends BaseBankParser {
                 txn.put("transaction_type", "CREDIT");
                 txn.put("amount", amount);
                 txn.put("deposit_amount", amount);
+                if (dep.groupCount() >= 5 && dep.group(5) != null) {
+                    txn.put("value_date", ParserUtil.normalizeDate(dep.group(5)));
+                }
             } else {
                 continue; // Can't parse amount
             }
@@ -117,7 +123,8 @@ public class BobParser extends BaseBankParser {
     public boolean canHandle(String text, String fileName) {
         if (text == null)
             return false;
-        return text.contains("Bank of Baroda") || text.contains("BANK OF BARODA");
+        return text.contains("Bank of Baroda") || text.contains("BANK OF BARODA") || 
+               text.contains("NARRATION DEPOSIT(CR)TRAN DATE CHQ.NO. WITHDRAWAL(DR) BALANCE(INR)VALUE DATE");
     }
 
     @Override

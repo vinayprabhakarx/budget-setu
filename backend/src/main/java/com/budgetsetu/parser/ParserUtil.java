@@ -39,14 +39,16 @@ public class ParserUtil {
                     year += 2000;
                 return String.format("%04d-%02d-%02d", year, month, day);
             }
-            // Try DD MMM YY or DD-MMM-YYYY
-            if (clean.matches("\\d{1,2}[-\\s]+[A-Za-z]{3}[-\\s]+\\d{2,4}")) {
+            // Try DD MMM YY or DD-MMM-YYYY or DD MMMM YYYY
+            if (clean.matches("\\d{1,2}[-\\s,']+[A-Za-z]{3,9}[-\\s,']+\\d{2,4}")) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-                String[] parts = clean.split("[-\\s]+");
+                String[] parts = clean.split("[-\\s,']+");
                 int year = Integer.parseInt(parts[2]);
                 if (year < 100)
                     year += 2000;
-                LocalDate d = LocalDate.parse(parts[0] + " " + parts[1] + " " + year, dtf);
+                String m = parts[1].length() > 3 ? parts[1].substring(0, 3) : parts[1];
+                m = m.substring(0, 1).toUpperCase() + m.substring(1).toLowerCase();
+                LocalDate d = LocalDate.parse(parts[0] + " " + m + " " + year, dtf);
                 return d.toString();
             }
             // Try Month DD, YYYY
@@ -161,6 +163,42 @@ public class ParserUtil {
         if (rawName.contains(" ") && rawName.length() > 4)
             return null;
         return rawName.trim();
+    }
+
+    public static LocalDate[] extractDateRangeFromHeader(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        String header = text.length() > 3000 ? text.substring(0, 3000) : text;
+        
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\b(\\d{1,2}[-/.\\s,]+[a-zA-Z]{3,9}[-/.\\s,']+\\d{2,4}(?!:)|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})\\b").matcher(header);
+        
+        LocalDate minDate = null;
+        LocalDate maxDate = null;
+        
+        while (m.find()) {
+            String dateStr = m.group(1);
+            String normalized = normalizeDate(dateStr);
+            if (normalized != null && normalized.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                try {
+                    LocalDate d = LocalDate.parse(normalized);
+                    // Sanity check: must be between 2000 and next year
+                    if (d.getYear() > 2000 && d.getYear() <= LocalDate.now().getYear() + 1) {
+                        if (minDate == null || d.isBefore(minDate)) {
+                            minDate = d;
+                        }
+                        if (maxDate == null || d.isAfter(maxDate)) {
+                            maxDate = d;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        
+        if (minDate != null && maxDate != null) {
+            return new LocalDate[]{minDate, maxDate};
+        }
+        return null;
     }
 
     public static Map<String, String> emptyTransaction() {

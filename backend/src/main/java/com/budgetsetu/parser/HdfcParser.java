@@ -41,6 +41,7 @@ public class HdfcParser extends BaseBankParser {
 
             Map<String, String> txn = ParserUtil.emptyTransaction();
             txn.put("transaction_date", ParserUtil.normalizeDate(dateStr));
+            txn.put("value_date", ParserUtil.normalizeDate(endMatcher.group(1)));
 
             String debit = endMatcher.group(2);
             String credit = endMatcher.group(3);

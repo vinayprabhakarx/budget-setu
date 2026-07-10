@@ -1,32 +1,22 @@
 import React from 'react';
+import { Skeleton } from '../ui/Skeleton';
+import { CardSkeleton } from './shared/CardSkeleton';
+import { TableSkeleton } from './shared/TableSkeleton';
 
 export const AdminSystemLogsSkeleton: React.FC = () => {
   return (
-    <div className="w-full animate-pulse">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-border bg-bg-subtle/40 text-text-secondary text-body-sm font-semibold">
-              <th className="py-3 px-6"><div className="h-4 bg-bg-muted rounded w-24"></div></th>
-              <th className="py-3 px-6"><div className="h-4 bg-bg-muted rounded w-20"></div></th>
-              <th className="py-3 px-6"><div className="h-4 bg-bg-muted rounded w-32"></div></th>
-              <th className="py-3 px-6"><div className="h-4 bg-bg-muted rounded w-32"></div></th>
-              <th className="py-3 px-6"><div className="h-4 bg-bg-muted rounded w-48"></div></th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...Array(8)].map((_, i) => (
-              <tr key={i} className="border-b border-border">
-                <td className="py-4 px-6"><div className="h-4 bg-bg-muted rounded w-32"></div></td>
-                <td className="py-4 px-6"><div className="h-6 bg-bg-muted rounded-md w-20"></div></td>
-                <td className="py-4 px-6"><div className="h-4 bg-bg-muted rounded w-36"></div></td>
-                <td className="py-4 px-6"><div className="h-4 bg-bg-muted rounded w-36"></div></td>
-                <td className="py-4 px-6"><div className="h-4 bg-bg-muted rounded w-64"></div></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="w-full space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+      <TableSkeleton columns={5} rows={4} />
     </div>
   );
 };

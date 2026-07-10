@@ -20,7 +20,7 @@ export const AccountsSkeleton: React.FC = () => {
             {/* Balance */}
             <div className="flex justify-between items-end mt-4 pt-4 border-t border-border">
               <div className="space-y-1.5 w-full">
-                <Skeleton className="h-3 w-16" />
+                <p className="text-text-muted text-xs">Balance</p>
                 <Skeleton className="h-7 w-32" />
               </div>
               <Skeleton className="h-3 w-24 shrink-0" />

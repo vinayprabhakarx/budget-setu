@@ -312,6 +312,8 @@ export const Login: React.FC = () => {
                               fullName: "",
                             }));
                         }}
+                        id="name"
+                        name="name"
                         autoComplete="name"
                         maxLength={25}
                         className={`input pl-10! ${fieldErrors.fullName ? "input-error" : ""}`}
@@ -351,6 +353,8 @@ export const Login: React.FC = () => {
                         }
                       }}
                       onBlur={handleEmailBlur}
+                      id="email"
+                      name="email"
                       autoComplete="email"
                       maxLength={50}
                       className={`input pl-10! ${fieldErrors.email ? "input-error" : ""}`}
@@ -395,6 +399,8 @@ export const Login: React.FC = () => {
                             }
                           }}
                           onBlur={handlePasswordBlur}
+                          id="password"
+                          name="password"
                           autoComplete={
                             isRegistering ? "new-password" : "current-password"
                           }

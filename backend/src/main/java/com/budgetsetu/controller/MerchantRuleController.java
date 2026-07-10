@@ -40,6 +40,7 @@ public class MerchantRuleController {
     @Data
     public static class MerchantRuleRequest {
         @NotBlank
+        @jakarta.validation.constraints.Size(max = 255)
         private String merchantPattern;
         @NotBlank
         private String categoryId;
@@ -49,6 +50,7 @@ public class MerchantRuleController {
     @Data
     public static class RecategorizeRequest {
         @NotBlank
+        @jakarta.validation.constraints.Size(max = 255)
         private String merchantPattern;
         @NotBlank
         private String categoryId;

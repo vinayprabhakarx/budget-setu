@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -32,6 +34,39 @@ public class GlobalExceptionHandler {
                 .error("BAD_REQUEST")
                 .message(message)
                 .field(field)
+                .timestamp(Instant.now())
+                .requestId(generateRequestId())
+                .build());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
+                .status(400)
+                .error("BAD_REQUEST")
+                .message("Invalid parameter: " + ex.getName())
+                .timestamp(Instant.now())
+                .requestId(generateRequestId())
+                .build());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiErrorResponse.builder()
+                .status(404)
+                .error("NOT_FOUND")
+                .message("The requested resource could not be found.")
+                .timestamp(Instant.now())
+                .requestId(generateRequestId())
+                .build());
+    }
+
+    @ExceptionHandler(org.springframework.data.mongodb.UncategorizedMongoDbException.class)
+    public ResponseEntity<ApiErrorResponse> handleMongoException(org.springframework.data.mongodb.UncategorizedMongoDbException ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
+                .status(400)
+                .error("BAD_REQUEST")
+                .message("Database constraint violated or invalid query payload.")
                 .timestamp(Instant.now())
                 .requestId(generateRequestId())
                 .build());
@@ -86,7 +121,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(413).body(ApiErrorResponse.builder()
                 .status(413)
                 .error("PAYLOAD_TOO_LARGE")
-                .message("This file is too large. Please upload files under 20MB.")
+                .message("This file is too large. Please upload files under 10MB.")
                 .timestamp(Instant.now())
                 .requestId(generateRequestId())
                 .build());

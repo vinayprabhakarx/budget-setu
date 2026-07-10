@@ -136,8 +136,10 @@ public class AdminController {
     @Data
     public static class AdminMerchantRuleRequest {
         @NotBlank
+        @jakarta.validation.constraints.Size(max = 255)
         private String merchantPattern;
         @NotBlank
+        @jakarta.validation.constraints.Size(max = 255)
         private String categoryId;
         private String matchType = "CONTAINS";
     }

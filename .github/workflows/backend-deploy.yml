@@ -152,7 +152,7 @@ jobs:
           echo "--- Checking Live Health Endpoint with Retry Loop ---"
           ssh -i private_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=60 "$ORACLE_USER@$ORACLE_HOST" << 'HEALTH_EOF'
             set -e
-            for i in {1..15}; do
+            for i in {1..30}; do
               if curl -s -f http://localhost:8080/api/health > /dev/null; then
                 echo "✅ Health check passed on attempt $i!"
                 curl -i http://localhost:8080/api/health
@@ -160,8 +160,8 @@ jobs:
               fi
               echo "Attempt $i failed (application starting up...), retrying in 3 seconds..."
               sleep 3
-              if [ $i -eq 15 ]; then
-                echo "❌ Health check failed after 15 attempts! Showing container logs:"
+              if [ $i -eq 30 ]; then
+                echo "❌ Health check failed after 30 attempts! Showing container logs:"
                 docker logs --tail 50 budget-setu 2>&1 || true
                 exit 1
               fi

@@ -29,6 +29,7 @@ export const PasswordResetConfirm: React.FC = () => {
           `/auth/reset-password/magic-link?token=${encodeURIComponent(token)}`
         );
         setVerificationCode(response.data.code);
+        setEmailForResend(response.data.email);
         setStatus('success');
       } catch (err: unknown) {
         const error = err as {
@@ -111,7 +112,7 @@ export const PasswordResetConfirm: React.FC = () => {
             onResend={handleResend}
             resending={resending}
             resendLabel="Resend Reset Email"
-            onGoToFallback={() => navigate('/reset-password')}
+            onGoToFallback={() => navigate(`/reset-password${emailForResend ? `?email=${encodeURIComponent(emailForResend)}` : ''}`)}
             goToFallbackLabel="Go to Reset Page"
           />
 

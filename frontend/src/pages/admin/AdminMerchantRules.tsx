@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Select } from "../../components/shared/Select";
 import { StateDisplay } from "../../components/shared/StateDisplay";
+import { AdminMerchantRulesSkeleton } from "../../components/skeletons/AdminMerchantRulesSkeleton";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { FilterSection } from "../../components/shared/FilterSection";
 import {
@@ -221,9 +222,9 @@ export const AdminMerchantRules: React.FC = () => {
       </FilterSection>
 
       {/* Table Card */}
-      <section className="card p-0 overflow-hidden">
+      <section className={rules.length === 0 && !loading ? "" : "card p-0 overflow-hidden"}>
         {loading ? (
-          <StateDisplay type="loading" title="Loading merchant rules…" />
+          <AdminMerchantRulesSkeleton />
         ) : error ? (
           <StateDisplay
             type="error"

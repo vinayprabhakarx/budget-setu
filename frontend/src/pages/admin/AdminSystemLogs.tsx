@@ -155,26 +155,28 @@ export const AdminSystemLogs: React.FC = () => {
         <section className="card p-0 overflow-hidden min-h-[60vh] lg:min-h-[70vh] flex flex-col">
           {/* AUDIT LOGS */}
           {activeTab === "audit" && (
-            <div className="overflow-auto flex-1">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Admin</TableHead>
-                    <TableHead>Target User</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {auditLogs.length === 0 ? (
+            <div className="overflow-auto flex-1 flex flex-col">
+              {auditLogs.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
+                  <Shield className="h-12 w-12 text-text-muted mb-4 opacity-50" />
+                  <p className="text-text-primary font-medium text-lg mb-1">No Audit Logs Found</p>
+                  <p className="text-text-secondary text-body-sm max-w-sm">
+                    There are currently no recorded administrative actions or security events in the system.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="py-8 text-center text-text-secondary">
-                        No audit logs found.
-                      </TableCell>
+                      <TableHead>Timestamp</TableHead>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Admin</TableHead>
+                      <TableHead>Target User</TableHead>
+                      <TableHead>Details</TableHead>
                     </TableRow>
-                  ) : (
-                    auditLogs.map((log) => (
+                  </TableHeader>
+                  <TableBody>
+                    {auditLogs.map((log) => (
                       <TableRow key={log.id} className="text-body-md">
                         <TableCell className="whitespace-nowrap text-text-secondary">
                           <div className="flex items-center gap-2">
@@ -204,10 +206,10 @@ export const AdminSystemLogs: React.FC = () => {
                           {log.details}
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </div>
           )}
 
@@ -228,26 +230,28 @@ export const AdminSystemLogs: React.FC = () => {
 
           {/* DATABASE LOGS */}
           {activeTab === "db" && (
-            <div className="overflow-auto flex-1">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>PID</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>App</TableHead>
-                    <TableHead>State</TableHead>
-                    <TableHead>Query</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dbLogs.length === 0 ? (
+            <div className="overflow-auto flex-1 flex flex-col">
+              {dbLogs.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
+                  <Database className="h-12 w-12 text-text-muted mb-4 opacity-50" />
+                  <p className="text-text-primary font-medium text-lg mb-1">No Active Queries</p>
+                  <p className="text-text-secondary text-body-sm max-w-sm">
+                    There are no running database queries at the moment.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="py-8 text-center text-text-secondary">
-                        No active queries found.
-                      </TableCell>
+                      <TableHead>PID</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>App</TableHead>
+                      <TableHead>State</TableHead>
+                      <TableHead>Query</TableHead>
                     </TableRow>
-                  ) : (
-                    dbLogs.map((log, idx) => (
+                  </TableHeader>
+                  <TableBody>
+                    {dbLogs.map((log, idx) => (
                       <TableRow key={idx} className="text-body-md">
                         <TableCell className="whitespace-nowrap font-medium text-text-primary">
                           {log.pid}
@@ -276,10 +280,10 @@ export const AdminSystemLogs: React.FC = () => {
                           {log.query}
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </div>
           )}
         </section>

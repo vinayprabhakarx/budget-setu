@@ -305,10 +305,15 @@
     box-shadow       var(--duration-fast) var(--ease-standard);
 }
 .input::placeholder  { color: var(--color-text-muted); }
-.input:focus         { border-color: var(--color-brand); box-shadow: var(--focus-ring); }
+.input:focus, .input:focus-visible { 
+  border-color: var(--color-brand); 
+  box-shadow: none !important; 
+  outline: none !important; 
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+}
 .input:disabled      { background-color: var(--color-bg-muted); color: var(--color-text-disabled); }
 .input.input-error   { border-color: var(--color-destructive); }
-.input.input-error:focus { box-shadow: 0 0 0 0.1875rem var(--color-destructive-bg); }
 
 select.input {
   appearance: none;

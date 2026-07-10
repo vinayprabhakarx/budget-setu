@@ -417,16 +417,15 @@ public class AuthService {
     public void requestPasswordReset(String email) {
         String normalizedEmail = email.toLowerCase().trim();
 
-        // Check if user exists. If not, throw an exception so the user gets clear
-        // feedback
-        if (!userRepository.existsByEmail(normalizedEmail)) {
-            log.info("Password reset requested for unregistered email: {}", normalizedEmail);
-            throw new IllegalArgumentException("Email address is not registered.");
-        }
-
         // Rate limiting check: max 3 requests in 24 hours per email
         rateLimitService.checkRateLimit("email-sends:" + normalizedEmail, 3, 86400,
                 "Too many requests. Please try again after 24 hours.");
+
+        // Check if user exists. If not, log and return silently to prevent email enumeration
+        if (!userRepository.existsByEmail(normalizedEmail)) {
+            log.info("Password reset requested for unregistered email: {}", normalizedEmail);
+            return;
+        }
 
         // Delete old password reset record for this email and flush
         passwordResetRepository.deleteByEmail(normalizedEmail);

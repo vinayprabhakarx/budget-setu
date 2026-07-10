@@ -34,7 +34,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String ip = getClientIP(request);
 
         Bucket bucket;
-        if (path.startsWith("/api/auth/magic-link") && "GET".equalsIgnoreCase(request.getMethod())) {
+        if ((path.startsWith("/api/auth/reset-password/magic-link") || path.startsWith("/api/auth/verify-email")) && "GET".equalsIgnoreCase(request.getMethod())) {
             // Opening a magic link is just a DB read, allow higher limit so users don't get blocked by refreshing
             bucket = standardBuckets.computeIfAbsent(ip, this::createStandardBucket);
         } else if (path.startsWith("/api/auth/")) {
@@ -57,8 +57,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private Bucket createAuthBucket(String ip) {
-        // 5 requests per minute
-        Bandwidth limit = Bandwidth.builder().capacity(5).refillIntervally(5, Duration.ofMinutes(1)).build();
+        // 15 requests per minute
+        Bandwidth limit = Bandwidth.builder().capacity(15).refillIntervally(15, Duration.ofMinutes(1)).build();
         return Bucket.builder().addLimit(limit).build();
     }
 

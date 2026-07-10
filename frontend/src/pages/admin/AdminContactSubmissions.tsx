@@ -6,13 +6,13 @@ import {
   Mail,
   CheckCircle,
   Trash2,
-  RefreshCw,
   Eye,
   X,
   Copy,
   Check,
 } from "lucide-react";
 import { StateDisplay } from "../../components/shared/StateDisplay";
+import { AdminContactSubmissionsSkeleton } from "../../components/skeletons/AdminContactSubmissionsSkeleton";
 import { PageHeader } from "../../components/shared/PageHeader";
 import {
   Table,
@@ -38,7 +38,8 @@ export const AdminContactSubmissions: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
-  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<ContactSubmission | null>(null);
   const [copied, setCopied] = useState(false);
   const { showToast } = useToast();
 
@@ -63,15 +64,23 @@ export const AdminContactSubmissions: React.FC = () => {
     return () => clearTimeout(timer);
   }, [loadSubmissions]);
 
-  const handleToggleRead = async (id: string, currentRead: boolean, e?: React.MouseEvent) => {
+  const handleToggleRead = async (
+    id: string,
+    currentRead: boolean,
+    e?: React.MouseEvent,
+  ) => {
     if (e) e.stopPropagation();
     try {
-      await api.patch(`/admin/contact-submissions/${id}/read`, { read: !currentRead });
+      await api.patch(`/admin/contact-submissions/${id}/read`, {
+        read: !currentRead,
+      });
       setSubmissions((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, read: !currentRead } : s))
+        prev.map((s) => (s.id === id ? { ...s, read: !currentRead } : s)),
       );
       if (selectedSubmission?.id === id) {
-        setSelectedSubmission((prev) => (prev ? { ...prev, read: !currentRead } : null));
+        setSelectedSubmission((prev) =>
+          prev ? { ...prev, read: !currentRead } : null,
+        );
       }
       showToast("success", `Marked as ${!currentRead ? "read" : "unread"}.`);
     } catch {
@@ -81,7 +90,12 @@ export const AdminContactSubmissions: React.FC = () => {
 
   const handleDelete = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!window.confirm("Are you sure you want to permanently delete this submission?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to permanently delete this submission?",
+      )
+    )
+      return;
     try {
       await api.delete(`/admin/contact-submissions/${id}`);
       setSubmissions((prev) => prev.filter((s) => s.id !== id));
@@ -112,7 +126,10 @@ export const AdminContactSubmissions: React.FC = () => {
 
   const tabs = [
     { key: "all" as const, label: `All (${submissions.length})` },
-    { key: "unread" as const, label: unreadCount > 0 ? `Unread (${unreadCount})` : "Unread" },
+    {
+      key: "unread" as const,
+      label: unreadCount > 0 ? `Unread (${unreadCount})` : "Unread",
+    },
     { key: "read" as const, label: `Read (${readCount})` },
   ];
 
@@ -157,18 +174,28 @@ export const AdminContactSubmissions: React.FC = () => {
 
       {/* Main Table Content matching AdminUserManagement exactly */}
       {!error && (
-        <section className={filteredSubmissions.length === 0 && !loading ? "" : "card p-0 overflow-hidden"}>
+        <section
+          className={
+            filteredSubmissions.length === 0 && !loading
+              ? ""
+              : "card p-0 overflow-hidden"
+          }
+        >
           {loading ? (
-            <div className="p-12 text-center text-text-secondary flex flex-col items-center justify-center gap-3">
-              <RefreshCw className="h-8 w-8 animate-spin text-brand" />
-              <span className="text-body-sm font-medium">Loading contact form submissions...</span>
-            </div>
+            <AdminContactSubmissionsSkeleton />
           ) : filteredSubmissions.length === 0 ? (
             <StateDisplay
               type="empty"
               title="No contact submissions yet"
               className="py-12"
-              action={filter !== "all" ? { label: "Show All Submissions", onClick: () => setFilter("all") } : undefined}
+              action={
+                filter !== "all"
+                  ? {
+                      label: "Show All Submissions",
+                      onClick: () => setFilter("all"),
+                    }
+                  : undefined
+              }
             />
           ) : (
             <Table>
@@ -208,9 +235,7 @@ export const AdminContactSubmissions: React.FC = () => {
 
                     {/* Topic */}
                     <TableCell className="whitespace-nowrap">
-                      <span className="badge badge-info">
-                        {sub.topic}
-                      </span>
+                      <span className="badge badge-info">{sub.topic}</span>
                     </TableCell>
 
                     {/* Message Preview */}
@@ -238,7 +263,10 @@ export const AdminContactSubmissions: React.FC = () => {
 
                     {/* Actions */}
                     <TableCell className="whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="flex items-center justify-end gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -280,11 +308,11 @@ export const AdminContactSubmissions: React.FC = () => {
 
       {/* Modal for Viewing Full Message Details */}
       {selectedSubmission && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setSelectedSubmission(null)}
         >
-          <div 
+          <div
             className="bg-bg-surface border border-border rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -316,7 +344,9 @@ export const AdminContactSubmissions: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between gap-3 text-body-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-text-tertiary">Topic:</span>
-                  <span className="badge badge-neutral font-medium">{selectedSubmission.topic}</span>
+                  <span className="badge badge-neutral font-medium">
+                    {selectedSubmission.topic}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-text-tertiary text-caption">
                   <Clock className="h-3.5 w-3.5" />
@@ -331,10 +361,16 @@ export const AdminContactSubmissions: React.FC = () => {
                     Message Content
                   </label>
                   <button
-                    onClick={() => handleCopyMessage(selectedSubmission.message)}
+                    onClick={() =>
+                      handleCopyMessage(selectedSubmission.message)
+                    }
                     className="inline-flex items-center gap-1 text-caption text-brand hover:underline font-medium"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5 text-success" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                     {copied ? "Copied!" : "Copy text"}
                   </button>
                 </div>
@@ -348,11 +384,22 @@ export const AdminContactSubmissions: React.FC = () => {
             <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-bg-subtle/30">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleToggleRead(selectedSubmission.id, selectedSubmission.read)}
+                  onClick={() =>
+                    handleToggleRead(
+                      selectedSubmission.id,
+                      selectedSubmission.read,
+                    )
+                  }
                   className="btn btn-secondary btn-sm flex items-center gap-1.5"
                 >
-                  <CheckCircle className={`h-4 w-4 ${selectedSubmission.read ? "text-text-tertiary" : "text-brand"}`} />
-                  <span>{selectedSubmission.read ? "Mark as Unread" : "Mark as Read"}</span>
+                  <CheckCircle
+                    className={`h-4 w-4 ${selectedSubmission.read ? "text-text-tertiary" : "text-brand"}`}
+                  />
+                  <span>
+                    {selectedSubmission.read
+                      ? "Mark as Unread"
+                      : "Mark as Read"}
+                  </span>
                 </button>
                 <button
                   onClick={() => handleDelete(selectedSubmission.id)}

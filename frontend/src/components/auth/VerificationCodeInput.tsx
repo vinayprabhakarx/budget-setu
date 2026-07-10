@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
-import { CheckCircle } from 'lucide-react';
 
 interface VerificationCodeInputProps {
   id: string;
@@ -134,13 +133,7 @@ export const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({
             />
           ))}
         </div>
-        
-        {isVerified && (
-          <div className="absolute -right-2 top-1/2 -translate-y-1/2 text-success translate-x-full">
-            <CheckCircle className="h-6 w-6" />
-          </div>
-        )}
-      </div>
+        </div>
       {error && !isVerified && (
         <p className="text-destructive text-body-sm mt-2 text-center">
           {error}

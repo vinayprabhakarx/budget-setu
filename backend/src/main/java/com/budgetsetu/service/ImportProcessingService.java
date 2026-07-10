@@ -363,8 +363,15 @@ public class ImportProcessingService {
             }
 
             String paymentMode = firstNonBlank(row, "mode", "payment_mode");
-            if (paymentMode == null || paymentMode.isBlank()) {
-                paymentMode = "OTHER";
+            if (paymentMode == null || paymentMode.isBlank() || "OTHER".equalsIgnoreCase(paymentMode)) {
+                String modeTarget = (rawParticulars != null ? rawParticulars : "").toUpperCase(Locale.ROOT);
+                if (modeTarget.contains("UPI")) paymentMode = "UPI";
+                else if (modeTarget.contains("NEFT")) paymentMode = "NEFT";
+                else if (modeTarget.contains("IMPS")) paymentMode = "IMPS";
+                else if (modeTarget.contains("RTGS")) paymentMode = "RTGS";
+                else if (modeTarget.contains("ATM") || modeTarget.contains("CASH")) paymentMode = "CASH";
+                else if (modeTarget.contains("POS") || modeTarget.contains("SWIPE")) paymentMode = "POS";
+                else paymentMode = "OTHER";
             }
             if (paymentMode.length() > 30) {
                 paymentMode = paymentMode.substring(0, 30);

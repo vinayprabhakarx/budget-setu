@@ -12,7 +12,7 @@ setup("authenticate", async ({ page }) => {
   const testPassword = "Password123!";
   
   // Register the user directly via API for speed
-  const response = await page.request.post("/api/auth/register", {
+  await page.request.post("/api/auth/register", {
     data: {
       fullName: "E2E Tester",
       email: testEmail,

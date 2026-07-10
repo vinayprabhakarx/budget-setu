@@ -149,9 +149,9 @@ export const DataDeletion: React.FC = () => {
             <div className="card border-destructive/20 bg-destructive-bg/10 p-5 space-y-2.5">
               <div className="flex items-center gap-2">
                 <Trash2 className="h-5 w-5 text-destructive shrink-0" />
-                <h4 className="text-destructive text-body-md font-semibold">
+                <h3 className="text-destructive text-body-md font-semibold">
                   No Recovery After Deletion
-                </h4>
+                </h3>
               </div>
               <p className="text-body-sm text-text-secondary leading-relaxed">
                 Once your account is deleted, your data is removed from our

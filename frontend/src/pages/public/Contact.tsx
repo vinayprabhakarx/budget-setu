@@ -93,9 +93,9 @@ export const Contact: React.FC = () => {
                       <CheckCircle2 className="h-10 w-10" />
                     </div>
                     <div className="space-y-3 animate-fade-up-2">
-                      <h3 className="font-display text-text-primary text-3xl">
+                      <h2 className="font-display text-text-primary text-3xl">
                         Message Sent
-                      </h3>
+                      </h2>
                       <p className="text-text-secondary text-body-lg max-w-md mx-auto leading-relaxed">
                         Thank you for reaching out! We've received your message and will get back to you shortly.
                       </p>
@@ -211,9 +211,9 @@ export const Contact: React.FC = () => {
               
               <div className="card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 flex flex-col gap-6 hover:-translate-y-1 transition-transform duration-500 hover:shadow-xl hover:shadow-brand/5">
                 <div>
-                  <h3 className="font-display text-text-primary text-2xl mb-2">
+                  <h2 className="font-display text-text-primary text-2xl mb-2">
                     Direct Channels
-                  </h3>
+                  </h2>
                   <p className="text-text-secondary text-body-sm">
                     Prefer immediate platforms? Drop a line directly to the developer.
                   </p>

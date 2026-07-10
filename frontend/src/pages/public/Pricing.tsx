@@ -73,9 +73,9 @@ export const Pricing: React.FC = () => {
               <div className="md:w-2/3 p-8 md:p-12 relative">
                 <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-bg-base rounded-full border-l border-dashed border-border hidden md:block" />
                 
-                <h3 className="font-display text-2xl text-text-primary mb-8">
+                <h2 className="font-display text-2xl text-text-primary mb-8">
                   Everything Included:
-                </h3>
+                </h2>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                   {freeFeatures.map((feature, i) => (

@@ -362,10 +362,20 @@ public class ImportProcessingService {
                 description = details.description() != null ? details.description() : rawParticulars;
             }
 
+            String paymentMode = firstNonBlank(row, "mode", "payment_mode");
+            if (paymentMode == null || paymentMode.isBlank()) {
+                paymentMode = "OTHER";
+            }
+            if (paymentMode.length() > 30) {
+                paymentMode = paymentMode.substring(0, 30);
+            }
+
             String searchTarget = (payeeNormalized + " "
                     + (description != null ? description.toLowerCase(Locale.ROOT) : "") + " "
                     + (rawParticulars != null ? rawParticulars.toLowerCase(Locale.ROOT) : "") + " "
-                    + (referenceNumber != null ? referenceNumber.toLowerCase(Locale.ROOT) : "")).trim();
+                    + (referenceNumber != null ? referenceNumber.toLowerCase(Locale.ROOT) : "") + " "
+                    + paymentMode.toLowerCase(Locale.ROOT) + " "
+                    + (transactionType != null ? transactionType.toLowerCase(Locale.ROOT) : "")).trim();
             Category matchedCategory = matchCategory(searchTarget, merchantRules, categories, uncategorized);
 
             if (matchedCategory.getId().equals(uncategorized.getId())) {
@@ -379,14 +389,6 @@ public class ImportProcessingService {
                         matchedCategory = found;
                     }
                 }
-            }
-
-            String paymentMode = firstNonBlank(row, "mode", "payment_mode");
-            if (paymentMode == null || paymentMode.isBlank()) {
-                paymentMode = "OTHER";
-            }
-            if (paymentMode.length() > 30) {
-                paymentMode = paymentMode.substring(0, 30);
             }
             String fingerprint = FingerprintUtil.generate(
                     transactionDate.toString(),
@@ -432,9 +434,9 @@ public class ImportProcessingService {
             List<Category> categories,
             Category uncategorized) {
         Optional<MerchantRule> matchedRule = merchantRules.stream()
-                .filter(rule -> rule.getMerchantPattern() != null)
+                .filter(rule -> rule.getMerchantPattern() != null && !rule.getMerchantPattern().trim().isEmpty())
                 .sorted(Comparator.comparingInt(rule -> -rule.getMerchantPattern().length()))
-                .filter(rule -> merchantNormalized.contains(rule.getMerchantPattern().toLowerCase(Locale.ROOT)))
+                .filter(rule -> merchantNormalized.contains(rule.getMerchantPattern().toLowerCase(Locale.ROOT).trim()))
                 .findFirst();
 
         if (matchedRule.isPresent()) {

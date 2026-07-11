@@ -60,7 +60,6 @@ export const Import: React.FC<ImportProps> = ({
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchHistory();
     window.addEventListener('import-history-updated', fetchHistory);
     return () => window.removeEventListener('import-history-updated', fetchHistory);

@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Trash2, X, ChevronDown, ChevronRight, Calendar, Edit2 } from 'lucide-react';
+import { Dialog } from '../../../components/ui/Dialog';
+import { Dropdown } from '../../../components/ui/Dropdown';
+import { Trash2, ChevronDown, ChevronRight, Calendar, Edit2, MoreHorizontal } from 'lucide-react';
 import { Select } from '../../../components/shared/Select';
 import { BudgetPlansSkeleton } from "../../../components/skeletons/BudgetPlansSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
@@ -143,7 +145,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
     
     return (
       <div key={plan.id} className={level === 0 ? '' : 'mt-4'}>
-        <div className={`card p-5 sm:p-6 min-h-[14rem] transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 flex flex-col justify-between space-y-4 relative group ${level > 0 ? 'ml-6 border-l-4 border-l-primary/30 mt-4' : 'h-full'}`}>
+        <div className={`card p-5 sm:p-6 min-h-56 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 flex flex-col justify-between space-y-4 relative group ${level > 0 ? 'ml-6 border-l-4 border-l-primary/30 mt-4' : 'h-full'}`}>
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="flex-1 min-w-0">
               <div className={`flex items-center gap-2 ${hasExpandableContent ? 'cursor-pointer' : ''}`} onClick={() => hasExpandableContent && toggleExpand(plan.id)}>
@@ -164,13 +166,34 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0 ml-1">
-              <button title="Edit Budget" onClick={e => { e.stopPropagation(); openEdit(plan); }} className="text-text-muted hover:text-primary p-1.5 transition-colors bg-background-alt/50 rounded-md">
-                <Edit2 className="h-4 w-4" />
-              </button>
-              <button title="Delete Budget" onClick={e => { e.stopPropagation(); handleDelete(plan.id); }} className="text-text-muted hover:text-expense p-1.5 transition-colors bg-background-alt/50 rounded-md">
-                <Trash2 className="h-4 w-4" />
-              </button>
+            <div className="shrink-0 ml-1" onClick={(e) => e.stopPropagation()}>
+              <Dropdown
+                align="right"
+                menuClassName="w-44"
+                trigger={
+                  <button
+                    className="p-1.5 rounded-md hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+                    title="Budget Actions"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                }
+                items={[
+                  {
+                    id: "edit",
+                    label: "Edit Budget",
+                    icon: <Edit2 className="h-4 w-4" />,
+                    onClick: () => openEdit(plan),
+                  },
+                  {
+                    id: "delete",
+                    label: "Delete Budget",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    variant: "danger",
+                    onClick: () => handleDelete(plan.id),
+                  },
+                ]}
+              />
             </div>
           </div>
           <div className="mt-auto pt-4 border-t border-border space-y-2">
@@ -238,13 +261,12 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
         </div>
       )}
 
-      {isPlanModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-background card w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-body-lg font-semibold text-text-primary">Configure Budget Plan</h2>
-              <button onClick={() => setIsPlanModalOpen(false)} className="text-text-muted hover:text-text-primary"><X className="h-5 w-5" /></button>
-            </div>
+      <Dialog
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        title="Configure Budget Plan"
+        maxWidth="lg"
+      >
             <div className="p-4 overflow-y-auto flex-1">
               <form id="planForm" onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -292,9 +314,7 @@ export const BudgetPlans: React.FC<Props> = ({ plans, categories, loading, onRef
               <button type="button" onClick={() => setIsPlanModalOpen(false)} className="btn btn-secondary">Cancel</button>
               <button type="submit" form="planForm" disabled={submitting} className="btn btn-primary">{submitting ? 'Saving...' : 'Save Plan'}</button>
             </div>
-          </div>
-        </div>
-      )}
+      </Dialog>
     </>
   );
 };

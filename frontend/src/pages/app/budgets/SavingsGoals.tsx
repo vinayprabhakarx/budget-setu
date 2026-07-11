@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Trash2, X, Edit2, Coins, Trophy, Calendar } from 'lucide-react';
+import { Dialog } from '../../../components/ui/Dialog';
+import { Dropdown } from '../../../components/ui/Dropdown';
+import { Trash2, Edit2, Coins, Trophy, Calendar, MoreHorizontal } from 'lucide-react';
 import { Select } from '../../../components/shared/Select';
 import { SavingsGoalsSkeleton } from "../../../components/skeletons/SavingsGoalsSkeleton";
 import { StateDisplay } from '../../../components/shared/StateDisplay';
@@ -104,7 +106,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
           {goals.map(g => {
             const isCompleted = g.completed;
             return (
-              <div key={g.id} className="card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group">
+              <div key={g.id} className="card p-5 sm:p-6 min-h-56 flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group">
                 <div className="flex justify-between items-start gap-3">
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -120,9 +122,34 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                       <span>Target: {g.targetDate ? new Date(g.targetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0 ml-1">
-                    <button onClick={() => openEdit(g)} className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"><Edit2 className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete(g.id)} className="p-1.5 rounded-md hover:bg-destructive-bg text-text-secondary hover:text-destructive transition-colors cursor-pointer"><Trash2 className="h-4 w-4" /></button>
+                  <div className="shrink-0 ml-1">
+                    <Dropdown
+                      align="right"
+                      menuClassName="w-44"
+                      trigger={
+                        <button
+                          className="p-1.5 rounded-md hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+                          title="Goal Actions"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      }
+                      items={[
+                        {
+                          id: "edit",
+                          label: "Edit Goal",
+                          icon: <Edit2 className="h-4 w-4" />,
+                          onClick: () => openEdit(g),
+                        },
+                        {
+                          id: "delete",
+                          label: "Delete Goal",
+                          icon: <Trash2 className="h-4 w-4" />,
+                          variant: "danger",
+                          onClick: () => handleDelete(g.id),
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2 mt-auto pt-2 border-t border-border">
@@ -150,13 +177,12 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
         </div>
       )}
 
-      {isGoalModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-background card w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-body-lg font-semibold text-text-primary">{activeGoal ? 'Modify Savings Target' : 'Define Savings Target'}</h2>
-              <button onClick={() => setIsGoalModalOpen(false)} className="text-text-muted hover:text-text-primary"><X className="h-5 w-5" /></button>
-            </div>
+      <Dialog
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        title={activeGoal ? 'Modify Savings Target' : 'Define Savings Target'}
+        maxWidth="md"
+      >
             <form onSubmit={handleGoalSubmit}>
               <div className="p-4 space-y-4">
                 <div><label className="block text-body-sm text-text-secondary mb-1">Goal Name *</label><input type="text" value={goalName} onChange={e => setGoalName(e.target.value)} className="input" required /></div>
@@ -170,17 +196,15 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                 <button type="submit" disabled={submitting} className="btn btn-primary">{submitting ? 'Saving...' : 'Save Goal'}</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
 
-      {isContributeOpen && contributionGoal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-background card w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-body-lg font-semibold text-text-primary">Allocate Savings</h2>
-              <button onClick={() => setIsContributeOpen(false)} className="text-text-muted hover:text-text-primary"><X className="h-5 w-5" /></button>
-            </div>
+      <Dialog
+        isOpen={isContributeOpen && !!contributionGoal}
+        onClose={() => setIsContributeOpen(false)}
+        title="Allocate Savings"
+        maxWidth="md"
+      >
+        {contributionGoal && (
             <form onSubmit={handleContributeSubmit}>
               <div className="p-4 space-y-4">
                 <p className="text-body-sm text-text-secondary">Allocate funds to <b>{contributionGoal.name}</b>.</p>
@@ -191,9 +215,8 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                 <button type="submit" disabled={submitting} className="btn btn-primary">{submitting ? 'Processing...' : 'Transfer Funds'}</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+        )}
+      </Dialog>
     </>
   );
 };

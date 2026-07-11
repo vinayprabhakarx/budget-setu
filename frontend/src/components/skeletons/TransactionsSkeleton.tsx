@@ -1,23 +1,59 @@
 import React from 'react';
-import { TableSkeleton } from './shared/TableSkeleton';
+import { Skeleton } from '../ui/Skeleton';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../shared/Table';
 
 export const TransactionsSkeleton: React.FC = () => {
   return (
-    <div className="space-y-4">
-      {/* Search and filter bar skeleton */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="h-10 bg-bg-subtle/50 rounded-lg w-full sm:w-64 animate-pulse"></div>
-          <div className="h-10 bg-bg-subtle/50 rounded-lg w-10 sm:w-24 animate-pulse"></div>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="h-10 bg-bg-subtle/50 rounded-lg w-24 animate-pulse"></div>
-          <div className="h-10 bg-brand/30 rounded-lg w-28 animate-pulse"></div>
-        </div>
-      </div>
-      
-      {/* Table skeleton */}
-      <TableSkeleton headers={["Date", "Description", "Category", "Account", "Method", "Amount", "Actions"]} rows={6} />
+    <div className="w-full">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Account</TableHead>
+            <TableHead>Method</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...Array(8)].map((_, i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <Skeleton className="h-4 w-20 rounded" />
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <Skeleton className="h-4 w-36 rounded" />
+                    <Skeleton className="h-3 w-24 rounded" />
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-16 rounded" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="h-5 w-24 rounded ml-auto" />
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

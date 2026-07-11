@@ -228,7 +228,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
       >
         {/* 3. Primary Page Content Container */}
         <div className="flex-1 flex flex-col w-full items-center">
-          <main className="flex-1 p-4 lg:p-8 max-w-(--layout-content-max-width) w-full">
+          <main key={location.pathname} className="animate-page-enter flex-1 p-4 lg:p-8 max-w-(--layout-content-max-width) w-full">
             {children}
           </main>
         </div>

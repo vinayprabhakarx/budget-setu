@@ -96,7 +96,7 @@ const JobIndicator: React.FC<{ job: ImportJobState; dismiss: (id: string) => voi
         )}
 
         {stage === 'FAILED' && (
-          <p className="text-body-sm text-error break-words">{errorMsg || 'An unknown error occurred.'}</p>
+          <p className="text-body-sm text-error wrap-break-word">{errorMsg || 'An unknown error occurred.'}</p>
         )}
       </div>
     </div>

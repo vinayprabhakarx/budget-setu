@@ -110,21 +110,8 @@ export const AdminOverview: React.FC = () => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMetrics();
   }, []);
-
-  if (loading) {
-    return <AdminOverviewSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-destructive-bg text-destructive rounded-lg border border-destructive/20">
-        Error loading metrics: {error}
-      </div>
-    );
-  }
 
   const formatBytes = (bytes: number) => {
     if (!bytes || bytes === 0) return "0 B";
@@ -151,8 +138,16 @@ export const AdminOverview: React.FC = () => {
         isRefreshing={loading}
       />
 
-      {/* TOP ROW: KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {loading && !metrics ? (
+        <AdminOverviewSkeleton />
+      ) : error ? (
+        <div className="p-4 bg-destructive-bg text-destructive rounded-lg border border-destructive/20">
+          Error loading metrics: {error}
+        </div>
+      ) : (
+        <>
+          {/* TOP ROW: KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Users className="h-16 w-16 text-brand" />
@@ -728,7 +723,7 @@ export const AdminOverview: React.FC = () => {
               to="/users"
               className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-brand/30 hover:bg-brand/5 transition-all group"
             >
-              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
+              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-text-inverse transition-colors">
                 <Users className="h-5 w-5" />
               </div>
               <div>
@@ -745,11 +740,11 @@ export const AdminOverview: React.FC = () => {
               to="/logs"
               className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-brand/30 hover:bg-brand/5 transition-all group"
             >
-              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
+              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-text-inverse transition-colors">
                 <ShieldAlert className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-text-primary group-hover:text-purple-500 transition-colors">
+                <h4 className="text-sm font-medium text-text-primary group-hover:text-brand transition-colors">
                   System Logs
                 </h4>
                 <p className="text-xs text-text-secondary mt-0.5">
@@ -760,6 +755,8 @@ export const AdminOverview: React.FC = () => {
           </div>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./styles/tokens.css";
+@import "./tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -238,7 +238,15 @@
   border: var(--border-default) solid transparent;
   cursor: pointer;
   white-space: nowrap;
-  padding: var(--space-2) var(--space-4);
+  /* Horizontal padding only — vertical sizing is handled by explicit height */
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  /* Fixed height ensures consistent sizing regardless of padding overrides */
+  height: var(--control-height-md);
+  min-height: var(--control-height-md);
+  box-sizing: border-box;
   transition:
     background-color var(--duration-fast) var(--ease-standard),
     border-color     var(--duration-fast) var(--ease-standard),
@@ -254,10 +262,11 @@
   pointer-events: none;
 }
 
-.btn-sm  { padding: var(--space-1-5) var(--space-3);  font-size: var(--text-body-sm); }
-.btn-md  { padding: var(--space-2-5) var(--space-5); }
-.btn-lg  { padding: var(--space-3)   var(--space-6);  font-size: var(--text-body-lg); }
-.btn-icon { padding: var(--space-2); aspect-ratio: 1; }
+/* Size variants — always set explicit height so py-* overrides can't break them */
+.btn-sm   { height: var(--control-height-sm);  min-height: var(--control-height-sm);  padding-left: var(--space-3);  padding-right: var(--space-3);  font-size: var(--text-body-sm); }
+.btn-md   { height: var(--control-height-md);  min-height: var(--control-height-md);  padding-left: var(--space-5);  padding-right: var(--space-5); }
+.btn-lg   { height: var(--control-height-lg);  min-height: var(--control-height-lg);  padding-left: var(--space-6);  padding-right: var(--space-6);  font-size: var(--text-body-lg); }
+.btn-icon { height: var(--control-height-md);  min-height: var(--control-height-md);  width: var(--control-height-md);                               padding: 0; }
 
 .btn-primary {
   background-color: var(--color-brand);
@@ -297,12 +306,26 @@
   background-color: var(--color-bg-surface);
   border: var(--border-default) solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-2-5) var(--space-3);
+  /* Horizontal padding only — height controls vertical sizing */
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  height: var(--control-height-md);
+  min-height: var(--control-height-md);
+  box-sizing: border-box;
   outline: none;
   transition:
     border-color     var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard),
     box-shadow       var(--duration-fast) var(--ease-standard);
+}
+textarea.input {
+  height: auto;
+  min-height: var(--control-height-textarea);
+  /* Restore vertical padding for multiline textareas */
+  padding-top: var(--space-2-5);
+  padding-bottom: var(--space-2-5);
 }
 .input::placeholder  { color: var(--color-text-muted); }
 .input:focus, .input:focus-visible { 
@@ -326,10 +349,13 @@ select.input {
   padding-right: 2.5rem;
 }
 
-/* Compact input variant — used in topbars, toolbars */
+/* Compact input variant — 2rem height to match btn-sm */
 .input-sm {
+  height: var(--control-height-sm);
+  min-height: var(--control-height-sm);
   font-size: var(--text-body-sm);
-  padding: var(--space-1-5) var(--space-3);
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
   width: auto;
 }
 select.input.input-sm {
@@ -393,15 +419,16 @@ input[type="number"] {
   z-index: var(--z-overlay);
   display: flex;
   padding: var(--space-4);
-  backdrop-filter: blur(0.125rem);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   overflow-y: auto;
 }
 .modal {
   margin: auto;
-  background-color: var(--color-bg-elevated);
-  border: var(--border-thin) solid var(--color-border);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 35rem;
   overflow: visible;
@@ -533,4 +560,20 @@ input[type="number"] {
   .hide-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
   }
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: page-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
 }

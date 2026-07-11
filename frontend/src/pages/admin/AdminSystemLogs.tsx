@@ -149,10 +149,11 @@ export const AdminSystemLogs: React.FC = () => {
         </div>
       )}
 
-      {loading ? (
-        <AdminSystemLogsSkeleton />
-      ) : (
-        <section className="card p-0 overflow-hidden min-h-[60vh] lg:min-h-[70vh] flex flex-col">
+      <section className="card p-0 overflow-hidden min-h-[60vh] lg:min-h-[70vh] flex flex-col">
+        {loading ? (
+          <AdminSystemLogsSkeleton />
+        ) : (
+          <>
           {/* AUDIT LOGS */}
           {activeTab === "audit" && (
             <div className="overflow-auto flex-1 flex flex-col">
@@ -286,8 +287,9 @@ export const AdminSystemLogs: React.FC = () => {
               )}
             </div>
           )}
-        </section>
-      )}
+          </>
+        )}
+      </section>
     </div>
   );
 };

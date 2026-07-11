@@ -65,7 +65,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
        @Query("SELECT t.categoryId, SUM(t.amount) FROM Transaction t " +
                      "WHERE t.userId = :userId AND t.transactionType = :type " +
                      "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
-                     "AND t.categoryId IS NOT NULL GROUP BY t.categoryId")
+                     "GROUP BY t.categoryId")
        List<Object[]> sumAmountByTypeGroupedByCategory(@Param("userId") UUID userId,
                      @Param("type") String type,
                      @Param("start") LocalDate start,
@@ -78,7 +78,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
 
        @Query("SELECT t.categoryId, SUM(t.amount) FROM Transaction t " +
                      "WHERE t.userId = :userId AND t.transactionType = :type AND t.isDeleted = false " +
-                     "AND t.categoryId IS NOT NULL GROUP BY t.categoryId")
+                     "GROUP BY t.categoryId")
        List<Object[]> sumAmountByTypeGroupedByCategoryAllTime(@Param("userId") UUID userId,
                      @Param("type") String type);
 
@@ -89,6 +89,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
                      "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
                      "ORDER BY t.amount DESC")
        List<Transaction> findTopExpensesByDateRange(@Param("userId") UUID userId,
+                     @Param("start") LocalDate start,
+                     @Param("end") LocalDate end,
+                     Pageable pageable);
+
+       @Query("SELECT t FROM Transaction t " +
+                     "WHERE t.userId = :userId AND t.transactionType = 'INCOME' " +
+                     "AND t.transactionDate BETWEEN :start AND :end AND t.isDeleted = false " +
+                     "ORDER BY t.amount DESC")
+       List<Transaction> findTopIncomesByDateRange(@Param("userId") UUID userId,
                      @Param("start") LocalDate start,
                      @Param("end") LocalDate end,
                      Pageable pageable);

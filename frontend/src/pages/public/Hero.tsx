@@ -126,7 +126,7 @@ export const Hero: React.FC = () => {
               <h3 className="font-display text-text-primary text-2xl mb-3">
                 Statement Parsing
               </h3>
-              <p className="text-text-secondary text-body-md mb-8 flex-grow">
+              <p className="text-text-secondary text-body-md mb-8 grow">
                 Drag-and-drop bank PDFs or CSVs. BudgetSetu auto-discovers bank
                 details, parses data in seconds, and handles password-protected
                 statements securely locally.

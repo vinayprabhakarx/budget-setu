@@ -43,6 +43,17 @@ interface GoalData {
   daysRemaining?: number;
 }
 
+interface BudgetPlanData {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  periodType: string;
+  totalAmount: number;
+  totalSpent?: number;
+  allocations: { spent?: number }[];
+}
+
 import { StateDisplay } from "../../components/shared/StateDisplay";
 import { PageHeader } from "../../components/shared/PageHeader";
 import {
@@ -189,15 +200,17 @@ export const Dashboard: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardSummary | null>(null);
-  const [budgetPlans, setBudgetPlans] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [recurringExpenses, setRecurringExpenses] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [goals, setGoals] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [budgetPlans, setBudgetPlans] = useState<BudgetPlanData[]>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<
+    RecurringExpenseData[]
+  >([]);
+  const [goals, setGoals] = useState<GoalData[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
+    setIsMounted(true);
   }, []);
 
   const toggleRow = (id: string) => {
@@ -213,9 +226,9 @@ export const Dashboard: React.FC = () => {
     try {
       const [dashRes, plansRes, recurringRes, goalsRes] = await Promise.all([
         api.get<DashboardSummary>(`/dashboard/summary`),
-        api.get<any[]>("/budget-plans"), // eslint-disable-line @typescript-eslint/no-explicit-any
-        api.get<any[]>("/recurring-expenses"), // eslint-disable-line @typescript-eslint/no-explicit-any
-        api.get<any[]>("/goals"), // eslint-disable-line @typescript-eslint/no-explicit-any
+        api.get<BudgetPlanData[]>("/budget-plans"),
+        api.get<RecurringExpenseData[]>("/recurring-expenses"),
+        api.get<GoalData[]>("/goals"),
       ]);
       setData(dashRes.data);
 
@@ -241,8 +254,8 @@ export const Dashboard: React.FC = () => {
         LOW: 3,
       };
       const sortedPlans = [...filteredPlans].sort((a, b) => {
-        const pA = periodPriority[a.periodType?.toUpperCase()] || 99;
-        const pB = periodPriority[b.periodType?.toUpperCase()] || 99;
+        const pA = periodPriority[(a.periodType || "").toUpperCase()] || 99;
+        const pB = periodPriority[(b.periodType || "").toUpperCase()] || 99;
         if (pA !== pB) return pA - pB;
         return (
           new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
@@ -342,7 +355,7 @@ export const Dashboard: React.FC = () => {
       {isLoading ? (
         <DashboardSummarySkeleton />
       ) : (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Income */}
           <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -409,7 +422,7 @@ export const Dashboard: React.FC = () => {
       {isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <section className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Spending by Category (Donut) */}
           <div className="card lg:col-span-5 flex flex-col min-h-96">
             <h3 className="font-semibold text-text-primary text-heading-sm mb-4"></h3>
@@ -534,7 +547,7 @@ export const Dashboard: React.FC = () => {
       {isLoading ? (
         <DashboardActiveBudgetsSkeleton />
       ) : (
-        <>
+        <div className="animate-fade-in space-y-6">
           {budgetPlans.length > 0 ||
           recurringExpenses.length > 0 ||
           goals.length > 0 ? (
@@ -859,14 +872,14 @@ export const Dashboard: React.FC = () => {
               </div>
             </section>
           )}
-        </>
+        </div>
       )}
 
       {/* 4. Recent Transactions */}
       {isLoading ? (
         <DashboardTransactionsSkeleton />
       ) : (
-        <section className="card p-6 space-y-4">
+        <section className="animate-fade-in card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-text-primary text-heading-sm">
               Recent Transactions

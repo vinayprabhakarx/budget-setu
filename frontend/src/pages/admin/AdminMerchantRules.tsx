@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Dialog, Button, Pagination, ModalFooter, Dropdown } from "../../components/ui";
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
 import {
@@ -6,7 +7,7 @@ import {
   Plus,
   Pencil,
   Trash2,
-  X,
+  MoreHorizontal,
 } from "lucide-react";
 import { Select } from "../../components/shared/Select";
 import { StateDisplay } from "../../components/shared/StateDisplay";
@@ -182,10 +183,14 @@ export const AdminMerchantRules: React.FC = () => {
         onRefreshClick={loadRules}
         isRefreshing={loading}
       >
-        <button onClick={openAddModal} className="btn btn-primary btn-sm flex items-center gap-1.5">
-          <Plus className="h-4 w-4" />
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={openAddModal}
+          leftIcon={<Plus className="h-4 w-4" />}
+        >
           Add Rule
-        </button>
+        </Button>
       </PageHeader>
 
       {/* Filter & Search Controls */}
@@ -293,21 +298,34 @@ export const AdminMerchantRules: React.FC = () => {
                       {new Date(rule.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(rule)}
-                          className="p-1.5 rounded-md text-text-secondary hover:bg-bg-subtle hover:text-text-primary transition-colors cursor-pointer"
-                          title="Edit Rule"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(rule)}
-                          className="p-1.5 rounded-md text-expense hover:bg-expense/10 transition-colors cursor-pointer"
-                          title="Delete Rule"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Dropdown
+                          align="right"
+                          menuClassName="w-44"
+                          trigger={
+                            <button
+                              className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                              title="Actions"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                          }
+                          items={[
+                            {
+                              id: "edit",
+                              label: "Edit Rule",
+                              icon: <Pencil className="h-4 w-4" />,
+                              onClick: () => openEditModal(rule),
+                            },
+                            {
+                              id: "delete",
+                              label: "Delete Rule",
+                              icon: <Trash2 className="h-4 w-4" />,
+                              variant: "danger",
+                              onClick: () => handleDelete(rule),
+                            },
+                          ]}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -318,50 +336,21 @@ export const AdminMerchantRules: React.FC = () => {
         )}
       </section>
 
-      {/* Pagination Footer matching Transactions table */}
-      {!loading && !error && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-            className="btn btn-secondary btn-sm"
-          >
-            Previous
-          </button>
-          <span className="text-body-sm text-text-secondary font-medium mx-2">
-            Page {currentPage + 1} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-            className="btn btn-secondary btn-sm"
-          >
-            Next
-          </button>
-        </div>
+      {!loading && !error && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       {/* Add / Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-bg-overlay/80 backdrop-blur-sm"
-            onClick={closeModal}
-          />
-          <div className="relative bg-bg-surface border border-border rounded-xl shadow-xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-lg font-semibold text-text-primary">
-                {editRule ? "Edit Merchant Rule" : "Add Merchant Rule"}
-              </h2>
-              <button
-                onClick={closeModal}
-                className="p-1.5 rounded-md text-text-secondary hover:bg-bg-subtle hover:text-text-primary transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      <Dialog
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editRule ? "Edit Merchant Rule" : "Add Merchant Rule"}
+        maxWidth="md"
+      >
             {/* Modal Body */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -401,29 +390,13 @@ export const AdminMerchantRules: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn btn-secondary btn-sm"
-                  disabled={formSubmitting}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  disabled={formSubmitting}
-                >
-                  {formSubmitting
-                    ? editRule ? "Saving…" : "Creating…"
-                    : editRule ? "Save Changes" : "Create Rule"}
-                </button>
-              </div>
+              <ModalFooter
+                onCancel={closeModal}
+                submitText={editRule ? "Save Changes" : "Create Rule"}
+                isLoading={formSubmitting}
+              />
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
     </div>
   );
 };

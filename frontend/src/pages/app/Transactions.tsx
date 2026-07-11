@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Dialog, Button, Pagination, ModalFooter, Dropdown } from "../../components/ui";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
 import { formatCurrency } from "../../utils/currency";
-import { X, Trash2, Edit3, Loader2, History, Plus } from "lucide-react";
+import { Edit3, Trash2, Loader2, History, Plus, MoreHorizontal } from "lucide-react";
 import { Select } from "../../components/shared/Select";
 import { TransactionsSkeleton } from "../../components/skeletons/TransactionsSkeleton";
 import { StateDisplay } from "../../components/shared/StateDisplay";
 import { CurrencyInput } from "../../components/shared/CurrencyInput";
+import { MaskedDateInput } from "../../components/shared/MaskedDateInput";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { FilterSection } from "../../components/shared/FilterSection";
 import {
@@ -438,19 +440,18 @@ export const Transactions: React.FC = () => {
         onRefreshClick={fetchTransactions}
         isRefreshing={loading}
       >
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() =>
             accounts.length > 0
               ? setIsAddModalOpen(true)
               : navigate("/accounts#new")
           }
-          className="btn btn-primary btn-sm flex items-center justify-center gap-2"
+          leftIcon={<Plus className="h-4 w-4" />}
         >
-          <Plus className="h-4 w-4" />
-          <span>
-            {accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}
-          </span>
-        </button>
+          {accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}
+        </Button>
       </PageHeader>
 
       {/* 1. Filter Controls */}
@@ -472,14 +473,13 @@ export const Transactions: React.FC = () => {
             <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               From Date
             </label>
-            <input
-              type="date"
+            <MaskedDateInput
               value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
+              onChange={(val) => {
+                setStartDate(val);
                 setPage(0);
               }}
-              className="input w-full"
+              className="w-full"
             />
           </div>
 
@@ -488,14 +488,13 @@ export const Transactions: React.FC = () => {
             <label className="block text-body-xs font-semibold text-text-secondary mb-1">
               To Date
             </label>
-            <input
-              type="date"
+            <MaskedDateInput
               value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
+              onChange={(val) => {
+                setEndDate(val);
                 setPage(0);
               }}
-              className="input w-full"
+              className="w-full"
             />
           </div>
 
@@ -602,7 +601,8 @@ export const Transactions: React.FC = () => {
         {loading ? (
           <TransactionsSkeleton />
         ) : transactions.length === 0 ? (
-          <StateDisplay
+          <div className="animate-fade-in">
+            <StateDisplay
             type="empty"
             title="No transactions found"
             description={
@@ -626,7 +626,9 @@ export const Transactions: React.FC = () => {
                   }
             }
           />
+          </div>
         ) : (
+          <div className="animate-fade-in">
           <Table>
             <TableHeader>
               <TableRow>
@@ -748,27 +750,34 @@ export const Transactions: React.FC = () => {
                       {formatCurrency(tx.amount)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditModal(tx);
-                          }}
-                          className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                          title="Edit / Audit Log"
-                        >
-                          <Edit3 className="h-4.5 w-4.5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(tx.id);
-                          }}
-                          className="p-1.5 rounded-md hover:bg-destructive-bg text-text-secondary hover:text-destructive transition-colors cursor-pointer"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4.5 w-4.5" />
-                        </button>
+                      <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        <Dropdown
+                          align="right"
+                          menuClassName="w-44"
+                          trigger={
+                            <button
+                              className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                              title="Actions"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                          }
+                          items={[
+                            {
+                              id: "edit",
+                              label: "Edit / Audit Log",
+                              icon: <Edit3 className="h-4 w-4" />,
+                              onClick: () => openEditModal(tx),
+                            },
+                            {
+                              id: "delete",
+                              label: "Delete",
+                              icon: <Trash2 className="h-4 w-4" />,
+                              variant: "danger",
+                              onClick: () => handleDelete(tx.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -776,49 +785,23 @@ export const Transactions: React.FC = () => {
               })}
             </TableBody>
           </Table>
+          </div>
         )}
       </section>
 
-      {/* 4. Pagination Footer */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="btn btn-secondary btn-sm"
-          >
-            Previous
-          </button>
-          <span className="text-body-sm text-text-secondary font-medium mx-2">
-            Page {page + 1} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="btn btn-secondary btn-sm"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       {/* Edit / Audit History Modal */}
-      {editingTx && (
-        <div className="modal-overlay">
-          <div className="modal max-w-2xl overflow-hidden flex flex-col">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-border-muted">
-              <h3 className="font-display text-text-primary text-heading-md">
-                Edit Transaction
-              </h3>
-              <button
-                type="button"
-                onClick={() => setEditingTx(null)}
-                className="text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <Dialog
+        isOpen={!!editingTx}
+        onClose={() => setEditingTx(null)}
+        title="Edit Transaction"
+        maxWidth="2xl"
+      >
 
             {/* Modal Body & Form */}
             <form
@@ -1041,27 +1024,15 @@ export const Transactions: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
 
       {/* Add Transaction Modal */}
-      {isAddModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal max-w-md">
-            <div className="modal-header">
-              <h3 className="font-display text-text-primary text-heading-md">
-                Add Transaction
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
+      <Dialog
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add Transaction"
+        maxWidth="md"
+      >
             <form onSubmit={handleAddSubmit}>
               <div className="modal-body space-y-4">
                 {/* Date */}
@@ -1069,11 +1040,9 @@ export const Transactions: React.FC = () => {
                   <label className="block text-body-sm font-semibold text-text-secondary mb-1">
                     Date *
                   </label>
-                  <input
-                    type="date"
+                  <MaskedDateInput
                     value={addDate}
-                    onChange={(e) => setAddDate(e.target.value)}
-                    className="input"
+                    onChange={setAddDate}
                     required
                   />
                 </div>
@@ -1206,26 +1175,14 @@ export const Transactions: React.FC = () => {
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={addSubmitting}
-                  className="btn btn-primary min-w-30"
-                >
-                  {addSubmitting ? "Logging..." : "Log Transaction"}
-                </button>
-              </div>
+              <ModalFooter
+                onCancel={() => setIsAddModalOpen(false)}
+                submitText="Log Transaction"
+                isLoading={addSubmitting}
+                loadingText="Logging..."
+              />
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Dialog, Button, Dropdown } from "../../components/ui";
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
 import {
@@ -7,9 +8,9 @@ import {
   CheckCircle,
   Trash2,
   Eye,
-  X,
   Copy,
   Check,
+  MoreHorizontal,
 } from "lucide-react";
 import { StateDisplay } from "../../components/shared/StateDisplay";
 import { AdminContactSubmissionsSkeleton } from "../../components/skeletons/AdminContactSubmissionsSkeleton";
@@ -218,17 +219,17 @@ export const AdminContactSubmissions: React.FC = () => {
                   >
                     {/* Sender */}
                     <TableCell>
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-3">
                         <div className="h-10 w-10 shrink-0 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center border border-brand/20">
                           {sub.fullName.charAt(0).toUpperCase()}
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-text-primary">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-semibold text-text-primary block truncate">
                             {sub.fullName}
-                          </div>
-                          <div className="text-sm text-text-tertiary flex items-center gap-1">
+                          </span>
+                          <span className="text-xs text-text-tertiary block truncate mt-0.5">
                             {sub.email}
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </TableCell>
@@ -263,39 +264,44 @@ export const AdminContactSubmissions: React.FC = () => {
 
                     {/* Actions */}
                     <TableCell className="whitespace-nowrap text-right text-sm font-medium">
-                      <div
-                        className="flex items-center justify-end gap-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSubmission(sub);
-                            if (!sub.read) handleToggleRead(sub.id, false);
-                          }}
-                          className="p-1.5 rounded-md text-info hover:bg-info/10 transition-colors cursor-pointer"
-                          title="View Message Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleToggleRead(sub.id, sub.read, e)}
-                          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                            sub.read
-                              ? "text-warning hover:bg-warning/10"
-                              : "text-income hover:bg-income/10"
-                          }`}
-                          title={sub.read ? "Mark as Unread" : "Mark as Read"}
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(sub.id, e)}
-                          className="p-1.5 rounded-md text-expense hover:bg-expense/10 transition-colors cursor-pointer"
-                          title="Delete Submission"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Dropdown
+                          align="right"
+                          menuClassName="w-48"
+                          trigger={
+                            <button
+                              className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                              title="Actions"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                          }
+                          items={[
+                            {
+                              id: "view",
+                              label: "View Details",
+                              icon: <Eye className="h-4 w-4" />,
+                              onClick: () => {
+                                setSelectedSubmission(sub);
+                                if (!sub.read) handleToggleRead(sub.id, false);
+                              },
+                            },
+                            {
+                              id: "toggle-read",
+                              label: sub.read ? "Mark as Unread" : "Mark as Read",
+                              icon: <CheckCircle className="h-4 w-4" />,
+                              onClick: () => handleToggleRead(sub.id, sub.read),
+                              dividerAfter: true,
+                            },
+                            {
+                              id: "delete",
+                              label: "Delete",
+                              icon: <Trash2 className="h-4 w-4" />,
+                              variant: "danger",
+                              onClick: () => handleDelete(sub.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -307,40 +313,14 @@ export const AdminContactSubmissions: React.FC = () => {
       )}
 
       {/* Modal for Viewing Full Message Details */}
-      {selectedSubmission && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={() => setSelectedSubmission(null)}
-        >
-          <div
-            className="bg-bg-surface border border-border rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-bg-subtle/50">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center border border-brand/20 text-body-sm">
-                  {selectedSubmission.fullName.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-body-md font-semibold text-text-primary">
-                    {selectedSubmission.fullName}
-                  </h3>
-                  <p className="text-caption text-text-tertiary">
-                    {selectedSubmission.email}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedSubmission(null)}
-                className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-subtle transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-5">
+      <Dialog
+        isOpen={!!selectedSubmission}
+        onClose={() => setSelectedSubmission(null)}
+        title={selectedSubmission ? `${selectedSubmission.fullName} (${selectedSubmission.email})` : "Message Details"}
+        maxWidth="xl"
+      >
+            {selectedSubmission && (<>
+            <div className="p-4 sm:p-6 space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3 text-body-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-text-tertiary">Topic:</span>
@@ -364,14 +344,14 @@ export const AdminContactSubmissions: React.FC = () => {
                     onClick={() =>
                       handleCopyMessage(selectedSubmission.message)
                     }
-                    className="inline-flex items-center gap-1 text-caption text-brand hover:underline font-medium"
+                    className="btn btn-ghost btn-sm text-text-tertiary hover:text-text-primary flex items-center gap-1"
                   >
                     {copied ? (
                       <Check className="h-3.5 w-3.5 text-success" />
                     ) : (
                       <Copy className="h-3.5 w-3.5" />
                     )}
-                    {copied ? "Copied!" : "Copy text"}
+                    <span>{copied ? "Copied!" : "Copy text"}</span>
                   </button>
                 </div>
                 <div className="p-4 rounded-xl bg-bg-subtle border border-border text-body-sm text-text-primary whitespace-pre-wrap leading-relaxed max-h-[50vh] overflow-y-auto font-sans">
@@ -381,47 +361,48 @@ export const AdminContactSubmissions: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-bg-subtle/30">
-              <div className="flex items-center gap-2">
-                <button
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-border bg-bg-subtle/30">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() =>
                     handleToggleRead(
                       selectedSubmission.id,
                       selectedSubmission.read,
                     )
                   }
-                  className="btn btn-secondary btn-sm flex items-center gap-1.5"
+                  leftIcon={
+                    <CheckCircle
+                      className={`h-4 w-4 shrink-0 ${selectedSubmission.read ? "text-text-tertiary" : "text-brand"}`}
+                    />
+                  }
                 >
-                  <CheckCircle
-                    className={`h-4 w-4 ${selectedSubmission.read ? "text-text-tertiary" : "text-brand"}`}
-                  />
-                  <span>
-                    {selectedSubmission.read
-                      ? "Mark as Unread"
-                      : "Mark as Read"}
-                  </span>
-                </button>
-                <button
+                  {selectedSubmission.read
+                    ? "Mark as Unread"
+                    : "Mark as Read"}
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleDelete(selectedSubmission.id)}
-                  className="btn btn-secondary btn-sm text-error hover:bg-error/10 border-error/20 flex items-center gap-1.5"
+                  leftIcon={<Trash2 className="h-4 w-4 shrink-0" />}
                 >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Delete</span>
-                </button>
+                  Delete
+                </Button>
               </div>
               <div className="flex items-center gap-2">
                 <a
                   href={`mailto:${selectedSubmission.email}?subject=Re: ${encodeURIComponent(selectedSubmission.topic)}`}
-                  className="btn btn-primary btn-sm flex items-center gap-1.5"
+                  className="btn btn-primary btn-sm w-full sm:w-auto flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 shrink-0" />
                   <span>Reply via Email</span>
                 </a>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+            </>)}
+      </Dialog>
     </div>
   );
 };

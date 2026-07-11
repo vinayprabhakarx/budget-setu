@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Trash2, X, Play, Pause, Edit2 } from "lucide-react";
+import { Dialog } from "../../../components/ui/Dialog";
+import { Dropdown } from "../../../components/ui/Dropdown";
+import { Trash2, Play, Pause, Edit2, MoreHorizontal } from "lucide-react";
 import { Select } from "../../../components/shared/Select";
 import { RecurringExpensesSkeleton } from "../../../components/skeletons/RecurringExpensesSkeleton";
 import { StateDisplay } from "../../../components/shared/StateDisplay";
@@ -165,38 +167,49 @@ export const RecurringExpenses: React.FC<Props> = ({
                       : "Category: N/A"}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 ml-1">
-                  <button
-                    onClick={() => {
-                      setForm(exp);
-                      setIsModalOpen(true);
-                    }}
-                    className="text-text-muted hover:text-primary p-1"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (exp.status === "ACTIVE") {
-                        setPauseConfig({ isOpen: true, exp, date: "" });
-                      } else {
-                        handleToggleStatus(exp, "ACTIVE", null);
-                      }
-                    }}
-                    className="text-text-muted hover:text-primary p-1"
-                  >
-                    {exp.status === "ACTIVE" ? (
-                      <Pause className="h-4 w-4" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(exp.id)}
-                    className="text-text-muted hover:text-expense p-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <div className="shrink-0 ml-1">
+                  <Dropdown
+                    align="right"
+                    menuClassName="w-48"
+                    trigger={
+                      <button
+                        className="p-1.5 rounded-md hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+                        title="Expense Actions"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    }
+                    items={[
+                      {
+                        id: "edit",
+                        label: "Edit",
+                        icon: <Edit2 className="h-4 w-4" />,
+                        onClick: () => { setForm(exp); setIsModalOpen(true); },
+                      },
+                      {
+                        id: "toggle-status",
+                        label: exp.status === "ACTIVE" ? "Pause" : "Resume",
+                        icon: exp.status === "ACTIVE"
+                          ? <Pause className="h-4 w-4" />
+                          : <Play className="h-4 w-4" />,
+                        onClick: () => {
+                          if (exp.status === "ACTIVE") {
+                            setPauseConfig({ isOpen: true, exp, date: "" });
+                          } else {
+                            handleToggleStatus(exp, "ACTIVE", null);
+                          }
+                        },
+                        dividerAfter: true,
+                      },
+                      {
+                        id: "delete",
+                        label: "Delete",
+                        icon: <Trash2 className="h-4 w-4" />,
+                        variant: "danger",
+                        onClick: () => handleDelete(exp.id),
+                      },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="mt-auto pt-4 border-t border-border space-y-2">
@@ -241,20 +254,12 @@ export const RecurringExpenses: React.FC<Props> = ({
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-background card w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-body-lg font-semibold text-text-primary">
-                Recurring Expense
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-text-muted hover:text-text-primary"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <Dialog
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Recurring Expense"
+        maxWidth="md"
+      >
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
                 <label className="block text-body-sm text-text-secondary mb-1">
@@ -341,26 +346,14 @@ export const RecurringExpenses: React.FC<Props> = ({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
 
-      {pauseConfig.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-background card w-full max-w-sm overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-body-lg font-semibold text-text-primary">
-                Pause Subscription
-              </h2>
-              <button
-                onClick={() =>
-                  setPauseConfig({ isOpen: false, exp: null, date: "" })
-                }
-                className="text-text-muted hover:text-text-primary"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <Dialog
+        isOpen={pauseConfig.isOpen}
+        onClose={() => setPauseConfig({ isOpen: false, exp: null, date: "" })}
+        title="Pause Subscription"
+        maxWidth="sm"
+      >
             <div className="p-4 space-y-4">
               <p className="text-body-sm text-text-secondary">
                 You are about to pause <strong>{pauseConfig.exp?.name}</strong>.
@@ -406,9 +399,7 @@ export const RecurringExpenses: React.FC<Props> = ({
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+      </Dialog>
     </>
   );
 };

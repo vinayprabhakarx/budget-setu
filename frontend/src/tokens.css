@@ -92,6 +92,12 @@
   --layout-content-padding-y:     var(--space-8);
   --layout-card-gap:              var(--space-6);
 
+  /* ── Interactive Control Heights (Buttons, Inputs, Selects) ── */
+  --control-height-sm:            2rem;       /* 32px */
+  --control-height-md:            2.625rem;   /* 42px - App Standard */
+  --control-height-lg:            3rem;       /* 48px */
+  --control-height-textarea:      5rem;       /* 80px min-height */
+
   /* ── Motion Durations ──────────────────────────────────── */
   --duration-instant:    50ms;
   --duration-fast:       120ms;
@@ -135,7 +141,7 @@
   --color-bg-subtle:       #F2F0EE;   /* Soft warm grey — hover, dividers */
   --color-bg-muted:        #E8E5E2;   /* Stronger — disabled states, skeletons */
   --color-bg-inverse:      #1A1917;   /* Near-black — tooltips on light bg */
-  --color-bg-overlay:      rgba(26, 25, 23, 0.45);  /* Modal backdrop */
+  --color-bg-overlay:      rgba(0, 0, 0, 0.25);  /* Modal backdrop */
 
   /* ── Text ──────────────────────────────────────────────── */
   --color-text-primary:    #1A1917;   /* Near-black — headings, body */

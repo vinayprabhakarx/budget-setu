@@ -163,7 +163,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
 
       {/* Main Page Content */}
       <main
-        className="flex flex-col"
+        key={location.pathname}
+        className="animate-page-enter flex flex-col"
         style={isAuthPage ? { flex: "1 1 0", overflowY: "auto" } : { flexGrow: 1, minHeight: "calc(100vh - 4rem)" }}
       >
         {children}

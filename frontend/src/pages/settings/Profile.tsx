@@ -227,7 +227,7 @@ export const Profile: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
               isEditingProfile
-                ? "bg-brand text-white"
+                ? "bg-brand text-text-inverse"
                 : "text-text-secondary hover:text-text-primary bg-bg-subtle hover:bg-border/40 border border-border/60"
             }`}
           >
@@ -242,7 +242,7 @@ export const Profile: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
               isEditingPassword
-                ? "bg-brand text-white"
+                ? "bg-brand text-text-inverse"
                 : "text-text-secondary hover:text-text-primary bg-bg-subtle hover:bg-border/40 border border-border/60"
             }`}
           >

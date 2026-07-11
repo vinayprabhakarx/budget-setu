@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, X, RotateCcw } from 'lucide-react';
+import { Button } from '../ui/Button';
 
 export interface FilterSectionProps {
   /** Whether the filter panel is currently visible */
@@ -62,7 +63,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         {/* Header Row: Primary Search Bar (or Title) on left, Reset Button anchored on top right */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
           {onSearchChange !== undefined ? (
-            <div className="relative flex-1 min-w-[240px] max-w-md">
+            <div className="relative flex-1 min-w-60 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted pointer-events-none" />
               <input
                 type="text"
@@ -70,7 +71,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 value={searchQuery ?? ""}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="input w-full !pl-10 !pr-8 py-1.5 text-sm bg-bg-card/90 focus:bg-bg-surface border-border transition-colors shadow-2xs"
+                className="input w-full pl-10! pr-8! py-1.5 text-sm bg-bg-card/90 focus:bg-bg-surface border-border transition-colors shadow-2xs"
               />
               {searchQuery && (
                 <button
@@ -84,26 +85,23 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex-1 min-w-[150px] flex items-center gap-2">
+            <div className="flex-1 min-w-37.5 flex items-center gap-2">
               <span className="text-body-sm font-semibold text-text-primary">Filter & Grouping Controls</span>
             </div>
           )}
 
           {onReset && (
-            <button
+            <Button
               type="button"
+              variant="subtle"
+              size="sm"
               onClick={onReset}
               disabled={!hasActiveFilters}
-              className={`flex items-center gap-1.5 text-body-sm font-semibold transition-all py-1.5 px-3 rounded-md ml-auto shrink-0 ${
-                hasActiveFilters
-                  ? "text-primary hover:text-primary/80 hover:bg-primary/5 hover:underline cursor-pointer"
-                  : "text-text-muted opacity-40 cursor-not-allowed hover:bg-transparent"
-              }`}
-              title={hasActiveFilters ? "Reset all filters to default" : "Filters are already at default values"}
+              leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
+              className="ml-auto shrink-0"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Reset Filters</span>
-            </button>
+              Reset Filters
+            </Button>
           )}
         </div>
 

@@ -81,11 +81,10 @@ export const Contact: React.FC = () => {
 
           {/* Asymmetrical 60/40 Split View */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-            
             {/* Left Column (60%): Interactive Glassmorphism Form */}
             <div className="lg:col-span-3 card bg-bg-surface/60 backdrop-blur-2xl border border-white/5 p-8 md:p-12 shadow-2xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-linear-to-br from-brand/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              
+
               <div className="relative z-10">
                 {success ? (
                   <div className="text-center py-16 space-y-6">
@@ -97,7 +96,8 @@ export const Contact: React.FC = () => {
                         Message Sent
                       </h2>
                       <p className="text-text-secondary text-body-lg max-w-md mx-auto leading-relaxed">
-                        Thank you for reaching out! We've received your message and will get back to you shortly.
+                        Thank you for reaching out! We've received your message
+                        and will get back to you shortly.
                       </p>
                     </div>
                     <button
@@ -186,7 +186,7 @@ export const Contact: React.FC = () => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         rows={6}
-                        className={`input w-full min-h-[150px] resize-y bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.message ? "border-destructive/50 focus:border-destructive" : ""}`}
+                        className={`input w-full min-h-37.5 resize-y bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.message ? "border-destructive/50 focus:border-destructive" : ""}`}
                         disabled={loading}
                       />
                     </div>
@@ -208,14 +208,14 @@ export const Contact: React.FC = () => {
 
             {/* Right Column (40%): Social Proof & Interactive Cards */}
             <div className="lg:col-span-2 space-y-6">
-              
               <div className="card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 flex flex-col gap-6 hover:-translate-y-1 transition-transform duration-500 hover:shadow-xl hover:shadow-brand/5">
                 <div>
                   <h2 className="font-display text-text-primary text-2xl mb-2">
                     Direct Channels
                   </h2>
                   <p className="text-text-secondary text-body-sm">
-                    Prefer immediate platforms? Drop a line directly to the developer.
+                    Prefer immediate platforms? Drop a line directly to the
+                    developer.
                   </p>
                 </div>
 
@@ -230,8 +230,12 @@ export const Contact: React.FC = () => {
                       <GithubIcon className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-text-primary">GitHub</div>
-                      <div className="text-xs text-text-secondary">@vinayprabhakarx</div>
+                      <div className="text-sm font-medium text-text-primary">
+                        GitHub
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        @vinayprabhakarx
+                      </div>
                     </div>
                   </a>
 
@@ -245,11 +249,15 @@ export const Contact: React.FC = () => {
                       <LinkedinIcon className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-text-primary">LinkedIn</div>
-                      <div className="text-xs text-text-secondary">Connect Professionally</div>
+                      <div className="text-sm font-medium text-text-primary">
+                        LinkedIn
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        Connect Professionally
+                      </div>
                     </div>
                   </a>
-                  
+
                   <a
                     href="https://vinayprabhakar.dev"
                     target="_blank"
@@ -260,15 +268,17 @@ export const Contact: React.FC = () => {
                       <Globe className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-text-primary">Website</div>
-                      <div className="text-xs text-text-secondary">vinayprabhakar.dev</div>
+                      <div className="text-sm font-medium text-text-primary">
+                        Website
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        vinayprabhakar.dev
+                      </div>
                     </div>
                   </a>
                 </div>
               </div>
-
             </div>
-
           </div>
         </div>
       </div>

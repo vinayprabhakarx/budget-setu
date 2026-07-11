@@ -7,11 +7,12 @@ import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { Import } from "./Import";
 import { formatCurrency } from "../../utils/currency";
-import { CreditCard, Plus, Edit2, FileUp, X, GitMerge } from "lucide-react";
+import { CreditCard, Plus, Edit2, FileUp, GitMerge } from "lucide-react";
 import { AccountsSkeleton } from "../../components/skeletons/AccountsSkeleton";
 import { Select } from "../../components/shared/Select";
 import { UploadStatementModal } from "../../components/shared/UploadStatementModal";
 import { StateDisplay } from "../../components/shared/StateDisplay";
+import { Dialog, Button, ModalFooter } from "../../components/ui";
 import { CurrencyInput } from "../../components/shared/CurrencyInput";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { FilterSection } from "../../components/shared/FilterSection";
@@ -375,21 +376,23 @@ export const Accounts: React.FC = () => {
         {activeTab === "accounts" && (
           <>
             {accounts.length >= 2 && (
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={openMergeModal}
-                className="btn btn-secondary btn-sm flex items-center justify-center gap-2"
+                leftIcon={<GitMerge className="h-4 w-4" />}
               >
-                <GitMerge className="h-4 w-4" />
                 <span className="hidden sm:inline">Merge Accounts</span>
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={openCreateModal}
-              className="btn btn-primary btn-sm flex items-center justify-center gap-2"
+              leftIcon={<Plus className="h-4 w-4" />}
             >
-              <Plus className="h-4 w-4" />
-              <span>Add Account</span>
-            </button>
+              Add Account
+            </Button>
           </>
         )}
       </PageHeader>
@@ -504,7 +507,7 @@ export const Accounts: React.FC = () => {
           {loading ? (
             <AccountsSkeleton />
           ) : accounts.length === 0 ? (
-            <section className="max-w-xl mx-auto mt-10">
+            <section className="animate-fade-in max-w-xl mx-auto mt-10">
               <StateDisplay
                 type="empty"
                 title="No bank accounts registered"
@@ -519,7 +522,7 @@ export const Accounts: React.FC = () => {
               />
             </section>
           ) : filteredAccounts.length === 0 ? (
-            <section className="max-w-xl mx-auto mt-10">
+            <section className="animate-fade-in max-w-xl mx-auto mt-10">
               <StateDisplay
                 type="empty"
                 title="No accounts found"
@@ -535,7 +538,7 @@ export const Accounts: React.FC = () => {
               />
             </section>
           ) : (
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <section className="animate-fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredAccounts.map((acc) => {
                 const isUpi =
                   acc.accountType === "UPI" ||
@@ -544,7 +547,7 @@ export const Accounts: React.FC = () => {
                 return (
                   <div
                     key={acc.id}
-                    className="card p-5 sm:p-6 min-h-[14rem] flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group"
+                    className="card p-5 sm:p-6 min-h-56 flex flex-col justify-between h-full space-y-4 transition-all duration-200 shadow-xs hover:shadow-md hover:border-border-muted/80 bg-bg-surface/95 relative group"
                   >
                     {/* Header */}
                     <div className="flex justify-between items-start">
@@ -603,369 +606,328 @@ export const Accounts: React.FC = () => {
           )}
 
           {/* Create / Edit Modal */}
-          {isModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal max-w-md">
-                <div className="modal-header">
-                  <h3 className="font-display text-text-primary text-heading-md">
-                    {activeAccount
-                      ? "Modify Bank Profile"
-                      : "Link Bank Account"}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+          <Dialog
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title={activeAccount ? "Modify Bank Profile" : "Link Bank Account"}
+            maxWidth="md"
+          >
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body space-y-4">
+                {/* Account Holder Name */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Account Holder Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. John Doe"
+                    value={accountHolderName}
+                    onChange={(e) => setAccountHolderName(e.target.value)}
+                    className="input"
+                  />
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                  <div className="modal-body space-y-4">
-                    {/* Account Holder Name */}
+                {/* Bank Name */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. HDFC, SBI, ICICI"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                {/* Account Number / Mobile Number (last 4 digits only) */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    {accountType === "UPI" ||
+                    bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i)
+                      ? "Mobile Number (Last 4 digits preferred)"
+                      : "Account Number (Last 4 digits preferred)"}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9876"
+                    maxLength={10}
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                {/* Account Type */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Account Type *
+                  </label>
+                  <Select
+                    value={accountType}
+                    onChange={setAccountType}
+                    options={[
+                      { value: "SAVINGS", label: "Savings Account" },
+                      { value: "CURRENT", label: "Current Account" },
+                      { value: "CREDIT_CARD", label: "Credit Card" },
+                      { value: "CASH", label: "Cash Wallet" },
+                      { value: "UPI", label: "UPI Virtual Wallet" },
+                    ]}
+                  />
+                </div>
+
+                {/* Manual Balance Initializer (mostly for UPI/CASH, but support for all) */}
+                <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
+                  <h4 className="text-body-sm font-bold text-text-primary">
+                    Manual Balance Initialization
+                  </h4>
+                  <p className="text-text-secondary text-[0.6875rem] leading-relaxed">
+                    Set a manual starting balance at a specific date.
+                    Transactions logged on or after this date will dynamically
+                    increment (credit) or decrement (debit) this starting value.
+                    Leave blank to disable this override.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Account Holder Name
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
+                        Starting Balance
+                      </label>
+                      <CurrencyInput
+                        placeholder="0.00"
+                        value={manualBalance}
+                        onChange={(e) => setManualBalance(e.target.value)}
+                        className="bg-bg-card"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
+                        As of Date
+                      </label>
+                      <input
+                        type="date"
+                        value={manualBalanceDate}
+                        onChange={(e) => setManualBalanceDate(e.target.value)}
+                        className="input bg-bg-card"
+                        required={!!manualBalance}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer justify-between">
+                {activeAccount ? (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    onClick={handleDeleteAccount}
+                    disabled={submitting}
+                  >
+                    Delete Account
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setIsModalOpen(false)}
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    isLoading={submitting}
+                    loadingText="Saving..."
+                  >
+                    Save Profile
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Dialog>
+
+          {/* Merge Accounts Modal */}
+          <Dialog
+            isOpen={isMergeModalOpen}
+            onClose={() => setIsMergeModalOpen(false)}
+            title="Merge Accounts"
+            maxWidth="md"
+          >
+            <form onSubmit={handleMergeSubmit}>
+              <div className="modal-body space-y-4">
+                {/* Source Account (Will be deleted) */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Source Account (will be deleted) *
+                  </label>
+                  <Select
+                    value={mergeSourceId}
+                    onChange={setMergeSourceId}
+                    options={[
+                      { value: "", label: "Select Source Account" },
+                      ...accounts.map((acc) => ({
+                        value: acc.id,
+                        label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
+                      })),
+                    ]}
+                  />
+                </div>
+
+                {/* Destination Account (Will be kept) */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Destination Account (will be kept) *
+                  </label>
+                  <Select
+                    value={mergeDestId}
+                    onChange={setMergeDestId}
+                    options={[
+                      { value: "", label: "Select Destination Account" },
+                      ...accounts
+                        .filter((acc) => acc.id !== mergeSourceId)
+                        .map((acc) => ({
+                          value: acc.id,
+                          label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
+                        })),
+                    ]}
+                  />
+                </div>
+
+                {/* Details Source Option */}
+                <div>
+                  <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                    Details to Keep *
+                  </label>
+                  <Select
+                    value={mergeDetailsSource}
+                    onChange={setMergeDetailsSource}
+                    options={[
+                      {
+                        value: "DESTINATION",
+                        label: "Keep Destination Account Details",
+                      },
+                      {
+                        value: "SOURCE",
+                        label: "Keep Source Account Details",
+                      },
+                      {
+                        value: "CUSTOM",
+                        label: "Enter Custom Details (Manually fill)",
+                      },
+                    ]}
+                  />
+                </div>
+
+                {/* Custom Details Fields */}
+                {mergeDetailsSource === "CUSTOM" && (
+                  <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
+                    <h4 className="text-body-sm font-bold text-text-primary">
+                      Custom Profile Data
+                    </h4>
+
+                    {/* Name */}
+                    <div>
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
+                        Profile Name *
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. John Doe"
-                        value={accountHolderName}
-                        onChange={(e) => setAccountHolderName(e.target.value)}
-                        className="input"
+                        placeholder="e.g. Merged Savings Account"
+                        value={mergeCustomName}
+                        onChange={(e) => setMergeCustomName(e.target.value)}
+                        className="input bg-bg-card"
+                        required
                       />
                     </div>
 
                     {/* Bank Name */}
                     <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
                         Bank Name
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. HDFC, SBI, ICICI"
-                        value={bankName}
-                        onChange={(e) => setBankName(e.target.value)}
-                        className="input"
+                        placeholder="e.g. HDFC Bank"
+                        value={mergeCustomBankName}
+                        onChange={(e) => setMergeCustomBankName(e.target.value)}
+                        className="input bg-bg-card"
                       />
                     </div>
 
-                    {/* Account Number / Mobile Number (last 4 digits only) */}
+                    {/* Account Number */}
                     <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        {accountType === "UPI" ||
-                        bankName?.match(/paytm|phone ?pe|google pay|gpay|bhim/i)
-                          ? "Mobile Number (Last 4 digits preferred)"
-                          : "Account Number (Last 4 digits preferred)"}
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
+                        Account Number (Last 4 digits)
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. 9876"
-                        maxLength={10}
-                        value={accountNumber}
-                        onChange={(e) => setAccountNumber(e.target.value)}
-                        className="input"
+                        maxLength={4}
+                        placeholder="e.g. 1234"
+                        value={mergeCustomAccountNumber}
+                        onChange={(e) =>
+                          setMergeCustomAccountNumber(e.target.value)
+                        }
+                        className="input bg-bg-card"
                       />
                     </div>
 
                     {/* Account Type */}
                     <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
                         Account Type *
                       </label>
                       <Select
-                        value={accountType}
-                        onChange={setAccountType}
+                        value={mergeCustomAccountType}
+                        onChange={setMergeCustomAccountType}
                         options={[
                           { value: "SAVINGS", label: "Savings Account" },
                           { value: "CURRENT", label: "Current Account" },
                           { value: "CREDIT_CARD", label: "Credit Card" },
+                          { value: "UPI", label: "UPI Handle" },
                           { value: "CASH", label: "Cash Wallet" },
-                          { value: "UPI", label: "UPI Virtual Wallet" },
+                          { value: "VIRTUAL", label: "Virtual Card" },
                         ]}
                       />
                     </div>
 
-                    {/* Manual Balance Initializer (mostly for UPI/CASH, but support for all) */}
-                    <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
-                      <h4 className="text-body-sm font-bold text-text-primary">
-                        Manual Balance Initialization
-                      </h4>
-                      <p className="text-text-secondary text-[0.6875rem] leading-relaxed">
-                        Set a manual starting balance at a specific date.
-                        Transactions logged on or after this date will
-                        dynamically increment (credit) or decrement (debit) this
-                        starting value. Leave blank to disable this override.
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Starting Balance
-                          </label>
-                          <CurrencyInput
-                            placeholder="0.00"
-                            value={manualBalance}
-                            onChange={(e) => setManualBalance(e.target.value)}
-                            className="bg-bg-card"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            As of Date
-                          </label>
-                          <input
-                            type="date"
-                            value={manualBalanceDate}
-                            onChange={(e) =>
-                              setManualBalanceDate(e.target.value)
-                            }
-                            className="input bg-bg-card"
-                            required={!!manualBalance}
-                          />
-                        </div>
-                      </div>
+                    {/* Balance */}
+                    <div>
+                      <label className="block text-body-xs font-semibold text-text-secondary mb-1">
+                        Manual Balance Override (Leave empty to sum balances)
+                      </label>
+                      <CurrencyInput
+                        placeholder="0.00"
+                        value={mergeCustomBalance}
+                        onChange={(e) => setMergeCustomBalance(e.target.value)}
+                        className="bg-bg-card"
+                      />
                     </div>
                   </div>
+                )}
 
-                  <div className="modal-footer justify-between">
-                    {activeAccount ? (
-                      <button
-                        type="button"
-                        onClick={handleDeleteAccount}
-                        disabled={submitting}
-                        className="btn btn-destructive"
-                      >
-                        Delete Account
-                      </button>
-                    ) : (
-                      <div />
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsModalOpen(false)}
-                        className="btn btn-secondary"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="btn btn-primary min-w-25"
-                      >
-                        {submitting ? "Saving..." : "Save Profile"}
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Merge Accounts Modal */}
-          {isMergeModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal max-w-md">
-                <div className="modal-header">
-                  <h3 className="font-display text-text-primary text-heading-md">
-                    Merge Accounts
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => setIsMergeModalOpen(false)}
-                    className="text-text-secondary hover:text-text-primary p-1 rounded-md hover:bg-bg-subtle cursor-pointer"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                {/* Warning message */}
+                <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-body-xs">
+                  <strong>Warning:</strong> Merging accounts is permanent. The
+                  source account will be deleted, but all its transactions and
+                  statements will be safely moved.
                 </div>
-
-                <form onSubmit={handleMergeSubmit}>
-                  <div className="modal-body space-y-4">
-                    {/* Source Account (Will be deleted) */}
-                    <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Source Account (will be deleted) *
-                      </label>
-                      <Select
-                        value={mergeSourceId}
-                        onChange={setMergeSourceId}
-                        options={[
-                          { value: "", label: "Select Source Account" },
-                          ...accounts.map((acc) => ({
-                            value: acc.id,
-                            label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
-                          })),
-                        ]}
-                      />
-                    </div>
-
-                    {/* Destination Account (Will be kept) */}
-                    <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Destination Account (will be kept) *
-                      </label>
-                      <Select
-                        value={mergeDestId}
-                        onChange={setMergeDestId}
-                        options={[
-                          { value: "", label: "Select Destination Account" },
-                          ...accounts
-                            .filter((acc) => acc.id !== mergeSourceId)
-                            .map((acc) => ({
-                              value: acc.id,
-                              label: `${getAccountDisplayName(acc)}${acc.balance !== null && acc.balance !== undefined ? ` (${formatCurrency(acc.balance)})` : ""}`,
-                            })),
-                        ]}
-                      />
-                    </div>
-
-                    {/* Details Source Option */}
-                    <div>
-                      <label className="block text-body-sm font-semibold text-text-secondary mb-1">
-                        Details to Keep *
-                      </label>
-                      <Select
-                        value={mergeDetailsSource}
-                        onChange={setMergeDetailsSource}
-                        options={[
-                          {
-                            value: "DESTINATION",
-                            label: "Keep Destination Account Details",
-                          },
-                          {
-                            value: "SOURCE",
-                            label: "Keep Source Account Details",
-                          },
-                          {
-                            value: "CUSTOM",
-                            label: "Enter Custom Details (Manually fill)",
-                          },
-                        ]}
-                      />
-                    </div>
-
-                    {/* Custom Details Fields */}
-                    {mergeDetailsSource === "CUSTOM" && (
-                      <div className="p-4 bg-bg-subtle rounded-lg border border-border-muted space-y-4">
-                        <h4 className="text-body-sm font-bold text-text-primary">
-                          Custom Profile Data
-                        </h4>
-
-                        {/* Name */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Profile Name *
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Merged Savings Account"
-                            value={mergeCustomName}
-                            onChange={(e) => setMergeCustomName(e.target.value)}
-                            className="input bg-bg-card"
-                            required
-                          />
-                        </div>
-
-                        {/* Bank Name */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Bank Name
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. HDFC Bank"
-                            value={mergeCustomBankName}
-                            onChange={(e) =>
-                              setMergeCustomBankName(e.target.value)
-                            }
-                            className="input bg-bg-card"
-                          />
-                        </div>
-
-                        {/* Account Number */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Account Number (Last 4 digits)
-                          </label>
-                          <input
-                            type="text"
-                            maxLength={4}
-                            placeholder="e.g. 1234"
-                            value={mergeCustomAccountNumber}
-                            onChange={(e) =>
-                              setMergeCustomAccountNumber(e.target.value)
-                            }
-                            className="input bg-bg-card"
-                          />
-                        </div>
-
-                        {/* Account Type */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Account Type *
-                          </label>
-                          <Select
-                            value={mergeCustomAccountType}
-                            onChange={setMergeCustomAccountType}
-                            options={[
-                              { value: "SAVINGS", label: "Savings Account" },
-                              { value: "CURRENT", label: "Current Account" },
-                              { value: "CREDIT_CARD", label: "Credit Card" },
-                              { value: "UPI", label: "UPI Handle" },
-                              { value: "CASH", label: "Cash Wallet" },
-                              { value: "VIRTUAL", label: "Virtual Card" },
-                            ]}
-                          />
-                        </div>
-
-                        {/* Balance */}
-                        <div>
-                          <label className="block text-body-xs font-semibold text-text-secondary mb-1">
-                            Manual Balance Override (Leave empty to sum
-                            balances)
-                          </label>
-                          <CurrencyInput
-                            placeholder="0.00"
-                            value={mergeCustomBalance}
-                            onChange={(e) =>
-                              setMergeCustomBalance(e.target.value)
-                            }
-                            className="bg-bg-card"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Warning message */}
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-body-xs">
-                      <strong>Warning:</strong> Merging accounts is permanent.
-                      The source account will be deleted, but all its
-                      transactions and statements will be safely moved.
-                    </div>
-                  </div>
-
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      onClick={() => setIsMergeModalOpen(false)}
-                      className="btn btn-secondary"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={mergeSubmitting}
-                      className="btn btn-primary min-w-30"
-                    >
-                      {mergeSubmitting ? "Merging..." : "Confirm Merge"}
-                    </button>
-                  </div>
-                </form>
               </div>
-            </div>
-          )}
+
+              <ModalFooter
+                onCancel={() => setIsMergeModalOpen(false)}
+                submitText="Confirm Merge"
+                isLoading={mergeSubmitting}
+                loadingText="Merging..."
+              />
+            </form>
+          </Dialog>
         </>
       ) : (
         <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">

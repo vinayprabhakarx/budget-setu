@@ -1,15 +1,52 @@
 import React from 'react';
 import { Skeleton } from '../ui/Skeleton';
-import { TableSkeleton } from './shared/TableSkeleton';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../shared/Table';
 
 export const AdminUserManagementSkeleton: React.FC = () => {
   return (
-    <div className="w-full space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-text-primary">User Management</h2>
-        <Skeleton className="h-10 w-32 rounded-lg" />
-      </div>
-      <TableSkeleton headers={["Name", "Email", "Role", "Status", "Actions"]} rows={6} />
+    <div className="w-full">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>User</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Joined</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...Array(6)].map((_, i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <Skeleton className="h-4 w-32 rounded" />
+                    <Skeleton className="h-3 w-44 rounded" />
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-14 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-20 rounded" />
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

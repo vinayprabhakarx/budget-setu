@@ -152,19 +152,39 @@ public class AnalyticsService {
                                 (AnalyticsResponse.CategoryBreakdownItem cb) -> cb.getAmount()).reversed())
                         .toList();
 
-        // 5. Top Expenses
+        // 5. Top Expenses & Top Incomes
         List<AnalyticsResponse.TopExpenseItem> topExpenses = transactionRepository
                 .findTopExpensesByDateRange(userId, from, to, org.springframework.data.domain.PageRequest.of(0, 5))
                 .stream()
                 .map(t -> {
                     Category cat = t.getCategoryId() != null ? categories.get(t.getCategoryId()) : null;
+                    String payeeVal = (t.getPayee() != null && !t.getPayee().isBlank()) ? t.getPayee() : t.getDescription();
                     return AnalyticsResponse.TopExpenseItem.builder()
                             .transactionId(t.getId().toString())
                             .description(t.getDescription())
+                            .payee(payeeVal)
                             .date(t.getTransactionDate().toString())
                             .amount(t.getAmount())
                             .categoryName(cat != null ? cat.getName() : "Unknown")
                             .categoryColor(cat != null ? cat.getColor() : "#7A7470")
+                            .build();
+                })
+                .toList();
+
+        List<AnalyticsResponse.TopExpenseItem> topIncomes = transactionRepository
+                .findTopIncomesByDateRange(userId, from, to, org.springframework.data.domain.PageRequest.of(0, 5))
+                .stream()
+                .map(t -> {
+                    Category cat = t.getCategoryId() != null ? categories.get(t.getCategoryId()) : null;
+                    String payeeVal = (t.getPayee() != null && !t.getPayee().isBlank()) ? t.getPayee() : t.getDescription();
+                    return AnalyticsResponse.TopExpenseItem.builder()
+                            .transactionId(t.getId().toString())
+                            .description(t.getDescription())
+                            .payee(payeeVal)
+                            .date(t.getTransactionDate().toString())
+                            .amount(t.getAmount())
+                            .categoryName(cat != null ? cat.getName() : "Unknown")
+                            .categoryColor(cat != null ? cat.getColor() : "#10B981")
                             .build();
                 })
                 .toList();
@@ -176,6 +196,7 @@ public class AnalyticsService {
                 .categoryBreakdown(categoryBreakdown)
                 .incomeCategoryBreakdown(incomeCategoryBreakdown)
                 .topExpenses(topExpenses)
+                .topIncomes(topIncomes)
                 .build();
     }
 
@@ -229,21 +250,21 @@ public class AnalyticsService {
     }
 
     private AnalyticsResponse.CategoryBreakdownItem toCategoryBreakdownItem(
-            Object[] row, Map<UUID, Category> categories, BigDecimal totalExpense) {
+            Object[] row, Map<UUID, Category> categories, BigDecimal totalForType) {
         UUID categoryId = (UUID) row[0];
         BigDecimal amount = nullToZero((BigDecimal) row[1]);
-        Category category = categories.get(categoryId);
+        Category category = categoryId != null ? categories.get(categoryId) : null;
 
-        double percent = totalExpense.compareTo(BigDecimal.ZERO) == 0
+        double percent = totalForType.compareTo(BigDecimal.ZERO) == 0
                 ? 0
                 : amount.multiply(BigDecimal.valueOf(100))
-                        .divide(totalExpense, 2, RoundingMode.HALF_UP)
+                        .divide(totalForType, 2, RoundingMode.HALF_UP)
                         .doubleValue();
 
         return AnalyticsResponse.CategoryBreakdownItem.builder()
-                .categoryId(categoryId.toString())
-                .name(category != null ? category.getName() : "Unknown")
-                .color(category != null ? category.getColor() : "#7A7470")
+                .categoryId(categoryId != null ? categoryId.toString() : "uncategorized")
+                .name(category != null ? category.getName() : "Uncategorized")
+                .color(category != null && category.getColor() != null ? category.getColor() : "#10B981")
                 .amount(amount)
                 .percent(percent)
                 .build();

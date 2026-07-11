@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Pagination } from "../../components/ui";
 import api from "../../api/axiosInstance";
 import {
   ShieldAlert,
@@ -145,10 +146,6 @@ export const AdminUserManagement: React.FC = () => {
     (page + 1) * pageSize,
   );
 
-  if (loading) {
-    return <AdminUserManagementSkeleton />;
-  }
-
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <PageHeader
@@ -213,6 +210,9 @@ export const AdminUserManagement: React.FC = () => {
 
       {/* Table Container matching Transactions table */}
       <section className="card p-0 overflow-hidden">
+        {loading ? (
+          <AdminUserManagementSkeleton />
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -234,19 +234,19 @@ export const AdminUserManagement: React.FC = () => {
               paginatedUsers.map((user) => (
                 <TableRow key={user.id} className="text-body-md">
                   <TableCell>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-3">
                       <div className="h-10 w-10 shrink-0 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center border border-brand/20">
                         {user.fullName.charAt(0)}
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-text-primary">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-text-primary block truncate">
                           {user.fullName}
-                        </div>
-                        <div className="text-sm text-text-tertiary flex items-center gap-1">
-                          {user.email}
+                        </span>
+                        <div className="text-xs text-text-tertiary flex items-center gap-1 mt-0.5 truncate">
+                          <span>{user.email}</span>
                           {user.emailVerified && (
                             <span title="Verified">
-                              <CheckCircle className="h-3 w-3 text-success" />
+                              <CheckCircle className="h-3 w-3 shrink-0 text-success" />
                             </span>
                           )}
                         </div>
@@ -324,29 +324,15 @@ export const AdminUserManagement: React.FC = () => {
             )}
           </TableBody>
         </Table>
+        )}
       </section>
 
-      {/* Pagination Footer matching Transactions table */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="btn btn-secondary btn-sm"
-          >
-            Previous
-          </button>
-          <span className="text-body-sm text-text-secondary font-medium mx-2">
-            Page {page + 1} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="btn btn-secondary btn-sm"
-          >
-            Next
-          </button>
-        </div>
+      {!loading && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

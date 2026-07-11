@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Inbox, AlertCircle, CheckCircle } from 'lucide-react';
+import { Button } from '../ui/Button';
 
 export type StateType = 'loading' | 'empty' | 'error' | 'success';
 
@@ -56,7 +57,7 @@ export const StateDisplay: React.FC<StateDisplayProps> = ({
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center py-16 text-center space-y-3 ${className}`}>
+    <div className={`flex flex-col items-center justify-center py-16 text-center space-y-3.5 ${className}`}>
       {icon || getDefaultIcon()}
       
       <div className="space-y-1 max-w-sm">
@@ -64,28 +65,28 @@ export const StateDisplay: React.FC<StateDisplayProps> = ({
           {title || getDefaultTitle()}
         </h3>
         {description && (
-          <p className="text-body-sm text-text-secondary">
+          <p className="text-body-sm text-text-secondary leading-relaxed">
             {description}
           </p>
         )}
       </div>
 
       {action && (
-        <div className="pt-2">
+        <div className="pt-3">
           {action.href ? (
-            <Link
-              to={action.href}
-              className="text-brand font-semibold hover:underline text-body-sm"
-            >
-              {action.label}
+            <Link to={action.href}>
+              <Button variant="primary" size="md">
+                {action.label}
+              </Button>
             </Link>
           ) : (
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={action.onClick}
-              className="text-brand font-semibold hover:underline text-body-sm"
             >
               {action.label}
-            </button>
+            </Button>
           )}
         </div>
       )}

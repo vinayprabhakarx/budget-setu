@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../../api/axiosInstance';
 import { useToast } from '../../context/ToastContext';
 import { useImportProcess } from '../../context/ImportProcessContext';
-import { FileUp, FileText, X, Loader2 } from 'lucide-react';
+import { FileUp, FileText } from 'lucide-react';
 import { Select } from './Select';
+import { Dialog, ModalFooter } from '../ui';
 
 interface Account {
   id: string;
@@ -230,16 +231,18 @@ export const UploadStatementModal: React.FC<UploadStatementModalProps> = ({ isOp
   // Show password sub-modal on top
   if (isPasswordModalOpen) {
     return (
-      <div className="modal-overlay">
-        <div className="modal max-w-sm">
-          <div className="modal-header">
-            <h3 className="font-display text-text-primary text-heading-md">Password Required</h3>
-          </div>
+      <Dialog isOpen={true} onClose={() => { setIsPasswordModalOpen(false); setCurrentPasswordFile(null); setPasswordError(''); }} title="Password Required" maxWidth="sm">
           <form onSubmit={handlePasswordSubmit}>
             <div className="modal-body space-y-4">
               <p className="text-body-sm text-text-secondary leading-relaxed">
                 <span className="font-semibold">{currentPasswordFile?.name}</span> is password-protected. Enter the password to decrypt and parse it.
               </p>
+              {passwordError && (
+                <p className="text-body-xs font-semibold text-expense flex items-center gap-1.5 bg-expense-bg/20 p-2 rounded-md border border-expense/10">
+                  <span className="h-1.5 w-1.5 rounded-full bg-expense shrink-0" />
+                  <span>{passwordError}</span>
+                </p>
+              )}
               <div>
                 <label className="block text-body-sm font-medium text-text-primary mb-1">
                   Document Password
@@ -249,60 +252,29 @@ export const UploadStatementModal: React.FC<UploadStatementModalProps> = ({ isOp
                   placeholder="Enter password..."
                   value={pdfPassword}
                   onChange={e => setPdfPassword(e.target.value)}
-                  className="input"
-                  disabled={isRetryingWithPassword}
+                  className="input bg-bg-card"
                   autoFocus
-                  required
                 />
               </div>
-              {passwordError && (
-                <p className="text-body-xs font-semibold text-expense flex items-center gap-1.5 bg-expense-bg/20 p-2 rounded-md border border-expense/10">
-                  <span className="h-1.5 w-1.5 rounded-full bg-expense shrink-0" />
-                  <span>{passwordError}</span>
-                </p>
-              )}
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                onClick={() => { setIsPasswordModalOpen(false); setPdfPassword(''); setPasswordError(''); }}
-                disabled={isRetryingWithPassword}
-                className="btn btn-secondary"
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                disabled={isRetryingWithPassword}
-                className="btn btn-primary min-w-28 flex items-center justify-center gap-1.5"
-              >
-                {isRetryingWithPassword
-                  ? <><Loader2 className="h-4 w-4 animate-spin" /><span>Unlocking...</span></>
-                  : <span>Unlock PDF</span>
-                }
-              </button>
-            </div>
+            <ModalFooter
+              onCancel={() => {
+                setIsPasswordModalOpen(false);
+                setPdfPassword('');
+                setPasswordError('');
+              }}
+              submitText="Unlock PDF"
+              disabled={!pdfPassword}
+              isLoading={isRetryingWithPassword}
+              loadingText="Unlocking..."
+            />
           </form>
-        </div>
-      </div>
+      </Dialog>
     );
   }
 
-
   return (
-    <div className="modal-overlay">
-      <div className="modal max-w-lg">
-        {/* Header */}
-        <div className="modal-header">
-          <h3 className="font-display text-text-primary text-heading-md">Upload Statement</h3>
-          <button
-            onClick={handleClose}
-            className="p-1.5 rounded-md hover:bg-bg-subtle text-text-secondary transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
+    <Dialog isOpen={isOpen} onClose={handleClose} title="Upload Statement" maxWidth="lg">
         <form onSubmit={handleSubmit}>
           <div className="modal-body space-y-5">
             <p className="text-body-sm text-text-secondary">
@@ -408,31 +380,14 @@ export const UploadStatementModal: React.FC<UploadStatementModalProps> = ({ isOp
             </div>
           </div>
 
-          <div className="modal-footer">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUploading || selectedFiles.length === 0}
-              className="btn btn-primary min-w-32 flex items-center justify-center gap-2"
-            >
-              {isUploading ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /><span>Starting...</span></>
-              ) : (
-                <>
-                  <FileUp className="h-4 w-4" />
-                  <span>Upload {selectedFiles.length > 1 ? 'Files' : 'Statement'}</span>
-                </>
-              )}
-            </button>
-          </div>
+          <ModalFooter
+            onCancel={handleClose}
+            submitText={`Upload ${selectedFiles.length > 1 ? 'Files' : 'Statement'}`}
+            isLoading={isUploading}
+            loadingText="Starting..."
+            disabled={selectedFiles.length === 0}
+          />
         </form>
-      </div>
-    </div>
+    </Dialog>
   );
 };

@@ -82,7 +82,7 @@ export const About: React.FC = () => {
                 <h3 className="font-display text-text-primary text-2xl mb-4">
                   Zero Trackers
                 </h3>
-                <p className="text-text-secondary text-body-md leading-relaxed flex-grow">
+                <p className="text-text-secondary text-body-md leading-relaxed grow">
                   We do not include Google Analytics, Facebook SDKs, or Hotjar
                   scripts. We don't want to track your clicks or watch your
                   cursor. Your session is private, and we collect only what is

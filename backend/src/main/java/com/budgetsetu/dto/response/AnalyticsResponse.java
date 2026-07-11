@@ -22,6 +22,7 @@ public class AnalyticsResponse {
     private List<CategoryBreakdownItem> categoryBreakdown;
     private List<CategoryBreakdownItem> incomeCategoryBreakdown;
     private List<TopExpenseItem> topExpenses;
+    private List<TopExpenseItem> topIncomes;
 
     @Getter
     @Setter
@@ -43,6 +44,7 @@ public class AnalyticsResponse {
     public static class TopExpenseItem {
         private String transactionId;
         private String description;
+        private String payee;
         private String date;
         private BigDecimal amount;
         private String categoryName;

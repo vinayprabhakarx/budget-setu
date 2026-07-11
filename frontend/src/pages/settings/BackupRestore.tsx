@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Database, Download, Upload, AlertTriangle, Loader2, ArrowLeft, X, Lock, Eye, EyeOff } from 'lucide-react';
+import { Dialog, ModalFooter } from '../../components/ui';
+import { Database, Download, Upload, AlertTriangle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import api from '../../api/axiosInstance';
@@ -223,29 +224,18 @@ export const BackupRestore: React.FC = () => {
       </div>
 
       {/* Password Modals */}
-      {(isExportModalOpen || isRestoreModalOpen) && (
-        <div className="modal-overlay">
-          <div className="modal max-w-md">
-            <div className="modal-header">
-              <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-brand" />
-                <h3 className="font-semibold text-text-primary">
-                  {isExportModalOpen ? 'Secure Backup Export' : 'Secure Backup Restore'}
-                </h3>
-              </div>
-              <button
-                onClick={() => {
-                  setIsExportModalOpen(false);
-                  setIsRestoreModalOpen(false);
-                  resetPasswords();
-                  setSelectedFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = '';
-                }}
-                className="p-1 rounded-md text-text-muted hover:bg-bg-subtle hover:text-text-primary transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <Dialog
+        isOpen={isExportModalOpen || isRestoreModalOpen}
+        onClose={() => {
+          setIsExportModalOpen(false);
+          setIsRestoreModalOpen(false);
+          resetPasswords();
+          setSelectedFile(null);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }}
+        title={isExportModalOpen ? 'Secure Backup Export' : 'Secure Backup Restore'}
+        maxWidth="md"
+      >
             
             <form onSubmit={isExportModalOpen ? handleExportBackup : handleRestoreBackup}>
               <div className="modal-body space-y-4">
@@ -322,38 +312,19 @@ export const BackupRestore: React.FC = () => {
               </div>
 
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsExportModalOpen(false);
-                    setIsRestoreModalOpen(false);
-                    resetPasswords();
-                    setSelectedFile(null);
-                    if (fileInputRef.current) fileInputRef.current.value = '';
-                  }}
-                  className="btn btn-secondary flex-1 py-2"
-                  disabled={backupExportLoading || backupRestoreLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary flex-1 py-2 flex items-center justify-center gap-2"
-                  disabled={backupExportLoading || backupRestoreLoading}
-                >
-                  {(backupExportLoading || backupRestoreLoading) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    isExportModalOpen ? <Download className="h-4 w-4" /> : <Upload className="h-4 w-4" />
-                  )}
-                  <span>{isExportModalOpen ? 'Export' : 'Restore'}</span>
-                </button>
-              </div>
+              <ModalFooter
+                onCancel={() => {
+                  setIsExportModalOpen(false);
+                  setIsRestoreModalOpen(false);
+                  resetPasswords();
+                  setSelectedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                submitText={isExportModalOpen ? 'Export' : 'Restore'}
+                isLoading={backupExportLoading || backupRestoreLoading}
+              />
             </form>
-          </div>
-        </div>
-      )}
+      </Dialog>
     </div>
   );
 };

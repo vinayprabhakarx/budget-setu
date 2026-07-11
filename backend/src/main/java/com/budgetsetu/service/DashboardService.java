@@ -235,7 +235,7 @@ public class DashboardService {
                         BigDecimal totalExpense) {
                 UUID categoryId = (UUID) row[0];
                 BigDecimal amount = nullToZero((BigDecimal) row[1]);
-                Category category = categories.get(categoryId);
+                Category category = categoryId != null ? categories.get(categoryId) : null;
                 double percentage = totalExpense.compareTo(BigDecimal.ZERO) == 0
                                 ? 0
                                 : amount.multiply(BigDecimal.valueOf(100))
@@ -243,9 +243,9 @@ public class DashboardService {
                                                 .doubleValue();
 
                 return DashboardResponse.CategoryBreakdown.builder()
-                                .categoryId(categoryId.toString())
-                                .name(category != null ? category.getName() : "Unknown")
-                                .color(category != null ? category.getColor() : null)
+                                .categoryId(categoryId != null ? categoryId.toString() : "uncategorized")
+                                .name(category != null ? category.getName() : "Uncategorized")
+                                .color(category != null && category.getColor() != null ? category.getColor() : "#10B981")
                                 .amount(amount)
                                 .percentage(percentage)
                                 .build();

@@ -273,10 +273,42 @@ public class ImportService {
                 .build());
     }
 
-    private String extractAccountNumber(String text, String sourceName) {
+    private String extractAccountNumber(String text, String sourceName, boolean isUpiApp) {
         if (text == null || text.trim().isEmpty()) {
             return "0000";
         }
+        if (isUpiApp) {
+            String[] mobilePatterns = {
+                    "(?i)(?:mobile|mob|registered\\s*mobile|mobile\\s*no\\.?|mobile\\s*number|phone\\s*no\\.?|phone\\s*number|phone|statement\\s+for)\\s*:?\\s*(?:\\+?91[- ]?)?([6-9]\\d{9})\\b",
+                    "(?i)\\+91[- ]?([6-9]\\d{9})\\b"
+            };
+            for (String patternText : mobilePatterns) {
+                Matcher matcher = Pattern.compile(patternText).matcher(text);
+                if (matcher.find()) {
+                    String matched = matcher.group(1);
+                    String last4 = last4Digits(matched);
+                    if (!last4.isBlank()) {
+                        return last4;
+                    }
+                }
+            }
+            String headerText = text.substring(0, Math.min(text.length(), 3000));
+            Matcher mobMatcher = Pattern.compile("\\b([6-9]\\d{9})\\b").matcher(headerText);
+            if (mobMatcher.find()) {
+                String last4 = last4Digits(mobMatcher.group(1));
+                if (!last4.isBlank()) {
+                    return last4;
+                }
+            }
+            if (sourceName != null) {
+                Matcher sourceDigits = Pattern.compile("\\b\\d{4,}\\b").matcher(sourceName);
+                if (sourceDigits.find()) {
+                    return last4Digits(sourceDigits.group());
+                }
+            }
+            return "0000";
+        }
+
         String lowerText = text.toLowerCase(Locale.ROOT);
 
         String[] explicitPatterns = {
@@ -367,7 +399,8 @@ public class ImportService {
                 accountType = "UPI";
             }
 
-            String accountNumber = extractAccountNumber(text, sourceName);
+            boolean isUpi = "UPI".equals(accountType);
+            String accountNumber = extractAccountNumber(text, sourceName, isUpi);
             return new AccountDiscovery(bankName, accountNumber, accountType);
         }
 
@@ -379,7 +412,7 @@ public class ImportService {
         boolean isPaymentBank = isPaymentBankStatement(headerText, lowerSource);
 
         String bankName = resolveBankName(headerText, lowerText, sourceName, isUpiApp, isPaymentBank);
-        String accountNumber = extractAccountNumber(text, sourceName);
+        String accountNumber = extractAccountNumber(text, sourceName, isUpiApp);
         String accountType = resolveAccountType(lowerText, lowerSource, isUpiApp, isPaymentBank);
         return new AccountDiscovery(bankName, accountNumber, accountType);
     }

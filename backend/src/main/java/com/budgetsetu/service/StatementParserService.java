@@ -126,7 +126,22 @@ public class StatementParserService {
         if (lowerSource.contains("pdf") || lowerFileName.endsWith(".pdf")) {
             genericResult = pdfParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
         } else if (lowerSource.contains("xls") || lowerFileName.endsWith(".xls") || lowerFileName.endsWith(".xlsx")) {
-            genericResult = excelParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
+            try {
+                genericResult = excelParser.parse(new ByteArrayInputStream(fileBytes), fileName, password);
+            } catch (Exception ignored) {
+            }
+            if ((genericResult == null || genericResult.isEmpty()) && lowerFileName.endsWith(".xls")) {
+                try {
+                    genericResult = htmlParser.parse(new ByteArrayInputStream(fileBytes), fileName);
+                } catch (Exception ignored) {
+                }
+                if (genericResult == null || genericResult.isEmpty()) {
+                    try {
+                        genericResult = csvParser.parse(new ByteArrayInputStream(fileBytes), fileName);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
         } else if (lowerSource.contains("html") || lowerFileName.endsWith(".html") || lowerFileName.endsWith(".htm")) {
             genericResult = htmlParser.parse(new ByteArrayInputStream(fileBytes), fileName);
         } else if (lowerSource.contains("csv") || lowerFileName.endsWith(".csv")) {

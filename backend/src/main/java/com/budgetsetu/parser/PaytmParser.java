@@ -13,7 +13,7 @@ public class PaytmParser extends BaseBankParser {
 
     private static final Pattern DATE_LEAD = Pattern
             .compile("^\\s*(\\d{1,2}[-\\s]+[A-Za-z]{3}(?:[-\\s,']*\\d{2,4}(?!:))?|\\d{1,2}[-/.]\\d{1,2}[-/.]\\d{2,4})");
-    private static final Pattern PAYTM_AMOUNT = Pattern.compile("([+-])\\s*Rs\\.\\s*([\\d,.]+)");
+    private static final Pattern PAYTM_AMOUNT = Pattern.compile("([+-])?\\s*Rs\\.\\s*([\\d,.]+)");
 
     @Override
     public List<Map<String, String>> parseText(String text, String fileName) {
@@ -38,7 +38,31 @@ public class PaytmParser extends BaseBankParser {
             if (amtMatcher.find()) {
                 String sign = amtMatcher.group(1);
                 String amount = amtMatcher.group(2).replace(",", "");
-                String type = "+".equals(sign) ? "CREDIT" : "DEBIT";
+
+                boolean isCreditKeyword = fullText.contains("Received from")
+                        || fullText.contains("Money received")
+                        || fullText.contains("Payment received")
+                        || fullText.contains("Added to Paytm Wallet")
+                        || fullText.contains("Cashback")
+                        || fullText.contains("Refund");
+
+                boolean isDebitKeyword = fullText.contains("Paid to")
+                        || fullText.contains("Money sent to")
+                        || fullText.contains("Paid for")
+                        || fullText.contains("Payment made");
+
+                boolean isSelfKeyword = fullText.contains("Transferred to Self");
+
+                String type;
+                if (isCreditKeyword || "+".equals(sign)) {
+                    type = "CREDIT";
+                } else if (isDebitKeyword || "-".equals(sign)) {
+                    type = "DEBIT";
+                } else if (isSelfKeyword) {
+                    type = "SELF_TRANSFER";
+                } else {
+                    type = "+".equals(sign) ? "CREDIT" : "DEBIT";
+                }
 
                 String narration = fullText;
                 String party = null;
@@ -48,6 +72,10 @@ public class PaytmParser extends BaseBankParser {
                         party = extractBetween(fullText, "Received from", "UPI ID:");
                         if (party == null)
                             party = extractBetween(fullText, "Received from", "Rs.");
+                    } else if (fullText.contains("Money received from")) {
+                        party = extractBetween(fullText, "Money received from", "UPI ID:");
+                        if (party == null)
+                            party = extractBetween(fullText, "Money received from", "Rs.");
                     } else if (fullText.contains("Added to Paytm Wallet")) {
                         party = "Paytm Wallet";
                     }
@@ -73,7 +101,7 @@ public class PaytmParser extends BaseBankParser {
                 txn.put("transaction_type", type);
                 if (type.equals("DEBIT")) {
                     txn.put("withdrawal_amount", amount);
-                } else {
+                } else if (type.equals("CREDIT")) {
                     txn.put("deposit_amount", amount);
                 }
 
@@ -81,10 +109,10 @@ public class PaytmParser extends BaseBankParser {
                 txn.put("mode", "UPI");
 
                 if (party != null) {
-                    if (type.equals("DEBIT"))
-                        txn.put("payee", party);
-                    else
+                    txn.put("payee", party);
+                    if (type.equals("CREDIT")) {
                         txn.put("payer", party);
+                    }
                 }
 
                 Matcher upiMatcher = Pattern.compile("UPI ID:\\s*([A-Za-z0-9._@-]+)").matcher(fullText);
@@ -96,6 +124,16 @@ public class PaytmParser extends BaseBankParser {
                 if (txIdMatcher.find()) {
                     txn.put("transaction_id", txIdMatcher.group(1));
                     txn.put("reference_number", txIdMatcher.group(1));
+                }
+
+                Matcher tagMatcher = Pattern.compile("Tag:\\s*(?:#\\s*)?([A-Za-z0-9_&/\\s-]+?)(?=\\s+(?:[A-Za-z\\s]+Bank|Paytm\\s+Wallet|[-+]?\\s*Rs\\.)|$)").matcher(fullText);
+                if (tagMatcher.find()) {
+                    String cleanTag = tagMatcher.group(1).replaceAll("^#\\s*", "").trim();
+                    if (!cleanTag.isEmpty()) {
+                        txn.put("tag", cleanTag);
+                        txn.put("category", cleanTag);
+                        txn.put("suggested_category", cleanTag);
+                    }
                 }
 
                 Matcher noteMatcher = Pattern.compile("Note:\\s*(.*?)\\s*Tag:").matcher(fullText);

@@ -111,7 +111,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
        void updateAccountId(@Param("sourceAccountId") UUID sourceAccountId, @Param("destAccountId") UUID destAccountId,
                      @Param("userId") UUID userId);
 
-       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
+       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER', 'SELF_TRANSFER') THEN -t.amount ELSE t.amount END) " +
                      "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false")
        BigDecimal calculateBalanceByAccountIdAndUserId(@Param("accountId") UUID accountId,
                      @Param("userId") UUID userId);
@@ -123,7 +123,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
        List<BigDecimal> findLatestRunningBalance(@Param("accountId") UUID accountId, @Param("userId") UUID userId,
                      org.springframework.data.domain.Pageable pageable);
 
-       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER') THEN -t.amount ELSE t.amount END) " +
+       @Query("SELECT SUM(CASE WHEN t.transactionType IN ('EXPENSE', 'TRANSFER', 'SELF_TRANSFER') THEN -t.amount ELSE t.amount END) " +
                      "FROM Transaction t WHERE t.accountId = :accountId AND t.userId = :userId AND t.isDeleted = false "
                      +
                      "AND t.transactionDate >= :startDate")

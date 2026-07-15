@@ -83,9 +83,8 @@ public class SbiParser extends BaseBankParser {
                                 txn.put("transaction_id", parts[i + 1]);
                             if (i + 2 < parts.length) {
                                 String counterParty = parts[i + 2].trim();
-                                if (txn.get("transaction_type").equals("DEBIT")) {
-                                    txn.put("payee", counterParty);
-                                } else {
+                                txn.put("payee", counterParty);
+                                if ("CREDIT".equals(txn.get("transaction_type"))) {
                                     txn.put("payer", counterParty);
                                 }
                             }

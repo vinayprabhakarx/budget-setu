@@ -107,7 +107,7 @@ public class ImportProcessingService {
                 int processed = 0;
                 for (Map<String, String> row : rawRows) {
                     ParsedRow parsed = parseRow(row, account.getId(), statementImport.getUserId(), merchantRules,
-                            availableCategories, uncategorized, fallbackYear);
+                            availableCategories, uncategorized, fallbackYear, statementImport.getBankKey(), statementImport.getSource());
                     parsedRows.add(parsed);
                     candidateFingerprints.add(parsed.fingerprint());
                     processed++;
@@ -165,7 +165,7 @@ public class ImportProcessingService {
                     seenFingerprints.add(parsed.fingerprint());
 
                     String finalType = parsed.transactionType();
-                    if (parsed.categoryId() != null) {
+                    if ((finalType == null || finalType.isBlank()) && parsed.categoryId() != null) {
                         for (Category c : availableCategories) {
                             if (c.getId().equals(parsed.categoryId())) {
                                 finalType = c.getType().toUpperCase();
@@ -286,7 +286,9 @@ public class ImportProcessingService {
             List<MerchantRule> merchantRules,
             List<Category> categories,
             Category uncategorized,
-            int fallbackYear) {
+            int fallbackYear,
+            String bankKey,
+            String source) {
         try {
             String rawRow = row.getOrDefault("raw_row", row.toString());
             LocalDate transactionDate = parseDate(row, fallbackYear);
@@ -306,8 +308,8 @@ public class ImportProcessingService {
                 }
             }
 
-            String payeeFromRow = firstNonBlank(row, "payee", "merchant_name", "merchant", "counterparty",
-                    "payee_name");
+            String payeeFromRow = firstNonBlank(row, "payee", "payer", "merchant_name", "merchant", "counterparty",
+                    "payee_name", "party");
             String rawParticulars = firstNonBlank(row,
                     "narration",
                     "description",
@@ -362,7 +364,23 @@ public class ImportProcessingService {
                 description = details.description() != null ? details.description() : rawParticulars;
             }
 
-            String paymentMode = firstNonBlank(row, "mode", "payment_mode");
+            if (isSelfTransfer(payee, description, rawParticulars)) {
+                transactionType = "SELF_TRANSFER";
+            } else if (!"INCOME".equals(transactionType)) {
+                String textToCheck = ((payee != null ? payee : "") + " "
+                        + (description != null ? description : "") + " "
+                        + (rawParticulars != null ? rawParticulars : "")).toLowerCase(Locale.ROOT);
+                if (textToCheck.contains("received from")
+                        || textToCheck.contains("money received")
+                        || textToCheck.contains("payment received")
+                        || textToCheck.contains("added to paytm wallet")
+                        || textToCheck.contains("cashback received")
+                        || textToCheck.contains("refund received")) {
+                    transactionType = "INCOME";
+                }
+            }
+
+            String paymentMode = firstNonBlank(row, "mode", "payment_mode", "transaction_mode", "channel");
             if (paymentMode == null || paymentMode.isBlank() || "OTHER".equalsIgnoreCase(paymentMode)) {
                 String modeTarget = (rawParticulars != null ? rawParticulars : "").toUpperCase(Locale.ROOT);
                 if (modeTarget.contains("UPI")) paymentMode = "UPI";
@@ -371,6 +389,9 @@ public class ImportProcessingService {
                 else if (modeTarget.contains("RTGS")) paymentMode = "RTGS";
                 else if (modeTarget.contains("ATM") || modeTarget.contains("CASH")) paymentMode = "CASH";
                 else if (modeTarget.contains("POS") || modeTarget.contains("SWIPE")) paymentMode = "POS";
+                else if (modeTarget.contains("CARD")) paymentMode = "CARD";
+                else if (modeTarget.contains("CHQ") || modeTarget.contains("CHEQUE")) paymentMode = "CHEQUE";
+                else if (modeTarget.contains("NETBANKING") || modeTarget.contains("NB")) paymentMode = "NETBANKING";
                 else paymentMode = "OTHER";
             }
             if (paymentMode.length() > 30) {
@@ -383,19 +404,22 @@ public class ImportProcessingService {
                     + (referenceNumber != null ? referenceNumber.toLowerCase(Locale.ROOT) : "") + " "
                     + paymentMode.toLowerCase(Locale.ROOT) + " "
                     + (transactionType != null ? transactionType.toLowerCase(Locale.ROOT) : "")).trim();
-            Category matchedCategory = matchCategory(searchTarget, merchantRules, categories, uncategorized);
-
-            if (matchedCategory.getId().equals(uncategorized.getId())) {
-                String suggestedCatName = row.get("suggested_category");
-                if (suggestedCatName != null) {
-                    Category found = categories.stream()
-                            .filter(c -> c.getName().equalsIgnoreCase(suggestedCatName))
-                            .findFirst()
-                            .orElse(null);
-                    if (found != null) {
-                        matchedCategory = found;
-                    }
+            Category matchedCategory = null;
+            boolean isPaytmStatement = (bankKey != null && bankKey.equalsIgnoreCase("PAYTM"))
+                    || (source != null && source.toLowerCase(Locale.ROOT).contains("paytm"));
+            if (isPaytmStatement) {
+                String explicitCat = firstNonBlank(row, "tag", "category", "suggested_category");
+                if (explicitCat != null) {
+                    matchedCategory = matchExplicitCategory(explicitCat, categories);
                 }
+            } else {
+                String explicitCat = firstNonBlank(row, "category", "suggested_category");
+                if (explicitCat != null) {
+                    matchedCategory = matchExplicitCategoryExactOnly(explicitCat, categories);
+                }
+            }
+            if (matchedCategory == null) {
+                matchedCategory = matchCategory(searchTarget, merchantRules, categories, uncategorized);
             }
             String fingerprint = FingerprintUtil.generate(
                     transactionDate.toString(),
@@ -435,6 +459,88 @@ public class ImportProcessingService {
                     ex.getMessage());
         }
     }
+
+    private Category matchExplicitCategory(String explicitCat, List<Category> categories) {
+        if (explicitCat == null || explicitCat.isBlank())
+            return null;
+        String cleaned = explicitCat.replaceAll("^#\\s*", "").trim();
+        if (cleaned.isEmpty())
+            return null;
+
+        String lower = cleaned.toLowerCase(Locale.ROOT);
+
+        // Pass 1: exact case-insensitive match
+        for (Category c : categories) {
+            if (c.getName().equalsIgnoreCase(cleaned)) {
+                return c;
+            }
+        }
+        // Pass 2: contains-based match (tag contains category name or vice versa)
+        for (Category c : categories) {
+            String cName = c.getName().toLowerCase(Locale.ROOT);
+            if (cName.contains(lower) || lower.contains(cName)) {
+                return c;
+            }
+        }
+        // Pass 3: synonym and common Paytm tag mappings
+        String targetName = null;
+        if (lower.contains("grocery") || lower.contains("groceries") || lower.contains("supermarket")) {
+            targetName = "Groceries";
+        } else if (lower.contains("food") || lower.contains("dining") || lower.contains("restaurant") || lower.contains("swiggy") || lower.contains("zomato")) {
+            targetName = "Food";
+        } else if (lower.contains("bill") || lower.contains("utility") || lower.contains("recharge") || lower.contains("electricity")) {
+            targetName = "Bills";
+        } else if (lower.contains("health") || lower.contains("medical") || lower.contains("pharmacy") || lower.contains("fitness") || lower.contains("doctor")) {
+            targetName = "Health";
+        } else if (lower.contains("travel") || lower.contains("flight") || lower.contains("hotel") || lower.contains("train") || lower.contains("irctc")) {
+            targetName = "Travel";
+        } else if (lower.contains("transport") || lower.contains("cab") || lower.contains("uber") || lower.contains("ola") || lower.contains("auto") || lower.contains("metro")) {
+            targetName = "Transport";
+        } else if (lower.contains("fuel") || lower.contains("petrol") || lower.contains("diesel")) {
+            targetName = "Fuel/Petrol";
+        } else if (lower.contains("shopping") || lower.contains("clothes") || lower.contains("apparel") || lower.contains("electronics") || lower.contains("amazon") || lower.contains("flipkart")) {
+            targetName = "Shopping";
+        } else if (lower.contains("entertainment") || lower.contains("movie") || lower.contains("cinema") || lower.contains("show")) {
+            targetName = "Entertainment";
+        } else if (lower.contains("education") || lower.contains("school") || lower.contains("college") || lower.contains("course") || lower.contains("book")) {
+            targetName = "Education";
+        } else if (lower.contains("rent")) {
+            targetName = "Rent";
+        } else if (lower.contains("emi") || lower.contains("loan")) {
+            targetName = "Loan EMI";
+        } else if (lower.contains("invest") || lower.contains("mutual fund") || lower.contains("stock") || lower.contains("trading")) {
+            targetName = "Investment";
+        } else if (lower.contains("salary") || lower.contains("income") || lower.contains("payout")) {
+            targetName = "Salary";
+        } else if (lower.contains("transfer")) {
+            targetName = "Transfer";
+        }
+
+        if (targetName != null) {
+            for (Category c : categories) {
+                if (c.getName().equalsIgnoreCase(targetName)) {
+                    return c;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Category matchExplicitCategoryExactOnly(String explicitCat, List<Category> categories) {
+        if (explicitCat == null || explicitCat.isBlank())
+            return null;
+        String cleaned = explicitCat.replaceAll("^#\\s*", "").trim();
+        if (cleaned.isEmpty())
+            return null;
+        for (Category c : categories) {
+            if (c.getName().equalsIgnoreCase(cleaned)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
 
     private Category matchCategory(String merchantNormalized,
             List<MerchantRule> merchantRules,
@@ -607,7 +713,7 @@ public class ImportProcessingService {
     private AmountInfo parseAmount(Map<String, String> row) {
         String debitText = firstNonBlank(row, "debit", "debits", "withdrawal", "withdrawals", "expense", "expenses",
                 "withdrawal_amount", "payment", "payments");
-        String creditText = firstNonBlank(row, "credit", "credits", "deposit", "deposits", "income", "received");
+        String creditText = firstNonBlank(row, "credit", "credits", "deposit", "deposits", "deposit_amount", "income", "received");
         String amountText = firstNonBlank(row, "amount", "amount_in_rs", "transaction_amount", "value");
 
         BigDecimal creditVal = null;
@@ -651,13 +757,54 @@ public class ImportProcessingService {
         return new BigDecimal(normalized);
     }
 
+    private boolean isSelfTransfer(String payee, String description, String rawParticulars) {
+        String combined = ((payee != null ? payee : "") + " " +
+                (description != null ? description : "") + " " +
+                (rawParticulars != null ? rawParticulars : "")).trim().toUpperCase(Locale.ROOT);
+        if (combined.isEmpty()) return false;
+
+        if (combined.contains("SELF TRANSFER") ||
+                combined.contains("TRANSFERRED TO SELF") ||
+                combined.contains("TRANSFER TO SELF") ||
+                combined.contains("SELF SEND") ||
+                combined.contains("SENT TO SELF") ||
+                combined.contains("PAID TO SELF") ||
+                combined.contains("SELF PAYMENT") ||
+                combined.contains("OWN ACCOUNT") ||
+                combined.contains("TRANSFER TO OWN") ||
+                combined.contains("TO SELF") ||
+                combined.contains("FROM SELF")) {
+            return true;
+        }
+
+        if (payee != null) {
+            String pClean = payee.trim().toUpperCase(Locale.ROOT);
+            if (pClean.equals("SELF") || pClean.equals("SELF TRANSFER") || pClean.endsWith("/SELF") || pClean.contains("/SELF/") || pClean.contains("/SELF ")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String resolveTransactionType(String explicitType, AmountInfo amountInfo) {
         if (explicitType != null && !explicitType.isBlank()) {
             String normalized = explicitType.trim().toUpperCase(Locale.ROOT);
-            if ("DR".equals(normalized) || "DEBIT".equals(normalized) || "PAY".equals(normalized)) {
+            if (normalized.equals("SELF") || normalized.equals("SELF TRANSFER") || normalized.equals("SELF_TRANSFER")) {
+                return "SELF_TRANSFER";
+            }
+            if (normalized.equals("TRANSFER")) {
+                return "TRANSFER";
+            }
+            if (normalized.equals("DR") || normalized.equals("DEBIT") || normalized.equals("DEBITED")
+                    || normalized.equals("PAY") || normalized.equals("PAID") || normalized.equals("SENT")
+                    || normalized.equals("WDL") || normalized.equals("WITHDRAWAL") || normalized.equals("EXPENSE")
+                    || normalized.equals("-")) {
                 return "EXPENSE";
             }
-            if ("CR".equals(normalized) || "CREDIT".equals(normalized) || "COLLECT".equals(normalized)) {
+            if (normalized.equals("CR") || normalized.equals("CREDIT") || normalized.equals("CREDITED")
+                    || normalized.equals("COLLECT") || normalized.equals("DEP") || normalized.equals("DEPOSIT")
+                    || normalized.equals("RECEIVED") || normalized.equals("CASHBACK") || normalized.equals("INCOME")
+                    || normalized.equals("+")) {
                 return "INCOME";
             }
             return normalized;

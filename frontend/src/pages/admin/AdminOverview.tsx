@@ -441,7 +441,7 @@ export const AdminOverview: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
-                <Activity className="h-4 w-4 text-orange-500" /> Platform
+                <Activity className="h-4 w-4 text-warning" /> Platform
                 Activity
               </h3>
               <p className="text-xs text-text-secondary">
@@ -524,7 +524,7 @@ export const AdminOverview: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
-              <Server className="h-4 w-4 text-purple-500" /> Historical
+              <Server className="h-4 w-4 text-info" /> Historical
               Infrastructure Performance
             </h3>
             <p className="text-xs text-text-secondary">
@@ -723,7 +723,7 @@ export const AdminOverview: React.FC = () => {
               to="/users"
               className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-brand/30 hover:bg-brand/5 transition-all group"
             >
-              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-text-inverse transition-colors">
+              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-brand-text transition-colors">
                 <Users className="h-5 w-5" />
               </div>
               <div>
@@ -740,7 +740,7 @@ export const AdminOverview: React.FC = () => {
               to="/logs"
               className="flex items-start gap-4 p-3 rounded-lg border border-border hover:border-brand/30 hover:bg-brand/5 transition-all group"
             >
-              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-text-inverse transition-colors">
+              <div className="p-2 rounded-md bg-brand/10 text-brand group-hover:bg-brand group-hover:text-brand-text transition-colors">
                 <ShieldAlert className="h-5 w-5" />
               </div>
               <div>

@@ -319,7 +319,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
         <GlobalImportIndicator />
         <button
           onClick={() => hasAccounts ? setIsAddTxnOpen(true) : navigate("/accounts#new")}
-          className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-text-inverse shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
+          className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-brand-text shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
           title={hasAccounts ? "Add Transaction" : "Add Bank Account"}
         >
           {hasAccounts ? <Plus className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}

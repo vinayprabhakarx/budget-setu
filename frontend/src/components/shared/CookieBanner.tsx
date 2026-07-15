@@ -51,7 +51,7 @@ export const CookieBanner: React.FC = () => {
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-bg-base bg-brand hover:bg-brand-hover rounded-md transition-colors shadow-sm whitespace-nowrap cursor-pointer"
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-brand-text bg-brand hover:bg-brand-hover rounded-md transition-colors shadow-sm whitespace-nowrap cursor-pointer"
           >
             Accept All
           </button>

@@ -45,11 +45,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles: Record<ButtonVariant, string> = {
       primary:
-        "bg-brand text-white hover:bg-brand-hover active:scale-[0.98] shadow-sm",
+        "bg-brand text-brand-text hover:bg-brand-hover active:scale-[0.98] shadow-sm",
       secondary:
         "bg-bg-subtle text-text-primary hover:bg-bg-subtle/80 border border-border active:scale-[0.98]",
       danger:
-        "bg-destructive text-white hover:bg-destructive/90 active:scale-[0.98] shadow-sm",
+        "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] shadow-sm",
       ghost:
         "bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-subtle",
       outline:

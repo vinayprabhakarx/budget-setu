@@ -53,7 +53,7 @@ export const About: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
               
               {/* Main Pillar: Spans 4 cols */}
-              <div className="md:col-span-4 card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 md:p-12 hover:-translate-y-2 transition-all duration-500 hover:bg-bg-surface/60 hover:shadow-2xl hover:shadow-brand/10 group">
+              <div className="md:col-span-4 card bg-bg-surface/40 backdrop-blur-xl border border-border/60 p-8 md:p-12 hover:-translate-y-2 transition-all duration-500 hover:bg-bg-surface/60 hover:shadow-2xl hover:shadow-brand/10 group">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="h-14 w-14 rounded-2xl bg-brand-subtle text-brand flex items-center justify-center shadow-sm shrink-0 transition-transform duration-500 group-hover:scale-110">
                     <ShieldCheck className="h-7 w-7" />
@@ -75,7 +75,7 @@ export const About: React.FC = () => {
               </div>
 
               {/* Secondary Pillar: Spans 2 cols, taller */}
-              <div className="md:col-span-2 card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 hover:-translate-y-2 transition-all duration-500 hover:bg-bg-surface/60 hover:shadow-2xl hover:shadow-brand/10 flex flex-col group">
+              <div className="md:col-span-2 card bg-bg-surface/40 backdrop-blur-xl border border-border/60 p-8 hover:-translate-y-2 transition-all duration-500 hover:bg-bg-surface/60 hover:shadow-2xl hover:shadow-brand/10 flex flex-col group">
                 <div className="h-12 w-12 rounded-xl bg-brand-subtle text-brand flex items-center justify-center shadow-sm mb-6 transition-transform duration-500 group-hover:scale-110">
                   <Eye className="h-6 w-6" />
                 </div>
@@ -91,8 +91,8 @@ export const About: React.FC = () => {
               </div>
 
               {/* Third Pillar: Spans 6 cols, wide banner */}
-              <div className="md:col-span-6 card bg-linear-to-r from-bg-surface/40 to-brand/5 backdrop-blur-xl border border-white/5 p-8 md:p-12 hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl hover:shadow-brand/10 group flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left">
-                <div className="h-16 w-16 rounded-2xl bg-brand text-bg-base flex items-center justify-center shadow-lg shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+              <div className="md:col-span-6 card bg-linear-to-r from-bg-surface/40 to-brand/5 backdrop-blur-xl border border-border/60 p-8 md:p-12 hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl hover:shadow-brand/10 group flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left">
+                <div className="h-16 w-16 rounded-2xl bg-brand text-brand-text flex items-center justify-center shadow-lg shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
                   <HeartHandshake className="h-8 w-8" />
                 </div>
                 <div>

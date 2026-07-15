@@ -32,12 +32,12 @@ export const Badge: React.FC<BadgeProps> = ({
   const variantStyles: Record<BadgeVariant, string> = {
     brand: "bg-brand/10 text-brand border border-brand/20",
     income: "bg-income/10 text-income border border-income/20",
-    success: "bg-income/10 text-income border border-income/20",
+    success: "bg-success/10 text-success border border-success/20",
     expense: "bg-destructive/10 text-destructive border border-destructive/20",
     danger: "bg-destructive/10 text-destructive border border-destructive/20",
     warning: "bg-warning/10 text-warning border border-warning/20",
     neutral: "bg-bg-subtle text-text-secondary border border-border",
-    info: "bg-sky-500/10 text-sky-500 border border-sky-500/20",
+    info: "bg-info/10 text-info border border-info/20",
   };
 
   const sizeStyles: Record<BadgeSize, string> = {

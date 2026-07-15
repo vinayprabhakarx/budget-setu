@@ -227,7 +227,7 @@ export const Profile: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
               isEditingProfile
-                ? "bg-brand text-text-inverse"
+                ? "bg-brand text-brand-text"
                 : "text-text-secondary hover:text-text-primary bg-bg-subtle hover:bg-border/40 border border-border/60"
             }`}
           >
@@ -242,7 +242,7 @@ export const Profile: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
               isEditingPassword
-                ? "bg-brand text-text-inverse"
+                ? "bg-brand text-brand-text"
                 : "text-text-secondary hover:text-text-primary bg-bg-subtle hover:bg-border/40 border border-border/60"
             }`}
           >
@@ -256,7 +256,7 @@ export const Profile: React.FC = () => {
 
           {/* Google link — same row */}
           {user?.isGoogleLinked ? (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-success">
               <CheckCircle className="h-3.5 w-3.5" />
               Google linked
             </span>

@@ -37,7 +37,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             onClick={onFilterClick}
             className={`p-2 rounded-lg border transition-colors flex items-center justify-center ${
               showFilters
-                ? "bg-primary-50 text-primary-600 border-primary-200 dark:bg-primary-950/50 dark:border-primary-800"
+                ? "bg-brand/10 text-brand border-brand/30"
                 : "bg-bg-surface text-text-secondary border-border hover:bg-bg-muted hover:text-text-primary"
             }`}
             title="Toggle Filters"

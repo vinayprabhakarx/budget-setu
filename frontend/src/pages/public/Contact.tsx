@@ -208,7 +208,7 @@ export const Contact: React.FC = () => {
 
             {/* Right Column (40%): Social Proof & Interactive Cards */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="card bg-bg-surface/40 backdrop-blur-xl border border-white/5 p-8 flex flex-col gap-6 hover:-translate-y-1 transition-transform duration-500 hover:shadow-xl hover:shadow-brand/5">
+              <div className="card bg-bg-surface/40 backdrop-blur-xl border border-border/60 p-8 flex flex-col gap-6 hover:-translate-y-1 transition-transform duration-500 hover:shadow-xl hover:shadow-brand/5">
                 <div>
                   <h2 className="font-display text-text-primary text-2xl mb-2">
                     Direct Channels

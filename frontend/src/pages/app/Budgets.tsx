@@ -13,14 +13,14 @@ import { SavingsGoals } from './budgets/SavingsGoals';
 import type { BudgetPlan, RecurringExpense, Goal, Category } from './budgets/types';
 
 const months = [
-  { val: 1, label: "January" }, { val: 2, label: "February" }, { val: 3, label: "March" },
-  { val: 4, label: "April" }, { val: 5, label: "May" }, { val: 6, label: "June" },
-  { val: 7, label: "July" }, { val: 8, label: "August" }, { val: 9, label: "September" },
-  { val: 10, label: "October" }, { val: 11, label: "November" }, { val: 12, label: "December" },
+  { val: 1, label: "Jan" }, { val: 2, label: "Feb" }, { val: 3, label: "Mar" },
+  { val: 4, label: "Apr" }, { val: 5, label: "May" }, { val: 6, label: "Jun" },
+  { val: 7, label: "Jul" }, { val: 8, label: "Aug" }, { val: 9, label: "Sep" },
+  { val: 10, label: "Oct" }, { val: 11, label: "Nov" }, { val: 12, label: "Dec" },
 ];
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+const years = Array.from({ length: 26 }, (_, i) => currentYear - 20 + i);
 
 /**
  * Budgets Page Component

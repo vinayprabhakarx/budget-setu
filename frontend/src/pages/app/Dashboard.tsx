@@ -343,6 +343,13 @@ export const Dashboard: React.FC = () => {
     recentTransactions = [],
   } = data || {};
 
+  const totalCategorySpending = React.useMemo(() => {
+    return categoryBreakdown.reduce(
+      (sum: number, item: { amount?: number }) => sum + (item.amount || 0),
+      0,
+    );
+  }, [categoryBreakdown]);
+
   return (
     <div className="space-y-6 pb-16">
       <PageHeader
@@ -424,50 +431,115 @@ export const Dashboard: React.FC = () => {
       ) : (
         <section className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Spending by Category (Donut) */}
-          <div className="card lg:col-span-5 flex flex-col min-h-96">
-            <h3 className="font-semibold text-text-primary text-heading-sm mb-4"></h3>
+          <div className="card lg:col-span-5 flex flex-col min-h-96 justify-between">
+            <div>
+              <h3 className="font-semibold text-text-primary text-heading-sm">
+                Spending by Category
+              </h3>
+              <p className="text-xs text-text-secondary mt-0.5 mb-4">
+                Expense breakdown across categories
+              </p>
+            </div>
             <div className="flex-1 relative flex items-center justify-center min-h-65 w-full">
               {categoryBreakdown.length === 0 ? (
                 <p className="text-text-muted text-body-md py-20">
                   No spending data available
                 </p>
               ) : isMounted ? (
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
-                  minWidth={1}
-                  minHeight={1}
-                >
-                  <PieChart>
-                    <Pie
-                      data={categoryBreakdown}
-                      nameKey="name"
-                      dataKey="amount"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={65}
-                      outerRadius={90}
-                      paddingAngle={3}
-                    >
-                      {categoryBreakdown.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color || "var(--color-bg-muted)"}
-                        />
-                      ))}
-                    </Pie>
-                    <ChartTooltip content={<CustomPieTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <>
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    minWidth={1}
+                    minHeight={1}
+                  >
+                    <PieChart>
+                      <Pie
+                        data={categoryBreakdown}
+                        nameKey="name"
+                        dataKey="amount"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={65}
+                        outerRadius={90}
+                        paddingAngle={3}
+                      >
+                        {categoryBreakdown.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color || "var(--color-bg-muted)"}
+                          />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<CustomPieTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider">
+                      Total Spent
+                    </span>
+                    <span className="font-mono text-base font-bold text-text-primary mt-0.5">
+                      {formatCurrency(totalCategorySpending)}
+                    </span>
+                  </div>
+                </>
               ) : null}
             </div>
+            {categoryBreakdown.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-border/60 flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                {categoryBreakdown.map(
+                  (
+                    entry: {
+                      name: string;
+                      amount: number;
+                      percentage?: number;
+                      color?: string;
+                    },
+                    index: number,
+                  ) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between text-xs min-w-0"
+                    >
+                      <div className="flex items-center gap-2 truncate pr-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{
+                            backgroundColor:
+                              entry.color || "var(--color-bg-muted)",
+                          }}
+                        />
+                        <span className="text-text-secondary truncate font-medium">
+                          {entry.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-mono text-text-primary font-semibold">
+                          {formatCurrency(entry.amount)}
+                        </span>
+                        {entry.percentage !== undefined && (
+                          <span className="text-text-tertiary w-8 text-right font-mono">
+                            {entry.percentage}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            )}
           </div>
 
           {/* Monthly Trend (Bar) */}
           <div className="card lg:col-span-7 flex flex-col min-h-96">
-            <h3 className="font-semibold text-text-primary text-heading-sm mb-4">
-              Monthly Trend
-            </h3>
+            <div className="mb-4">
+              <h3 className="font-semibold text-text-primary text-heading-sm">
+                Monthly Trend
+              </h3>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Income vs expense history over time
+              </p>
+            </div>
             <div className="flex-1 min-h-65 w-full">
               {monthlyTrend.length === 0 ? (
                 <StateDisplay

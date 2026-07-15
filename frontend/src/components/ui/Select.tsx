@@ -36,6 +36,8 @@ export const Select: React.FC<SelectProps> = ({
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const selectedItemRef = useRef<HTMLLIElement>(null);
   const generatedId = React.useId();
 
   const selected = options.find((o) => o.value === value);
@@ -66,6 +68,15 @@ export const Select: React.FC<SelectProps> = ({
       window.removeEventListener("scroll", handleScroll, true);
       window.removeEventListener("resize", handleResize);
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (open && listRef.current && selectedItemRef.current) {
+      const list = listRef.current;
+      const item = selectedItemRef.current;
+      const itemOffset = item.offsetTop;
+      list.scrollTop = itemOffset - (list.clientHeight / 2) + (item.clientHeight / 2);
+    }
   }, [open]);
 
   useEffect(() => {
@@ -100,11 +111,11 @@ export const Select: React.FC<SelectProps> = ({
       style={dropdownStyle}
       className="border border-border rounded-md shadow-2xl overflow-hidden bg-bg-surface"
     >
-      <ul className="max-h-60 overflow-y-auto py-1">
+      <ul ref={listRef} className="max-h-60 overflow-y-auto py-1 relative">
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <li key={option.value}>
+            <li key={option.value} ref={isSelected ? selectedItemRef : null}>
               <button
                 type="button"
                 onMouseDown={(e) => {

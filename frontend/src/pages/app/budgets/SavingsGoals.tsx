@@ -114,7 +114,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                         <span className="truncate">{g.name || "N/A"}</span>
                         {isCompleted && <Trophy className="h-4 w-4 text-income shrink-0" />}
                       </h4>
-                      <span className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${g.priority === 'HIGH' ? 'badge-expense' : g.priority === 'LOW' ? 'badge-income' : 'badge-warning'}`}>{g.priority || 'MEDIUM'}</span>
+                      <span className={`px-1.5 py-0.5 text-badge font-semibold tracking-wider uppercase rounded shrink-0 ${g.priority === 'HIGH' ? 'badge-expense' : g.priority === 'LOW' ? 'badge-income' : 'badge-warning'}`}>{g.priority || 'MEDIUM'}</span>
                     </div>
                     <p className="text-body-sm text-text-secondary truncate">{g.description || "Description: N/A"}</p>
                     <p className="text-body-sm text-text-secondary flex items-center gap-1 whitespace-nowrap">
@@ -160,7 +160,7 @@ export const SavingsGoals: React.FC<Props> = ({ goals, loading, onRefresh }) => 
                   <div className="h-2 w-full bg-bg-subtle rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-deliberate ease-standard ${isCompleted ? 'bg-income' : 'bg-brand'}`} style={{ width: `${Math.min(g.percentageComplete, 100)}%` }} />
                   </div>
-                  <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                  <div className="flex justify-between items-center pt-1 text-caption">
                     <span className={`font-semibold ${isCompleted ? 'text-income' : 'text-brand'}`}>{g.percentageComplete.toFixed(0)}% Achieved</span>
                     {g.daysRemaining !== null && g.daysRemaining > 0 && !isCompleted && <span className="text-text-muted">{g.daysRemaining} days left</span>}
                     {isCompleted && <span className="text-income font-semibold">Goal Complete! 🎉</span>}

@@ -184,7 +184,7 @@ export const Budgets: React.FC = () => {
               key={type}
               type="button"
               onClick={() => setFilterPeriod(type)}
-              className={`px-3 py-1 rounded-lg text-body-sm font-medium transition-all ${
+              className={`h-control-sm px-3.5 flex items-center justify-center rounded-lg text-body-sm font-medium transition-all ${
                 filterPeriod === type
                   ? 'bg-primary text-text-inverse shadow-sm'
                   : 'bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-border'

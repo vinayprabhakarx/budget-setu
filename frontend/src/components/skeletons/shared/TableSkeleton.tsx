@@ -35,7 +35,7 @@ export const TableSkeleton: React.FC<TableSkeletonProps> = ({ headers, columns =
             <tr key={rowIndex} className="border-b border-border-muted">
               {[...Array(colCount)].map((_, colIndex) => (
                 <td key={colIndex} className="py-3.5 px-3 sm:px-4 align-middle">
-                  <Skeleton className="h-4 w-full max-w-[8.75rem] rounded" />
+                  <Skeleton className="h-4 w-full max-w-36 rounded" />
                 </td>
               ))}
             </tr>

@@ -58,12 +58,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-brand/10 text-brand hover:bg-brand/20 active:scale-[0.98]",
     };
 
-    // Note: 'md' size uses 2.625rem (42px) height to match app standard
+    // Note: size uses control-height tokens to match app standard without hardcoded px/rem values
     const sizeStyles: Record<ButtonSize, string> = {
-      sm: "h-8 px-3 text-body-sm gap-1.5",
-      md: "h-[2.625rem] px-4 text-body-md gap-2",
-      lg: "h-12 px-6 text-body-lg gap-2.5",
-      icon: "h-[2.625rem] w-[2.625rem] p-0",
+      sm: "h-control-sm px-3.5 text-body-sm gap-1.5",
+      md: "h-control-md px-4 text-body-md gap-2",
+      lg: "h-control-lg px-6 text-body-lg gap-2.5",
+      icon: "h-control-md w-control-md p-0",
     };
 
     const widthStyle = fullWidth ? "w-full" : "";

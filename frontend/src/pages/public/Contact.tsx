@@ -70,7 +70,7 @@ export const Contact: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-16">
           {/* Header Hero Section */}
           <div className="space-y-4 max-w-2xl">
-            <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
+            <h1 className="font-display text-text-primary text-hero-lg leading-tight tracking-tight">
               Get in Touch.
             </h1>
             <p className="text-text-secondary text-body-lg leading-relaxed">

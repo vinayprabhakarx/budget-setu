@@ -41,7 +41,7 @@ export const Badge: React.FC<BadgeProps> = ({
   };
 
   const sizeStyles: Record<BadgeSize, string> = {
-    sm: "px-2 py-0.5 text-[0.6875rem] gap-1",
+    sm: "px-2 py-0.5 text-badge gap-1",
     md: "px-2.5 py-1 text-caption gap-1.5",
   };
 

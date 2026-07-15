@@ -579,7 +579,7 @@ export const Accounts: React.FC = () => {
 
                     {/* Balance display */}
                     <div className="space-y-1">
-                      <span className="text-text-secondary text-[0.6875rem] font-semibold uppercase tracking-wider">
+                      <span className="text-text-secondary text-caption font-semibold uppercase tracking-wider">
                         Current Balance
                       </span>
                       <p className="num text-mono-xl font-bold text-text-primary">
@@ -683,7 +683,7 @@ export const Accounts: React.FC = () => {
                   <h4 className="text-body-sm font-bold text-text-primary">
                     Manual Balance Initialization
                   </h4>
-                  <p className="text-text-secondary text-[0.6875rem] leading-relaxed">
+                  <p className="text-text-secondary text-caption leading-relaxed">
                     Set a manual starting balance at a specific date.
                     Transactions logged on or after this date will dynamically
                     increment (credit) or decrement (debit) this starting value.

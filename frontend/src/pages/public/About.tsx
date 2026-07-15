@@ -13,7 +13,7 @@ export const About: React.FC = () => {
           
           {/* Header & Manifesto */}
           <section className="max-w-3xl mx-auto text-center space-y-8">
-            <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
+            <h1 className="font-display text-text-primary text-hero-lg leading-tight tracking-tight">
               Privacy is <br />
               <span className="text-brand">
                 Not a Luxury.
@@ -42,7 +42,7 @@ export const About: React.FC = () => {
           {/* Design Pillars (Masonry Bento Grid) */}
           <section className="space-y-12">
             <div className="text-center max-w-2xl mx-auto">
-              <h2 className="font-display text-text-primary text-[2.25rem] md:text-[3.5rem] tracking-tight mb-4">
+              <h2 className="font-display text-text-primary text-hero-md tracking-tight mb-4">
                 Our Core Pillars
               </h2>
               <p className="text-text-secondary text-body-lg">

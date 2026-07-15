@@ -25,7 +25,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(() => {
     const saved = localStorage.getItem("budgetsetu_admin_sidebar_pinned");
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : false;
   });
 
   const isExpanded = isPinned;
@@ -56,7 +56,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
         <nav
           className={`flex-1 py-6 space-y-1 ${isExpanded ? "px-4" : "px-2"}`}
         >
-          <div className={`text-[0.625rem] font-bold text-text-tertiary uppercase tracking-wider mb-2 ${isExpanded ? "px-3" : "text-center"}`}>
+          <div className={`text-micro font-bold text-text-tertiary uppercase tracking-wider mb-2 ${isExpanded ? "px-3" : "text-center"}`}>
             {isExpanded ? "Admin Portal" : "Admin"}
           </div>
           {menuItems.map((item) => {
@@ -249,7 +249,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
                 }`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className="text-[0.625rem] mt-0.5 truncate w-full text-center font-medium px-0.5">
+                <span className="text-micro mt-0.5 truncate w-full text-center font-medium px-0.5">
                   {item.name}
                 </span>
               </Link>

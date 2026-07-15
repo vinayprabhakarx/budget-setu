@@ -19,12 +19,12 @@ export const Pricing: React.FC = () => {
     <PublicLayout>
       <div className="relative overflow-hidden py-24 md:py-32">
         {/* Animated background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-brand/20 blur-[7.5rem] rounded-full opacity-50 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-brand/20 blur-3xl rounded-full opacity-50 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-20">
           {/* Header */}
           <div className="text-center space-y-6 max-w-2xl mx-auto">
-            <h1 className="font-display text-text-primary text-[3rem] md:text-[4.5rem] leading-[1.05] tracking-tight">
+            <h1 className="font-display text-text-primary text-hero-lg leading-tight tracking-tight">
               100% Free.
               <br />
               <span className="text-brand">For Everyone.</span>

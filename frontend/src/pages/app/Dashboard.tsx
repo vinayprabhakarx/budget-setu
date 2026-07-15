@@ -191,7 +191,7 @@ const CustomBarTooltip = ({
         {payload.map((item) => (
           <p
             key={item.name}
-            className="text-mono-md font-medium"
+            className="num text-mono-md font-medium"
             style={{ color: item.color }}
           >
             {item.name}: {formatCurrency(item.value)}
@@ -332,8 +332,10 @@ export const Dashboard: React.FC = () => {
       fetchDashboardData();
     };
     window.addEventListener("transaction-added", handleRefresh);
+    window.addEventListener("transactions-updated", handleRefresh);
     return () => {
       window.removeEventListener("transaction-added", handleRefresh);
+      window.removeEventListener("transactions-updated", handleRefresh);
     };
   }, [fetchDashboardData]);
 
@@ -472,16 +474,18 @@ export const Dashboard: React.FC = () => {
       ) : (
         <section className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Spending by Category (Donut) */}
-          <div className="card lg:col-span-5 flex flex-col min-h-96 justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary text-heading-sm">
-                Spending by Category
-              </h3>
-              <p className="text-xs text-text-secondary mt-0.5 mb-4">
-                Expense breakdown across categories
-              </p>
+          <div className="card lg:col-span-5 flex flex-col gap-6 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between min-w-0 gap-2">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-text-primary text-heading-sm truncate">
+                  Spending by Category
+                </h3>
+                <p className="text-xs text-text-secondary mt-0.5 truncate">
+                  Expense breakdown across categories
+                </p>
+              </div>
             </div>
-            <div className="flex-1 relative flex items-center justify-center min-h-65 w-full">
+            <div className="h-80 w-full min-w-0 relative flex items-center justify-center">
               {categoryBreakdown.length === 0 ? (
                 <p className="text-text-muted text-body-md py-20">
                   No spending data available
@@ -501,9 +505,9 @@ export const Dashboard: React.FC = () => {
                         dataKey="amount"
                         cx="50%"
                         cy="50%"
-                        innerRadius={65}
+                        innerRadius={60}
                         outerRadius={90}
-                        paddingAngle={3}
+                        paddingAngle={2}
                       >
                         {categoryBreakdown.map((entry, index) => (
                           <Cell
@@ -516,10 +520,10 @@ export const Dashboard: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[11px] font-medium text-text-secondary uppercase tracking-wider">
+                    <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">
                       Total Spent
                     </span>
-                    <span className="font-mono text-base font-bold text-text-primary mt-0.5">
+                    <span className="num text-mono-md font-bold text-text-primary mt-0.5">
                       {formatCurrency(totalCategorySpending)}
                     </span>
                   </div>
@@ -527,7 +531,7 @@ export const Dashboard: React.FC = () => {
               ) : null}
             </div>
             {categoryBreakdown.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-border/60 flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="flex flex-col gap-3 overflow-y-auto max-h-72 pr-2 custom-scrollbar min-w-0 border-t border-border/60 pt-3">
                 {categoryBreakdown.map(
                   (
                     entry: {
@@ -540,27 +544,29 @@ export const Dashboard: React.FC = () => {
                   ) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between text-xs min-w-0"
+                      className="flex items-center justify-between group min-w-0 gap-2"
                     >
-                      <div className="flex items-center gap-2 truncate pr-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                      <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                        <div
+                          className="w-3 h-3 rounded-full shrink-0"
                           style={{
                             backgroundColor:
                               entry.color || "var(--color-bg-muted)",
                           }}
                         />
-                        <span className="text-text-secondary truncate font-medium">
+                        <span className="text-body-sm text-text-secondary group-hover:text-text-primary transition-colors truncate block min-w-0">
                           {entry.name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono text-text-primary font-semibold">
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="num text-mono-sm font-medium text-text-primary">
                           {formatCurrency(entry.amount)}
                         </span>
                         {entry.percentage !== undefined && (
-                          <span className="text-text-tertiary w-8 text-right font-mono">
-                            {entry.percentage}%
+                          <span className="num text-body-xs text-text-tertiary w-10 text-right">
+                            {typeof entry.percentage === "number"
+                              ? entry.percentage.toFixed(1)
+                              : entry.percentage}%
                           </span>
                         )}
                       </div>
@@ -572,16 +578,16 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Monthly Trend (Bar) */}
-          <div className="card lg:col-span-7 flex flex-col min-h-96">
-            <div className="mb-4">
-              <h3 className="font-semibold text-text-primary text-heading-sm">
+          <div className="card lg:col-span-7 flex flex-col gap-6 min-w-0 overflow-hidden">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-text-primary text-heading-sm truncate">
                 Monthly Trend
               </h3>
-              <p className="text-xs text-text-secondary mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5 truncate">
                 Income vs expense history over time
               </p>
             </div>
-            <div className="flex-1 min-h-65 w-full">
+            <div className="h-80 w-full min-w-0">
               {monthlyTrend.length === 0 ? (
                 <StateDisplay
                   type="empty"
@@ -755,7 +761,7 @@ export const Dashboard: React.FC = () => {
                                   }}
                                 />
                               </div>
-                              <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                              <div className="flex justify-between items-center pt-1 text-caption">
                                 <span
                                   className={`font-semibold ${progressPercent >= 100 ? "text-expense" : progressPercent >= 75 ? "text-warning" : "text-income"}`}
                                 >
@@ -803,7 +809,7 @@ export const Dashboard: React.FC = () => {
                                 <h3 className="font-semibold text-text-primary text-body-lg leading-tight truncate max-w-full">
                                   {exp.name || "N/A"}
                                 </h3>
-                                <span className="text-[0.65rem] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
+                                <span className="text-badge font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
                                   {exp.frequency || "N/A"}
                                 </span>
                               </div>
@@ -814,7 +820,7 @@ export const Dashboard: React.FC = () => {
                               </p>
                             </div>
                             <span
-                              className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}
+                              className={`px-1.5 py-0.5 text-badge font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}
                             >
                               {exp.status || "N/A"}
                             </span>
@@ -842,7 +848,7 @@ export const Dashboard: React.FC = () => {
                                 className={`h-full rounded-full transition-all duration-deliberate ease-standard ${exp.status === "ACTIVE" ? "bg-income w-full" : "bg-warning w-1/2"}`}
                               />
                             </div>
-                            <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                            <div className="flex justify-between items-center pt-1 text-caption">
                               <span
                                 className={`font-semibold ${exp.status === "ACTIVE" ? "text-income" : "text-warning"}`}
                               >
@@ -896,7 +902,7 @@ export const Dashboard: React.FC = () => {
                                   )}
                                 </h4>
                                 <span
-                                  className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${g.priority === "HIGH" ? "badge-expense" : g.priority === "LOW" ? "badge-income" : "badge-warning"}`}
+                                  className={`px-1.5 py-0.5 text-badge font-semibold tracking-wider uppercase rounded shrink-0 ${g.priority === "HIGH" ? "badge-expense" : g.priority === "LOW" ? "badge-income" : "badge-warning"}`}
                                 >
                                   {g.priority || "MEDIUM"}
                                 </span>
@@ -935,7 +941,7 @@ export const Dashboard: React.FC = () => {
                                 }}
                               />
                             </div>
-                            <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                            <div className="flex justify-between items-center pt-1 text-caption">
                               <span
                                 className={`font-semibold ${isCompleted ? "text-income" : "text-brand"}`}
                               >

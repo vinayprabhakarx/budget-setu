@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
-interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'size'> {
   value: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onValueChange?: (value: string, numericValue: number) => void;
+  size?: "sm" | "md";
 }
 
 // Cache the formatter outside the component to prevent lag on every keystroke
@@ -15,6 +16,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   onValueChange,
   className = '',
   placeholder = '0.00',
+  size = "md",
   ...props
 }) => {
   // Helper to format string in Indian Rupee format (en-IN)
@@ -80,7 +82,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         value={displayValue}
         onChange={handleChange}
         placeholder={placeholder}
-        className={`input input-currency ${className}`}
+        className={`input input-currency ${size === "sm" ? "input-sm" : ""} ${className}`}
         {...props}
       />
     </div>

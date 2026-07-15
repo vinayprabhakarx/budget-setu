@@ -23,7 +23,7 @@ export const Hero: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column: Typography */}
             <div className="space-y-8 text-center lg:text-left">
-              <h1 className="font-display text-text-primary text-[3rem] md:text-[5rem] leading-[1.1] tracking-tight">
+              <h1 className="font-display text-text-primary text-hero-xl leading-tight tracking-tight">
                 Financial Clarity,
                 <br />
                 <span className="text-brand">
@@ -108,7 +108,7 @@ export const Hero: React.FC = () => {
       <section id="features" className="py-24 md:py-32 bg-bg-surface/20 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-16 max-w-2xl">
-            <h2 className="font-display text-text-primary text-[2.25rem] md:text-[3rem] tracking-tight mb-4">
+            <h2 className="font-display text-text-primary text-hero-sm tracking-tight mb-4">
               Engineered for Precision
             </h2>
             <p className="text-text-secondary text-body-lg">
@@ -187,7 +187,7 @@ export const Hero: React.FC = () => {
       <section className="py-24 md:py-32 border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-24">
-            <h2 className="font-display text-text-primary text-[2.25rem] md:text-[3.5rem] tracking-tight mb-4">
+            <h2 className="font-display text-text-primary text-hero-md tracking-tight mb-4">
               How it Works
             </h2>
             <p className="text-text-secondary text-body-lg max-w-2xl mx-auto">

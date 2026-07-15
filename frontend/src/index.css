@@ -83,6 +83,39 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
+
+  --height-control-sm: var(--control-height-sm);
+  --height-control-md: var(--control-height-md);
+  --height-control-lg: var(--control-height-lg);
+  --height-control-textarea: var(--control-height-textarea);
+  --size-control-sm: var(--control-height-sm);
+  --size-control-md: var(--control-height-md);
+  --size-control-lg: var(--control-height-lg);
+
+  --text-display: var(--text-display);
+  --text-heading-lg: var(--text-heading-lg);
+  --text-heading-md: var(--text-heading-md);
+  --text-heading-sm: var(--text-heading-sm);
+  --text-body-lg: var(--text-body-lg);
+  --text-body-md: var(--text-body-md);
+  --text-body-sm: var(--text-body-sm);
+  --text-caption: var(--text-caption);
+  --text-badge: var(--text-badge);
+  --text-micro: var(--text-micro);
+  --text-hero-sm: var(--text-hero-sm);
+  --text-hero-md: var(--text-hero-md);
+  --text-hero-lg: var(--text-hero-lg);
+  --text-hero-xl: var(--text-hero-xl);
+  --text-mono-xl: var(--text-mono-xl);
+  --text-mono-lg: var(--text-mono-lg);
+  --text-mono-md: var(--text-mono-md);
+  --text-mono-sm: var(--text-mono-sm);
+
+  --height-layout-sidebar: var(--layout-sidebar-height);
+  --height-layout-topbar: var(--layout-topbar-height);
+  --width-layout-sidebar: var(--layout-sidebar-width);
+  --width-layout-sidebar-collapsed: var(--layout-sidebar-collapsed);
+  --max-width-layout-content: var(--layout-content-max-width);
 }
 
 :root {
@@ -217,7 +250,13 @@
    SHARED COMPONENT CLASSES (Minimalist Style)
    ============================================================= */
 
-.num {
+.num,
+.num-positive,
+.num-negative,
+.recharts-text,
+.recharts-cartesian-axis-tick-value,
+.recharts-tooltip-item-value,
+.recharts-pie-label-text {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--tracking-tight);

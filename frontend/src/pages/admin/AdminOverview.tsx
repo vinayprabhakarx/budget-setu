@@ -147,16 +147,16 @@ export const AdminOverview: React.FC = () => {
       ) : (
         <>
           {/* TOP ROW: KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Users className="h-16 w-16 text-brand" />
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-text-secondary">
+          <div className="relative z-10 space-y-2">
+            <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
               Total Users
-            </p>
-            <p className="text-3xl font-display font-bold text-text-primary mt-2">
+            </span>
+            <p className="num text-mono-xl text-brand font-medium">
               {metrics?.totalUsers?.toLocaleString() || 0}
             </p>
           </div>
@@ -166,11 +166,11 @@ export const AdminOverview: React.FC = () => {
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <UserCheck className="h-16 w-16 text-income" />
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-text-secondary">
+          <div className="relative z-10 space-y-2">
+            <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
               Active Users
-            </p>
-            <p className="text-3xl font-display font-bold text-text-primary mt-2">
+            </span>
+            <p className="num text-mono-xl text-income font-medium">
               {metrics?.activeUsers?.toLocaleString() || 0}
             </p>
           </div>
@@ -180,11 +180,11 @@ export const AdminOverview: React.FC = () => {
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <CreditCard className="h-16 w-16 text-info" />
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-text-secondary">
+          <div className="relative z-10 space-y-2">
+            <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
               Total Accounts
-            </p>
-            <p className="text-3xl font-display font-bold text-text-primary mt-2">
+            </span>
+            <p className="num text-mono-xl text-info font-medium">
               {metrics?.totalAccounts?.toLocaleString() || 0}
             </p>
           </div>
@@ -194,11 +194,11 @@ export const AdminOverview: React.FC = () => {
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <Receipt className="h-16 w-16 text-warning" />
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-text-secondary">
+          <div className="relative z-10 space-y-2">
+            <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
               Total Transactions
-            </p>
-            <p className="text-3xl font-display font-bold text-text-primary mt-2">
+            </span>
+            <p className="num text-mono-xl text-warning font-medium">
               {metrics?.totalTransactions?.toLocaleString() || 0}
             </p>
           </div>
@@ -289,7 +289,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Total Commits (Lifetime)
                 </p>
-                <p className="text-sm font-medium text-text-primary mt-0.5">
+                <p className="num text-mono-md font-medium text-text-primary mt-0.5">
                   {metrics?.databaseHealth?.totalCommits?.toLocaleString() || 0}
                 </p>
               </div>
@@ -309,7 +309,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Clients
                 </p>
-                <p className="text-lg font-semibold text-text-primary mt-0.5">
+                <p className="num text-mono-lg font-medium text-text-primary mt-0.5">
                   {metrics?.redisHealth?.connectedClients || 0}
                 </p>
               </div>
@@ -317,7 +317,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Ops / Sec
                 </p>
-                <p className="text-lg font-semibold text-text-primary mt-0.5">
+                <p className="num text-mono-lg font-medium text-text-primary mt-0.5">
                   {metrics?.redisHealth?.opsPerSec || 0}
                 </p>
               </div>
@@ -325,7 +325,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Used Memory
                 </p>
-                <p className="text-sm font-medium text-text-primary mt-0.5">
+                <p className="num text-mono-md font-medium text-text-primary mt-0.5">
                   {metrics?.redisHealth?.usedMemory || "0B"}
                 </p>
               </div>
@@ -345,7 +345,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Connections
                 </p>
-                <p className="text-lg font-semibold text-text-primary mt-0.5">
+                <p className="num text-mono-lg font-medium text-text-primary mt-0.5">
                   {metrics?.mongoHealth?.activeConnections || 0}
                 </p>
               </div>
@@ -353,7 +353,7 @@ export const AdminOverview: React.FC = () => {
                 <p className="text-xs text-text-tertiary uppercase tracking-wider">
                   Operations
                 </p>
-                <p className="text-lg font-semibold text-text-primary mt-0.5">
+                <p className="num text-mono-lg font-medium text-text-primary mt-0.5">
                   {metrics?.mongoHealth?.queriesPerSec?.toLocaleString() || 0}
                 </p>
               </div>
@@ -373,7 +373,7 @@ export const AdminOverview: React.FC = () => {
       {/* MIDDLE ROW: CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* User Growth */}
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
@@ -382,7 +382,7 @@ export const AdminOverview: React.FC = () => {
               <p className="text-xs text-text-secondary">Past 6 months</p>
             </div>
           </div>
-          <div className="h-64">
+          <div className="h-64 w-full min-w-0">
             {metrics?.monthlySignups && metrics.monthlySignups.length > 0 ? (
               <ResponsiveContainer
                 width="100%"
@@ -437,7 +437,7 @@ export const AdminOverview: React.FC = () => {
         </div>
 
         {/* Platform Activity (Transactions) */}
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm min-w-0 overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
@@ -449,7 +449,7 @@ export const AdminOverview: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="h-64">
+          <div className="h-64 w-full min-w-0">
             {metrics?.monthlyTransactions &&
             metrics.monthlyTransactions.length > 0 ? (
               <ResponsiveContainer
@@ -520,7 +520,7 @@ export const AdminOverview: React.FC = () => {
       </div>
 
       {/* HISTORICAL INFRASTRUCTURE CHART */}
-      <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm min-w-0 overflow-hidden">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
@@ -532,7 +532,7 @@ export const AdminOverview: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="h-72">
+        <div className="h-72 w-full min-w-0">
           {metrics?.historicalInfraMetrics &&
           metrics.historicalInfraMetrics.length > 0 ? (
             <ResponsiveContainer

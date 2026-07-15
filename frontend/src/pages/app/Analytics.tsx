@@ -249,7 +249,7 @@ export const Analytics: React.FC = () => {
           {payload.map((entry, index: number) => (
             <p
               key={index}
-              className="text-mono-md font-medium"
+              className="num text-mono-md font-medium"
               style={{ color: entry.color }}
             >
               {entry.name}: {formatCurrency(Number(entry.value) || 0)}
@@ -272,7 +272,7 @@ export const Analytics: React.FC = () => {
           <p className="text-body-md font-semibold text-text-primary mb-1">
             {slice.name}
           </p>
-          <p className="text-mono-md font-medium text-text-secondary">
+          <p className="num text-mono-md font-medium text-text-secondary">
             {formatCurrency(slice.amount || 0)} (
             {(slice.percent || 0).toFixed(1)}%)
           </p>
@@ -299,15 +299,15 @@ export const Analytics: React.FC = () => {
     const textColor = isNeutral
       ? "text-text-tertiary"
       : isPositive
-        ? "text-success"
-        : "text-error";
+        ? "text-income"
+        : "text-expense";
 
     return (
       <div
-        className={`flex items-center gap-1 text-body-xs font-medium mt-1 ${textColor}`}
+        className={`flex items-center gap-1 text-body-xs font-medium ${textColor}`}
       >
-        <Icon className="w-3 h-3" />
-        <span>{Math.abs(percentChange).toFixed(1)}% vs prev period</span>
+        <Icon className="w-3 h-3 shrink-0" />
+        <span className="num">{Math.abs(percentChange).toFixed(1)}% vs prev period</span>
       </div>
     );
   };
@@ -371,7 +371,7 @@ export const Analytics: React.FC = () => {
             <button
               key={preset.type}
               onClick={() => handlePresetChange(preset.type)}
-              className={`px-4 py-2 rounded-lg text-body-sm font-medium transition-all ${
+              className={`h-control-sm px-3.5 flex items-center justify-center rounded-lg text-body-sm font-medium transition-all ${
                 activePreset === preset.type
                   ? "bg-primary text-text-inverse shadow-sm"
                   : "bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-border"
@@ -387,13 +387,15 @@ export const Analytics: React.FC = () => {
             <MaskedDateInput
               value={fromDate}
               onChange={(val) => handleCustomDateChange(val, "from")}
-              className="w-32! bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-1.5 text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
+              size="sm"
+              className="w-32! bg-bg-elevated text-text-primary border border-border rounded-lg px-3 h-control-sm text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
             />
             <span className="text-text-tertiary">to</span>
             <MaskedDateInput
               value={toDate}
               onChange={(val) => handleCustomDateChange(val, "to")}
-              className="w-32! bg-bg-elevated text-text-primary border border-border rounded-lg px-3 py-1.5 text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
+              size="sm"
+              className="w-32! bg-bg-elevated text-text-primary border border-border rounded-lg px-3 h-control-sm text-body-sm focus:ring-2 focus:ring-primary/50 outline-none"
             />
           </div>
           <Select
@@ -413,18 +415,18 @@ export const Analytics: React.FC = () => {
       {isLoading ? (
         <AnalyticsSummarySkeleton />
       ) : (
-        <div className="animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="animate-fade-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingUp className="h-16 w-16 text-success" />
+              <TrendingUp className="h-16 w-16 text-income" />
             </div>
-            <div className="relative z-10 flex flex-col gap-1">
-              <span className="text-text-secondary text-body-sm font-medium tracking-wider uppercase mb-1">
+            <div className="relative z-10 space-y-2">
+              <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
                 Total Income
               </span>
-              <span className="text-heading-3 font-display num-positive">
+              <p className="num text-mono-xl text-income font-medium">
                 {formatCurrency(safeData.summaryCards.income)}
-              </span>
+              </p>
               {renderTrendIndicator(
                 safeData.summaryCards.income,
                 safeData.previousPeriodSummary?.income,
@@ -434,15 +436,15 @@ export const Analytics: React.FC = () => {
 
           <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingDown className="h-16 w-16 text-error" />
+              <TrendingDown className="h-16 w-16 text-expense" />
             </div>
-            <div className="relative z-10 flex flex-col gap-1">
-              <span className="text-text-secondary text-body-sm font-medium tracking-wider uppercase mb-1">
+            <div className="relative z-10 space-y-2">
+              <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
                 Total Expense
               </span>
-              <span className="text-heading-3 font-display num-negative">
+              <p className="num text-mono-xl text-expense font-medium">
                 {formatCurrency(safeData.summaryCards.expense)}
-              </span>
+              </p>
               {renderTrendIndicator(
                 safeData.summaryCards.expense,
                 safeData.previousPeriodSummary?.expense,
@@ -453,17 +455,15 @@ export const Analytics: React.FC = () => {
 
           <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Wallet className="h-16 w-16 text-primary" />
+              <PiggyBank className="h-16 w-16 text-text-secondary" />
             </div>
-            <div className="relative z-10 flex flex-col gap-1">
-              <span className="text-text-secondary text-body-sm font-medium tracking-wider uppercase mb-1">
+            <div className="relative z-10 space-y-2">
+              <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
                 Net Savings
               </span>
-              <span
-                className={`text-heading-3 font-display ${safeData.summaryCards.net >= 0 ? "num-positive" : "num-negative"}`}
-              >
+              <p className={`num text-mono-xl font-medium ${safeData.summaryCards.net >= 0 ? "text-income" : "text-expense"}`}>
                 {formatCurrency(safeData.summaryCards.net)}
-              </span>
+              </p>
               {renderTrendIndicator(
                 safeData.summaryCards.net,
                 safeData.previousPeriodSummary?.net,
@@ -473,15 +473,15 @@ export const Analytics: React.FC = () => {
 
           <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <PiggyBank className="h-16 w-16 text-warning" />
+              <Wallet className="h-16 w-16 text-brand" />
             </div>
-            <div className="relative z-10 flex flex-col gap-1">
-              <span className="text-text-secondary text-body-sm font-medium tracking-wider uppercase mb-1">
+            <div className="relative z-10 space-y-2">
+              <span className="text-text-secondary text-body-sm font-semibold tracking-wider uppercase">
                 Savings Rate
               </span>
-              <span className="text-heading-3 font-display num">
+              <p className="num text-mono-xl text-brand font-medium">
                 {safeData.summaryCards.savingsRate.toFixed(1)}%
-              </span>
+              </p>
               {renderTrendIndicator(
                 safeData.summaryCards.savingsRate,
                 safeData.previousPeriodSummary?.savingsRate,
@@ -496,11 +496,11 @@ export const Analytics: React.FC = () => {
       ) : (
         <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Trend Chart */}
-          <div className="lg:col-span-2 card p-6 flex flex-col gap-6 min-w-0">
-            <h2 className="text-heading-3 font-display text-text-primary">
+          <div className="lg:col-span-2 card p-6 flex flex-col gap-6 min-w-0 overflow-hidden">
+            <h2 className="text-heading-3 font-display text-text-primary truncate">
               Income vs Expense Trend
             </h2>
-            <div className="h-96 w-full">
+            <div className="h-96 w-full min-w-0">
               {isMounted && safeData.trend.length > 0 ? (
                 <ResponsiveContainer
                   width="100%"
@@ -573,12 +573,12 @@ export const Analytics: React.FC = () => {
           </div>
 
           {/* Category Breakdown */}
-          <div className="card p-6 flex flex-col gap-6 min-w-0">
-            <div className="flex items-center justify-between">
-              <h2 className="text-heading-3 font-display text-text-primary">
+          <div className="card p-6 flex flex-col gap-6 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between min-w-0 gap-2">
+              <h2 className="text-heading-3 font-display text-text-primary truncate">
                 Breakdown
               </h2>
-              <div className="flex bg-bg-elevated rounded-lg p-1 border border-border">
+              <div className="flex bg-bg-elevated rounded-lg p-1 border border-border shrink-0">
                 <button
                   onClick={() => setBreakdownType("EXPENSE")}
                   className={`px-3 py-1 rounded-md text-body-xs font-medium transition-colors ${
@@ -602,7 +602,7 @@ export const Analytics: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-80 w-full">
+            <div className="h-80 w-full min-w-0">
               {isMounted && currentBreakdown.length > 0 ? (
                 <ResponsiveContainer
                   width="100%"
@@ -643,43 +643,45 @@ export const Analytics: React.FC = () => {
               )}
             </div>
 
-            <div className="flex flex-col gap-3 overflow-y-auto max-h-72 pr-2 custom-scrollbar">
-              {currentBreakdown.map(
-                (category: {
-                  categoryId: string;
-                  name: string;
-                  color?: string;
-                  amount: number;
-                  percent: number;
-                }) => (
-                  <div
-                    key={category.categoryId}
-                    className="flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor:
-                            category.color || "var(--color-primary)",
-                        }}
-                      />
-                      <span className="text-body-sm text-text-secondary group-hover:text-text-primary transition-colors line-clamp-1">
-                        {category.name}
-                      </span>
+            {currentBreakdown.length > 0 && (
+              <div className="flex flex-col gap-3 overflow-y-auto max-h-72 pr-2 custom-scrollbar min-w-0 border-t border-border/60 pt-3">
+                {currentBreakdown.map(
+                  (category: {
+                    categoryId: string;
+                    name: string;
+                    color?: string;
+                    amount: number;
+                    percent: number;
+                  }) => (
+                    <div
+                      key={category.categoryId}
+                      className="flex items-center justify-between group min-w-0 gap-2"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                        <div
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{
+                            backgroundColor:
+                              category.color || "var(--color-primary)",
+                          }}
+                        />
+                        <span className="text-body-sm text-text-secondary group-hover:text-text-primary transition-colors truncate block min-w-0">
+                          {category.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="num text-mono-sm font-medium text-text-primary">
+                          {formatCurrency(category.amount)}
+                        </span>
+                        <span className="num text-body-xs text-text-tertiary w-10 text-right">
+                          {category.percent.toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-mono-sm font-medium text-text-primary">
-                        {formatCurrency(category.amount)}
-                      </span>
-                      <span className="text-body-xs text-text-tertiary w-10 text-right">
-                        {category.percent.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                ),
-              )}
-            </div>
+                  ),
+                )}
+              </div>
+            )}
           </div>
 
           {/* Top Transactions */}
@@ -813,7 +815,7 @@ export const Analytics: React.FC = () => {
                                   </div>
                                   <p>Date: {data.date}</p>
                                   <p
-                                    className={`text-body-md font-display font-medium mt-0.5 ${
+                                    className={`num text-mono-md font-medium mt-0.5 ${
                                       topTransactionsType === "EXPENSE"
                                         ? "text-expense"
                                         : "text-income"

@@ -71,7 +71,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 value={searchQuery ?? ""}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="input w-full pl-10! pr-8! py-1.5 text-sm bg-bg-card/90 focus:bg-bg-surface border-border transition-colors shadow-2xs"
+                className="input input-sm w-full pl-10! pr-8! text-body-sm bg-bg-card/90 focus:bg-bg-surface border-border transition-colors shadow-2xs"
               />
               {searchQuery && (
                 <button

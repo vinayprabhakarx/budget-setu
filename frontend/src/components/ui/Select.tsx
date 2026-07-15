@@ -166,7 +166,7 @@ export const Select: React.FC<SelectProps> = ({
           disabled:opacity-50 disabled:cursor-not-allowed
           ${error ? "border-destructive ring-1 ring-destructive/30" : "border-border"}
           ${open && !error ? "border-brand ring-1 ring-brand" : ""}
-          ${isSmall ? "px-3 py-1.5 text-body-sm h-8 min-h-8" : "px-3.5 text-body-md h-10.5 min-h-10.5"}
+          ${isSmall ? "px-3 py-1.5 text-body-sm h-control-sm min-h-control-sm" : "px-3.5 text-body-md h-control-md min-h-control-md"}
         `}
       >
         <span className={selected ? "text-text-primary truncate" : "text-text-muted truncate"}>

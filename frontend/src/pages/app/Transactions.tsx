@@ -168,9 +168,13 @@ export const Transactions: React.FC = () => {
         totalPages: number;
         totalElements: number;
       }>("/transactions", { params });
-      setTransactions(response.data.content);
-      setTotalPages(response.data.totalPages);
-      setTotalElements(response.data.totalElements);
+      if (response.data.totalPages > 0 && page >= response.data.totalPages) {
+        setPage(response.data.totalPages - 1);
+      } else {
+        setTransactions(response.data.content);
+        setTotalPages(response.data.totalPages);
+        setTotalElements(response.data.totalElements);
+      }
     } catch (err) {
       console.error(err);
       showToast("error", "Failed to retrieve transactions.");
@@ -214,17 +218,20 @@ export const Transactions: React.FC = () => {
   }, [fetchTransactions, refreshCounter]);
 
   useEffect(() => {
-    const handleRefresh = () => {
+    const handleTransactionAdded = () => {
       setPage(0);
       setRefreshCounter((prev) => prev + 1);
     };
-    window.addEventListener("transaction-added", handleRefresh);
-    window.addEventListener("transactions-updated", handleRefresh);
-    return () => {
-      window.removeEventListener("transaction-added", handleRefresh);
-      window.removeEventListener("transactions-updated", handleRefresh);
+    const handleTransactionUpdated = () => {
+      setRefreshCounter((prev) => prev + 1);
     };
-  }, [fetchTransactions]);
+    window.addEventListener("transaction-added", handleTransactionAdded);
+    window.addEventListener("transactions-updated", handleTransactionUpdated);
+    return () => {
+      window.removeEventListener("transaction-added", handleTransactionAdded);
+      window.removeEventListener("transactions-updated", handleTransactionUpdated);
+    };
+  }, []);
 
   // Handle Search input debounce or trigger on Enter/click
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -254,7 +261,7 @@ export const Transactions: React.FC = () => {
       await api.delete(`/transactions/${id}`);
       showToast("success", "Transaction successfully removed.");
       fetchTransactions();
-      window.dispatchEvent(new CustomEvent("transaction-added"));
+      window.dispatchEvent(new CustomEvent("transactions-updated"));
     } catch (err) {
       console.error(err);
       showToast("error", "Failed to delete transaction.");
@@ -358,7 +365,7 @@ export const Transactions: React.FC = () => {
       }
       setEditingTx(null);
       fetchTransactions();
-      window.dispatchEvent(new CustomEvent("transaction-added"));
+      window.dispatchEvent(new CustomEvent("transactions-updated"));
     } catch (err) {
       console.error(err);
       showToast("error", "Failed to update transaction.");
@@ -479,6 +486,7 @@ export const Transactions: React.FC = () => {
                 setStartDate(val);
                 setPage(0);
               }}
+              size="sm"
               className="w-full"
             />
           </div>
@@ -494,6 +502,7 @@ export const Transactions: React.FC = () => {
                 setEndDate(val);
                 setPage(0);
               }}
+              size="sm"
               className="w-full"
             />
           </div>
@@ -943,7 +952,7 @@ export const Transactions: React.FC = () => {
                         <History className="h-4 w-4 text-text-muted group-hover:text-primary transition-colors" />
                         <span>Audit History</span>
                         {auditLogs.length > 0 && (
-                          <span className="px-1.5 py-0.5 text-[0.6875rem] font-bold rounded-full bg-brand/10 text-brand">
+                          <span className="px-1.5 py-0.5 text-caption font-bold rounded-full bg-brand/10 text-brand">
                             {auditLogs.length}
                           </span>
                         )}
@@ -972,7 +981,7 @@ export const Transactions: React.FC = () => {
                               <div className="absolute -left-5.25 top-1.5 h-2 w-2 rounded-full bg-brand border-2 border-bg-surface" />
                               <p className="text-body-sm font-semibold text-text-primary">
                                 Edited field:{" "}
-                                <span className="text-brand font-mono text-[0.6875rem]">
+                                <span className="text-brand font-mono text-caption">
                                   {log.fieldName}
                                 </span>
                               </p>
@@ -986,7 +995,7 @@ export const Transactions: React.FC = () => {
                                   {log.newValue || "null"}
                                 </span>
                               </p>
-                              <p className="text-[0.625rem] text-text-muted">
+                              <p className="text-micro text-text-muted">
                                 by {log.actor} on{" "}
                                 {new Date(log.timestamp).toLocaleString(
                                   "en-IN",

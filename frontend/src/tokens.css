@@ -17,10 +17,18 @@
   --text-body-lg:      1rem;                          /* 16px */
   --text-body-md:      0.875rem;                      /* 14px */
   --text-body-sm:      0.75rem;                       /* 12px */
+  --text-body-xs:      0.6875rem;                     /* 11px */
   --text-mono-xl:      1.5rem;                        /* 24px — hero amounts */
   --text-mono-lg:      1.125rem;                      /* 18px — card totals */
   --text-mono-md:      0.875rem;                      /* 14px — table amounts */
   --text-mono-sm:      0.75rem;                       /* 12px — small amounts */
+  --text-caption:      0.6875rem;                     /* 11px — captions, sublabels, compact badges */
+  --text-badge:        0.65rem;                       /* 10.4px — uppercase badges */
+  --text-micro:        0.625rem;                      /* 10px — super compact / sidebar collapsed labels */
+  --text-hero-sm:      clamp(2.25rem, 4vw, 3rem);     /* 36–48px */
+  --text-hero-md:      clamp(2.5rem, 5vw, 3.5rem);    /* 40–56px */
+  --text-hero-lg:      clamp(3rem, 6vw, 4.5rem);      /* 48–72px */
+  --text-hero-xl:      clamp(3rem, 7vw, 5rem);        /* 48–80px */
 
   /* ── Line Heights ──────────────────────────────────────── */
   --leading-tight:   1.25;
@@ -87,13 +95,14 @@
   --layout-sidebar-width:         15rem;      /* 240px */
   --layout-sidebar-collapsed:     3.75rem;    /* 60px */
   --layout-topbar-height:         4rem;       /* 64px */
+  --layout-sidebar-height:        calc(100vh - var(--layout-topbar-height));
   --layout-content-max-width:     75rem;     /* 1200px */
   --layout-content-padding-x:     var(--space-8);
   --layout-content-padding-y:     var(--space-8);
   --layout-card-gap:              var(--space-6);
 
   /* ── Interactive Control Heights (Buttons, Inputs, Selects) ── */
-  --control-height-sm:            2rem;       /* 32px */
+  --control-height-sm:            2.25rem;    /* 36px - Standardized Compact / Filter Control Height */
   --control-height-md:            2.625rem;   /* 42px - App Standard */
   --control-height-lg:            3rem;       /* 48px */
   --control-height-textarea:      5rem;       /* 80px min-height */

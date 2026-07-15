@@ -31,11 +31,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const generatedId = React.useId();
     const inputId = id || generatedId;
 
-    // Note: 'md' size uses 2.625rem (42px) height to match app standard
+    // Note: size uses control-height tokens to match app standard without hardcoded px/rem values
     const sizeStyles = {
-      sm: "h-8 text-body-sm px-3",
-      md: "h-[2.625rem] text-body-md px-3.5",
-      lg: "h-12 text-body-lg px-4",
+      sm: "h-control-sm text-body-sm px-3",
+      md: "h-control-md text-body-md px-3.5",
+      lg: "h-control-lg text-body-lg px-4",
     }[inputSize];
 
     const leftPadding = leftIcon ? "pl-10" : "";

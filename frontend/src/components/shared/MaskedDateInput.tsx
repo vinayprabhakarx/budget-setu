@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 
-interface MaskedDateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface MaskedDateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'size'> {
   value: string; // YYYY-MM-DD format
   onChange: (value: string) => void;
+  size?: "sm" | "md";
 }
 
 export const MaskedDateInput: React.FC<MaskedDateInputProps> = ({ 
   value, 
   onChange, 
   className = '', 
+  size = "md",
   ...props 
 }) => {
   // Convert YYYY-MM-DD to DD/MM/YYYY for display
@@ -77,7 +79,7 @@ export const MaskedDateInput: React.FC<MaskedDateInputProps> = ({
       onChange={handleChange}
       placeholder="DD/MM/YYYY"
       maxLength={10}
-      className={`input ${className}`}
+      className={`input ${size === "sm" ? "input-sm" : ""} ${className}`}
       {...props}
     />
   );

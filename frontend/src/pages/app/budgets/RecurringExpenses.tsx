@@ -152,11 +152,11 @@ export const RecurringExpenses: React.FC<Props> = ({
                     <h3 className="font-semibold text-text-primary text-body-lg leading-tight truncate max-w-full">
                       {exp.name || "N/A"}
                     </h3>
-                    <span className="text-[0.65rem] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
+                    <span className="text-badge font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 shrink-0">
                       {exp.frequency || "N/A"}
                     </span>
                     <span
-                      className={`px-1.5 py-0.5 text-[0.65rem] font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}
+                      className={`px-1.5 py-0.5 text-badge font-semibold tracking-wider uppercase rounded shrink-0 ${exp.status === "ACTIVE" ? "badge-income" : "badge-warning"}`}
                     >
                       {exp.status || "N/A"}
                     </span>
@@ -227,7 +227,7 @@ export const RecurringExpenses: React.FC<Props> = ({
                       </p>
                     )}
                   </div>
-                  <p className="num text-heading-3 font-bold text-text-primary whitespace-nowrap">
+                  <p className="num text-mono-xl font-bold text-text-primary whitespace-nowrap">
                     {exp.amount !== null && exp.amount !== undefined
                       ? formatCurrency(exp.amount)
                       : "N/A"}
@@ -238,7 +238,7 @@ export const RecurringExpenses: React.FC<Props> = ({
                     className={`h-full rounded-full transition-all duration-deliberate ease-standard ${exp.status === "ACTIVE" ? "bg-income w-full" : "bg-warning w-1/2"}`}
                   />
                 </div>
-                <div className="flex justify-between items-center pt-1 text-[0.6875rem]">
+                <div className="flex justify-between items-center pt-1 text-caption">
                   <span
                     className={`font-semibold ${exp.status === "ACTIVE" ? "text-income" : "text-warning"}`}
                   >

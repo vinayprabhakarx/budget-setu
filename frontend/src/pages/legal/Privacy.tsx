@@ -21,7 +21,7 @@ export const Privacy: React.FC = () => {
       <div className="max-w-4xl mx-auto px-6 py-16 md:py-24 space-y-12">
         {/* Header */}
         <div className="space-y-3 border-b border-border pb-6">
-          <h1 className="font-display text-text-primary text-[2.5rem] md:text-[3.5rem] tracking-tight">
+          <h1 className="font-display text-text-primary text-hero-md tracking-tight">
             Privacy Policy
           </h1>
           <p className="text-text-secondary text-body-sm">

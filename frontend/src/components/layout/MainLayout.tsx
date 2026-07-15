@@ -308,7 +308,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
                 }`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className="text-[0.625rem] mt-0.5 truncate w-full text-center font-medium px-0.5">
+                <span className="text-micro mt-0.5 truncate w-full text-center font-medium px-0.5">
                   {shortName}
                 </span>
               </Link>

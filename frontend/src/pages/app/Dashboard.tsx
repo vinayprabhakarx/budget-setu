@@ -1,5 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDateFilter } from "../../context/DateFilterContext";
+import { FilterSection } from "../../components/shared/FilterSection";
+import { Select } from "../../components/shared/Select";
+
+const months = [
+  { val: 1, label: "January" }, { val: 2, label: "February" }, { val: 3, label: "March" },
+  { val: 4, label: "April" }, { val: 5, label: "May" }, { val: 6, label: "June" },
+  { val: 7, label: "July" }, { val: 8, label: "August" }, { val: 9, label: "September" },
+  { val: 10, label: "October" }, { val: 11, label: "November" }, { val: 12, label: "December" },
+];
+
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
 import api from "../../api/axiosInstance";
 import { useToast } from "../../context/ToastContext";
@@ -199,6 +212,8 @@ const CustomBarTooltip = ({
 export const Dashboard: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { month, year, setMonth, setYear } = useDateFilter();
+  const [showFilters, setShowFilters] = useState(false);
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlanData[]>([]);
   const [recurringExpenses, setRecurringExpenses] = useState<
@@ -225,18 +240,15 @@ export const Dashboard: React.FC = () => {
   const fetchDashboardData = useCallback(async () => {
     try {
       const [dashRes, plansRes, recurringRes, goalsRes] = await Promise.all([
-        api.get<DashboardSummary>(`/dashboard/summary`),
+        api.get<DashboardSummary>(`/dashboard/summary?month=${month}&year=${year}`),
         api.get<BudgetPlanData[]>("/budget-plans"),
         api.get<RecurringExpenseData[]>("/recurring-expenses"),
         api.get<GoalData[]>("/goals"),
       ]);
       setData(dashRes.data);
 
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth() + 1; // 1-indexed
-      const filterMonthStart = new Date(currentYear, currentMonth - 1, 1);
-      const filterMonthEnd = new Date(currentYear, currentMonth, 0);
+      const filterMonthStart = new Date(year, month - 1, 1);
+      const filterMonthEnd = new Date(year, month, 0);
       const filteredPlans = plansRes.data.filter((p) => {
         const planStart = new Date(p.startDate);
         const planEnd = new Date(p.endDate);
@@ -299,7 +311,7 @@ export const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, month, year]);
 
   useEffect(() => {
     let active = true;
@@ -354,10 +366,39 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6 pb-16">
       <PageHeader
         title="Dashboard"
-        subtitle="Overview of your financial health, recent activity, and goals for the current month."
+        subtitle="Overview of your financial health, recent activity, and goals for the selected period."
+        onFilterClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
         onRefreshClick={fetchDashboardData}
         isRefreshing={loading}
       />
+
+      {/* Filter Controls */}
+      <FilterSection
+        isOpen={showFilters}
+        hasActiveFilters={month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()}
+        onReset={() => {
+          const now = new Date();
+          setMonth(now.getMonth() + 1);
+          setYear(now.getFullYear());
+        }}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-body-sm font-medium text-text-secondary">Period:</span>
+          <Select
+            value={String(month)}
+            onChange={(val) => setMonth(Number(val))}
+            options={months.map((m) => ({ value: String(m.val), label: m.label }))}
+            size="sm"
+          />
+          <Select
+            value={String(year)}
+            onChange={(val) => setYear(Number(val))}
+            options={years.map((y) => ({ value: String(y), label: String(y) }))}
+            size="sm"
+          />
+        </div>
+      </FilterSection>
       {/* 1. Summary Cards Grid */}
       {isLoading ? (
         <DashboardSummarySkeleton />

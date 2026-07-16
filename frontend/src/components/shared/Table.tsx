@@ -25,7 +25,7 @@ export const TableHeader = React.forwardRef<
 >(({ className = '', children, ...props }, ref) => (
   <thead
     ref={ref}
-    className={`border-b border-border text-text-secondary text-body-sm font-semibold ${className}`}
+    className={`border-b border-border text-text-secondary text-body-md font-semibold ${className}`}
     {...props}
   >
     {children}
@@ -81,7 +81,7 @@ export const TableCell = React.forwardRef<
 >(({ className = '', children, ...props }, ref) => (
   <td
     ref={ref}
-    className={`py-3.5 px-3 sm:px-4 align-middle text-body-sm text-text-primary ${className}`}
+    className={`py-3.5 px-3 sm:px-4 align-middle text-body-md text-text-primary ${className}`}
     {...props}
   >
     {children}

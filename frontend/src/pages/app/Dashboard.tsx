@@ -1060,9 +1060,9 @@ export const Dashboard: React.FC = () => {
                           },
                         )}
                       </TableCell>
-                      <TableCell className="font-medium text-text-primary">
+                      <TableCell className="text-body-lg font-semibold text-text-primary">
                         <div
-                          className={`max-w-20 sm:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                           title={tx.payee}
                         >
                           {tx.payee}
@@ -1071,7 +1071,7 @@ export const Dashboard: React.FC = () => {
                       <TableCell className="text-text-secondary">
                         {tx.paymentMode && tx.paymentMode !== "OTHER" ? (
                           <span
-                            className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-bg-muted text-text-muted max-w-16 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
                             title={tx.paymentMode}
                           >
                             {tx.paymentMode}
@@ -1083,7 +1083,7 @@ export const Dashboard: React.FC = () => {
                       <TableCell>
                         {catObj ? (
                           <span
-                            className={`badge badge-neutral max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
+                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
                             style={{
                               backgroundColor: `${catObj.color}15`,
                               color: catObj.color,
@@ -1096,7 +1096,7 @@ export const Dashboard: React.FC = () => {
                           </span>
                         ) : (
                           <span
-                            className={`badge badge-neutral max-w-15 sm:max-w-none align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                           >
                             Uncategorized
                           </span>
@@ -1104,11 +1104,11 @@ export const Dashboard: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div
-                          className={`max-w-20 sm:max-w-52 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                         >
                           {tx.description ? (
                             <p
-                              className="text-body-sm text-text-secondary font-normal"
+                              className="text-body-md text-text-secondary font-normal"
                               title={tx.description}
                             >
                               {tx.description}
@@ -1119,7 +1119,7 @@ export const Dashboard: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell
-                        className={`text-right num font-semibold whitespace-nowrap ${
+                        className={`text-right num text-mono-lg font-bold whitespace-nowrap ${
                           isNegative ? "num-negative" : "num-positive"
                         }`}
                       >

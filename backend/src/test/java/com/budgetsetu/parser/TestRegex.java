@@ -1,6 +1,9 @@
+package com.budgetsetu.parser;
+
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.Locale;
+
 public class TestRegex {
     public static void main(String[] args) {
         String clean = "14 MAY'26".trim().replaceAll("\\s+", " ");

@@ -664,7 +664,7 @@ export const Transactions: React.FC = () => {
                     onClick={() => toggleRow(tx.id)}
                     className="cursor-pointer md:cursor-default text-body-md"
                   >
-                    <TableCell className="text-text-secondary whitespace-nowrap">
+                    <TableCell className="text-body-md text-text-secondary whitespace-nowrap">
                       {new Date(tx.transactionDate).toLocaleDateString(
                         "en-IN",
                         {
@@ -674,9 +674,9 @@ export const Transactions: React.FC = () => {
                         },
                       )}
                     </TableCell>
-                    <TableCell className="font-medium text-text-primary">
+                    <TableCell className="text-body-lg font-semibold text-text-primary">
                       <div
-                        className={`max-w-20 sm:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                        className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                         title={tx.payee}
                       >
                         {tx.payee}
@@ -696,7 +696,7 @@ export const Transactions: React.FC = () => {
                         }
                         return accountName ? (
                           <span
-                            className={`inline-block px-1.5 py-0.5 rounded text-xs sm:text-xs font-medium bg-bg-muted text-text-muted max-w-24 sm:max-w-none transition-all duration-200 align-bottom truncate`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-36 sm:max-w-none transition-all duration-200 align-bottom truncate`}
                             title={accountName}
                           >
                             {accountName}
@@ -709,7 +709,7 @@ export const Transactions: React.FC = () => {
                     <TableCell>
                       {catObj ? (
                         <span
-                          className={`badge max-w-15 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                           style={{
                             backgroundColor: `${catObj.color}15`,
                             color: catObj.color,
@@ -724,11 +724,11 @@ export const Transactions: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div
-                        className={`max-w-20 sm:max-w-52 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                        className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
                       >
                         {tx.description ? (
                           <p
-                            className="text-body-sm text-text-secondary font-normal"
+                            className="text-body-md text-text-secondary font-normal"
                             title={tx.description}
                           >
                             {tx.description}
@@ -741,7 +741,7 @@ export const Transactions: React.FC = () => {
                             {tx.tags.map((t) => (
                               <span
                                 key={t}
-                                className="text-xs sm:text-xs bg-bg-subtle text-text-secondary px-1.5 py-0.5 rounded"
+                                className="text-body-sm font-medium bg-bg-subtle text-text-secondary px-2 py-0.5 rounded-md"
                               >
                                 #{t}
                               </span>
@@ -751,14 +751,14 @@ export const Transactions: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell
-                      className={`text-right num font-semibold whitespace-nowrap ${
+                      className={`text-right num text-mono-lg font-bold whitespace-nowrap ${
                         isNegative ? "num-negative" : "num-positive"
                       }`}
                     >
                       {isNegative ? "−" : "+"}
                       {formatCurrency(tx.amount)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                         <Dropdown
                           align="right"
@@ -861,7 +861,7 @@ export const Transactions: React.FC = () => {
                       />
                       <label
                         htmlFor="applyMerchantRule"
-                        className="text-xs text-text-secondary leading-tight cursor-pointer flex-1"
+                        className="text-body-sm text-text-secondary leading-tight cursor-pointer flex-1"
                       >
                         <span className="font-semibold text-text-primary block mb-0.5 text-body-sm">
                           Always categorize "{editPayee.trim()}" as this
@@ -885,7 +885,7 @@ export const Transactions: React.FC = () => {
                         />
                         <label
                           htmlFor="contributeGlobally"
-                          className="text-xs text-text-secondary leading-tight cursor-pointer flex-1"
+                          className="text-body-sm text-text-secondary leading-tight cursor-pointer flex-1"
                         >
                           <span className="font-semibold text-primary block mb-0.5 text-body-sm">
                             Contribute this merchant mapping globally
@@ -957,10 +957,10 @@ export const Transactions: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-text-muted group-open:hidden">
+                      <span className="text-body-sm text-text-muted group-open:hidden">
                         View edits
                       </span>
-                      <span className="text-xs text-text-muted hidden group-open:inline">
+                      <span className="text-body-sm text-text-muted hidden group-open:inline">
                         Hide edits
                       </span>
                     </summary>

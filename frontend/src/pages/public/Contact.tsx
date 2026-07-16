@@ -112,14 +112,25 @@ export const Contact: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       {/* Full Name */}
                       <div className="space-y-2 group/input">
-                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                        <label
+                          htmlFor="contact-fullName"
+                          className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand"
+                        >
                           Your Name
                         </label>
                         <input
+                          id="contact-fullName"
+                          name="fullName"
+                          autoComplete="name"
                           type="text"
                           placeholder="Arjun Sharma"
                           value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
+                          onChange={(e) => {
+                            setFullName(e.target.value);
+                            if (fieldErrors.fullName) {
+                              setFieldErrors((prev) => ({ ...prev, fullName: "" }));
+                            }
+                          }}
                           className={`input w-full bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.fullName ? "border-destructive/50 focus:border-destructive" : ""}`}
                           disabled={loading}
                         />
@@ -132,14 +143,25 @@ export const Contact: React.FC = () => {
 
                       {/* Email Address */}
                       <div className="space-y-2 group/input">
-                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                        <label
+                          htmlFor="contact-email"
+                          className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand"
+                        >
                           Email Address
                         </label>
                         <input
+                          id="contact-email"
+                          name="email"
+                          autoComplete="email"
                           type="email"
                           placeholder="arjun@example.com"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (fieldErrors.email) {
+                              setFieldErrors((prev) => ({ ...prev, email: "" }));
+                            }
+                          }}
                           className={`input w-full bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.email ? "border-destructive/50 focus:border-destructive" : ""}`}
                           disabled={loading}
                         />
@@ -172,7 +194,10 @@ export const Contact: React.FC = () => {
                     {/* Message */}
                     <div className="space-y-2 group/input">
                       <div className="flex justify-between items-end">
-                        <label className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand">
+                        <label
+                          htmlFor="contact-message"
+                          className="block text-body-sm font-semibold text-text-primary transition-colors group-focus-within/input:text-brand"
+                        >
                           Your Message
                         </label>
                         {fieldErrors.message && (
@@ -182,9 +207,16 @@ export const Contact: React.FC = () => {
                         )}
                       </div>
                       <textarea
+                        id="contact-message"
+                        name="message"
                         placeholder="Tell us what you're thinking or describe the issue in detail..."
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={(e) => {
+                          setMessage(e.target.value);
+                          if (fieldErrors.message) {
+                            setFieldErrors((prev) => ({ ...prev, message: "" }));
+                          }
+                        }}
                         rows={6}
                         className={`input w-full min-h-37.5 resize-y bg-bg-base/50 border-border/50 focus:border-brand/50 focus:bg-bg-surface transition-all duration-300 ${fieldErrors.message ? "border-destructive/50 focus:border-destructive" : ""}`}
                         disabled={loading}

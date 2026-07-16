@@ -110,7 +110,7 @@ export const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({
         Verification Code
       </label>
       <div className="relative">
-        <div className="flex gap-1.5 sm:gap-2 justify-center max-w-full overflow-x-auto py-1">
+        <div className="flex gap-2 justify-center">
           {[0, 1, 2, 3, 4, 5].map((index) => (
             <input
               key={index}
@@ -125,7 +125,7 @@ export const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               onFocus={() => handleFocus(index)}
-              className={`input shrink-0 w-10 h-12 sm:w-12 sm:h-14 p-0! text-center font-mono! text-xl sm:text-2xl md:text-3xl! leading-normal font-semibold text-text-primary rounded-lg ${
+              className={`input w-10 h-12 md:w-12 md:h-14 px-1 text-center font-mono! text-3xl! md:text-4xl! leading-none font-semibold text-text-primary ${
                 error && !isVerified ? 'input-error' : ''
               } ${isVerified ? 'bg-bg-disabled border-success text-success' : ''}`}
               disabled={disabled || isVerified}
@@ -133,7 +133,7 @@ export const VerificationCodeInput: React.FC<VerificationCodeInputProps> = ({
             />
           ))}
         </div>
-      </div>
+        </div>
       {error && !isVerified && (
         <p className="text-destructive text-body-sm mt-2 text-center">
           {error}

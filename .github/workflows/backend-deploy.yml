@@ -128,6 +128,9 @@ jobs:
             docker run -d \
               --name budget-setu \
               --restart unless-stopped \
+              --memory="2g" \
+              --memory-swap="2g" \
+              -e JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0 -XX:+UseG1GC" \
               -p 8080:8080 \
               --env-file /home/ubuntu/budget-setu/.env.production \
               -v /home/ubuntu/budget-setu/logs:/app/logs \

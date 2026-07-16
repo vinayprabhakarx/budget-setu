@@ -3,6 +3,10 @@ services:
   postgres:
     image: postgres:16
     container_name: budgetsetu_postgres
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     environment:
       POSTGRES_USER: budgetsetu_user
       POSTGRES_PASSWORD: your_strong_password_here
@@ -20,6 +24,10 @@ services:
   mongodb:
     image: mongo:7
     container_name: budgetsetu_mongo
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     ports:
       - "27017:27017"
     volumes:
@@ -33,6 +41,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: budgetsetu_redis
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     ports:
       - "6379:6379"
     volumes:

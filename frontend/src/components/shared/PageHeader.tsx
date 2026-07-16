@@ -21,8 +21,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   children,
 }) => {
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-x-4">
-      <h1 className="text-2xl font-display font-semibold tracking-tight text-text-primary min-w-0 col-start-1 row-start-1 self-center">
+    <div className="grid grid-cols-[1fr_auto] gap-x-2 sm:gap-x-4">
+      <h1 className="text-xl sm:text-2xl font-display font-semibold tracking-tight text-text-primary min-w-0 truncate col-start-1 row-start-1 self-center">
         {title}
       </h1>
       {subtitle && (
@@ -30,7 +30,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {subtitle}
         </p>
       )}
-      <div className="col-start-2 row-start-1 sm:row-span-2 flex items-center gap-2 flex-wrap justify-end self-start sm:self-center">
+      <div className="col-start-2 row-start-1 sm:row-span-2 flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end self-center shrink-0">
         {onFilterClick && (
           <button
             type="button"

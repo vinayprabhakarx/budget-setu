@@ -17,7 +17,8 @@ export const Hero: React.FC = () => {
     <PublicLayout>
       {/* 1. Hero Section (Split Layout + App Mockup) */}
       <section className="relative overflow-hidden py-24 md:py-32 border-b border-border">
-        <div className="ambient-glow" />
+        {/* Animated background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-brand/20 blur-3xl rounded-full opacity-50 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

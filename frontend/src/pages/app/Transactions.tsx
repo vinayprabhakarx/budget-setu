@@ -457,7 +457,17 @@ export const Transactions: React.FC = () => {
           }
           leftIcon={<Plus className="h-4 w-4" />}
         >
-          {accounts.length > 0 ? "Add Transaction" : "Add Bank Account"}
+          {accounts.length > 0 ? (
+            <>
+              <span className="sm:hidden">Add Txn</span>
+              <span className="hidden sm:inline">Add Transaction</span>
+            </>
+          ) : (
+            <>
+              <span className="sm:hidden">Add Bank</span>
+              <span className="hidden sm:inline">Add Bank Account</span>
+            </>
+          )}
         </Button>
       </PageHeader>
 

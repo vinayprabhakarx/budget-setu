@@ -6,8 +6,8 @@ export const About: React.FC = () => {
   return (
     <PublicLayout>
       <div className="relative overflow-hidden py-24 md:py-32">
-        {/* Animated ambient glow */}
-        <div className="ambient-glow-animated" />
+        {/* Animated background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-brand/20 blur-3xl rounded-full opacity-50 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-32">
           

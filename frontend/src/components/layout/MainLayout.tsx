@@ -6,9 +6,9 @@ import { useToast } from "../../context/ToastContext";
 import { ThemeToggle } from "../shared/ThemeToggle";
 import {
   LayoutDashboard,
-  Receipt,
-  PieChart,
-  CreditCard,
+  ArrowRightLeft,
+  IndianRupee,
+  Landmark,
   LogOut,
   Plus,
   Pin,
@@ -46,7 +46,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
       }
     };
     fetchAccounts();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [location.pathname]);
 
   const [isPinned, setIsPinned] = useState(() => {
@@ -58,10 +60,10 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "Transactions", path: "/transactions", icon: Receipt },
+    { name: "Transactions", path: "/transactions", icon: ArrowRightLeft },
     { name: "Analytics", path: "/analytics", icon: BarChart3 },
-    { name: "Budgets & Goals", path: "/budgets", icon: PieChart },
-    { name: "Bank Accounts", path: "/accounts", icon: CreditCard },
+    { name: "Budgets & Goals", path: "/budgets", icon: IndianRupee },
+    { name: "Bank Accounts", path: "/accounts", icon: Landmark },
   ];
 
   const handleLogout = async () => {
@@ -69,7 +71,6 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
     showToast("success", "Logged out successfully.");
     navigate("/login");
   };
-
 
   // Generate lists for month/year dropdowns
 
@@ -123,7 +124,11 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           >
             <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0 overflow-hidden">
               {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                <img
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 user?.fullName?.charAt(0) || "U"
               )}
@@ -181,7 +186,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
           className="flex items-start gap-2 font-display text-text-primary text-2xl font-medium tracking-tight select-none"
         >
           <span>BudgetSetu</span>
-          <span className="text-xl font-bold text-brand font-sans" title="Beta">β</span>
+          <span className="text-xl font-bold text-brand font-sans" title="Beta">
+            β
+          </span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -222,7 +229,11 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
             >
               <div className="h-9 w-9 rounded-full bg-brand/10 text-brand font-semibold flex items-center justify-center shrink-0 overflow-hidden">
                 {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  <img
+                    src={user.avatarUrl}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   user?.fullName?.charAt(0) || "U"
                 )}
@@ -253,9 +264,14 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
       {/* Desktop Topbar */}
       <header className="hidden lg:flex items-center justify-between h-16 w-full fixed top-0 left-0 bg-bg-surface border-b border-border px-8 z-40">
-        <Link to="/dashboard" className="font-display text-text-primary text-xl md:text-2xl tracking-tight flex items-start gap-2">
+        <Link
+          to="/dashboard"
+          className="font-display text-text-primary text-xl md:text-2xl tracking-tight flex items-start gap-2"
+        >
           <span>BudgetSetu</span>
-          <span className="text-xl font-bold text-brand font-sans" title="Beta">β</span>
+          <span className="text-xl font-bold text-brand font-sans" title="Beta">
+            β
+          </span>
         </Link>
 
         <div className="flex items-center gap-4">
@@ -279,7 +295,10 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
       >
         {/* 3. Primary Page Content Container */}
         <div className="flex-1 flex flex-col w-full items-center">
-          <main key={location.pathname} className="animate-page-enter flex-1 p-4 lg:p-8 max-w-(--layout-content-max-width) w-full">
+          <main
+            key={location.pathname}
+            className="animate-page-enter flex-1 p-4 lg:p-8 max-w-(--layout-content-max-width) w-full"
+          >
             {children}
           </main>
         </div>
@@ -318,11 +337,17 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({
 
         <GlobalImportIndicator />
         <button
-          onClick={() => hasAccounts ? setIsAddTxnOpen(true) : navigate("/accounts#new")}
+          onClick={() =>
+            hasAccounts ? setIsAddTxnOpen(true) : navigate("/accounts#new")
+          }
           className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 h-12 w-12 rounded-full bg-brand text-brand-text shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all"
           title={hasAccounts ? "Add Transaction" : "Add Bank Account"}
         >
-          {hasAccounts ? <Plus className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
+          {hasAccounts ? (
+            <Plus className="h-5 w-5" />
+          ) : (
+            <Landmark className="h-5 w-5" />
+          )}
         </button>
       </div>
 

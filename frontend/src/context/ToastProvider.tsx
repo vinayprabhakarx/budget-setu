@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { ToastContext } from './ToastContext';
 import type { Toast, ToastType } from './ToastContext';
 
@@ -32,16 +33,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const translateY = -(revIdx * 1); // 1rem
           const zIndex = 50 - revIdx;
 
-          let icon = '✓';
+          let IconComponent = CheckCircle2;
+          let iconColorClass = 'text-success';
           let progressColor = 'var(--color-success)';
           if (toast.type === 'error') {
-            icon = '✕';
+            IconComponent = AlertCircle;
+            iconColorClass = 'text-expense';
             progressColor = 'var(--color-expense)';
           } else if (toast.type === 'warning') {
-            icon = '⚠';
+            IconComponent = AlertTriangle;
+            iconColorClass = 'text-warning';
             progressColor = 'var(--color-warning)';
           } else if (toast.type === 'info') {
-            icon = 'ℹ';
+            IconComponent = Info;
+            iconColorClass = 'text-[var(--color-info)]';
             progressColor = 'var(--color-info)';
           }
 
@@ -59,17 +64,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               }}
             >
               <div className="flex items-center gap-3 relative z-10">
-                <span className="font-semibold text-text-primary">{icon}</span>
-                <span className="text-body-md text-text-primary">{toast.message}</span>
+                <IconComponent className={`h-5 w-5 shrink-0 ${iconColorClass}`} />
+                <span className="text-body-md text-text-primary font-medium">{toast.message}</span>
               </div>
               <button
-                className="text-text-muted hover:text-text-primary text-body-sm transition-colors relative z-10"
+                className={`p-1 rounded transition-colors ${iconColorClass} opacity-70 hover:opacity-100 relative z-10`}
                 onClick={(e) => {
                   e.stopPropagation();
                   removeToast(toast.id);
                 }}
+                title="Close"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
               <div 
                 className="absolute bottom-0 left-0 h-1 opacity-50"

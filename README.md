@@ -4,6 +4,52 @@ BudgetSetu is a statement-first personal finance application designed to help us
 
 ---
 
+## Application Walkthrough & Screenshots
+
+### 1. User Application & Financial Hub
+The core user application offers a comprehensive, privacy-focused dashboard to monitor cashflow, audit bank statements, and track spending goals.
+
+<div align="center">
+  <img src="img/user/dashboard.png" alt="Dashboard Overview" width="850" style="border-radius: 8px;" />
+  <p><b>Interactive Financial Health & Cashflow Dashboard</b></p>
+</div>
+
+| Transactions & Filtering | Visual Analytics & Trends |
+| :---: | :---: |
+| <img src="img/user/transactions.png" alt="Transactions" width="420" /> | <img src="img/user/analytics.png" alt="Analytics" width="420" /> |
+| **Active Budgets & Limits** | **Savings Goals Tracking** |
+| <img src="img/user/budget.png" alt="Budgets" width="420" /> | <img src="img/user/goal.png" alt="Goals" width="420" /> |
+| **Bank Accounts Management** | **Statement Import & Parsing History** |
+| <img src="img/user/bank_account.png" alt="Bank Accounts" width="420" /> | <img src="img/user/import_history.png" alt="Import History" width="420" /> |
+| **User Profile & Security** | **Encrypted Data Backup & Restore** |
+| <img src="img/user/profile.png" alt="Profile" width="420" /> | <img src="img/user/backup_restore.png" alt="Backup Restore" width="420" /> |
+
+---
+
+### 2. Public Marketing & Compliance Portal
+A rich, responsive public showcase featuring transparent pricing, contact workflows, and comprehensive data privacy policies.
+
+| Public Hero Landing | Transparent Pricing & Tiers |
+| :---: | :---: |
+| <img src="img/public/hero.png" alt="Hero Landing" width="420" /> | <img src="img/public/pricing.png" alt="Pricing" width="420" /> |
+| **About Our Mission** | **Contact Support & Feedback** |
+| <img src="img/public/about.png" alt="About Us" width="420" /> | <img src="img/public/contact.png" alt="Contact Form" width="420" /> |
+
+---
+
+### 3. Administration Console & System Diagnostics
+Dedicated administration portal for monitoring system health, managing categorization rules, and auditing database logs in real time.
+
+| Admin System Overview | User Account Management |
+| :---: | :---: |
+| <img src="img/admin/admin_dashboard.png" alt="Admin Dashboard" width="420" /> | <img src="img/admin/user_management.png" alt="User Management" width="420" /> |
+| **Merchant Rules Engine** | **Contact Submissions Inbox** |
+| <img src="img/admin/merchant_rules.png" alt="Merchant Rules" width="420" /> | <img src="img/admin/contact_submissions.png" alt="Submissions" width="420" /> |
+| **PostgreSQL Diagnostics & Logs** | **MongoDB Audit Trail Logs** |
+| <img src="img/admin/db_logs.png" alt="Postgres Logs" width="420" /> | <img src="img/admin/mongo_logs.png" alt="Mongo Logs" width="420" /> |
+
+---
+
 ## Key Features
 
 - **Automated Categorization**: Rule-based matching engine that tags transactions to categories (Food, Bills, Transport, etc.).

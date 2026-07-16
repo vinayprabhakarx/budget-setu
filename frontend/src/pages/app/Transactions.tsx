@@ -676,7 +676,7 @@ export const Transactions: React.FC = () => {
                     </TableCell>
                     <TableCell className="text-body-lg font-semibold text-text-primary">
                       <div
-                        className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                        className={`max-w-28 sm:max-w-36 lg:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                         title={tx.payee}
                       >
                         {tx.payee}
@@ -696,7 +696,7 @@ export const Transactions: React.FC = () => {
                         }
                         return accountName ? (
                           <span
-                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-36 sm:max-w-none transition-all duration-200 align-bottom truncate`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-28 sm:max-w-36 lg:max-w-44 transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                             title={accountName}
                           >
                             {accountName}
@@ -709,7 +709,7 @@ export const Transactions: React.FC = () => {
                     <TableCell>
                       {catObj ? (
                         <span
-                          className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-28 sm:max-w-36 lg:max-w-44 transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                           style={{
                             backgroundColor: `${catObj.color}15`,
                             color: catObj.color,
@@ -724,7 +724,7 @@ export const Transactions: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div
-                        className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                        className={`max-w-28 sm:max-w-36 lg:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                       >
                         {tx.description ? (
                           <p

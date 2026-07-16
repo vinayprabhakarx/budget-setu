@@ -396,7 +396,7 @@ select.input {
   font-size: var(--text-body-sm);
   padding-left: var(--space-3);
   padding-right: var(--space-3);
-  width: auto;
+  width: 100%;
 }
 select.input.input-sm {
   padding-right: 2.25rem;

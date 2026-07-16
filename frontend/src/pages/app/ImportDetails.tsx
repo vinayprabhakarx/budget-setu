@@ -222,17 +222,17 @@ export const ImportDetails: React.FC = () => {
                         className="text-body-md"
                       >
                         {/* Date */}
-                        <TableCell className="text-text-secondary whitespace-nowrap">
+                        <TableCell className="text-body-md text-text-secondary whitespace-nowrap">
                           {row.date ? formatDate(row.date) : '—'}
                         </TableCell>
 
                         {/* Payee */}
-                        <TableCell className="font-medium text-text-primary">
+                        <TableCell className="text-body-lg font-semibold text-text-primary">
                           <span>{row.payee}</span>
                         </TableCell>
 
                         {/* Amount — same num classes as Transactions */}
-                        <TableCell className={`text-right num font-semibold whitespace-nowrap ${
+                        <TableCell className={`text-right num text-mono-lg font-bold whitespace-nowrap ${
                           isNegative
                             ? 'num-negative'
                             : 'num-positive'
@@ -243,12 +243,12 @@ export const ImportDetails: React.FC = () => {
                         {/* Status badge */}
                         <TableCell className="whitespace-nowrap">
                           {row.type === 'IMPORTED' && (
-                            <span className="inline-flex items-center gap-1.5 text-income text-xs font-medium bg-income/10 px-2 py-1 rounded">
+                            <span className="badge text-body-sm font-medium px-2.5 py-0.5 rounded-md bg-income/10 text-income inline-flex items-center gap-1.5">
                               <CheckCircle className="w-3.5 h-3.5" /> Imported
                             </span>
                           )}
                           {row.type === 'SKIPPED' && (
-                            <span className="inline-flex items-center gap-1.5 text-warning text-xs font-medium bg-warning/15 px-2 py-1 rounded">
+                            <span className="badge text-body-sm font-medium px-2.5 py-0.5 rounded-md bg-warning/15 text-warning inline-flex items-center gap-1.5">
                               <AlertCircle className="w-3.5 h-3.5" /> Skipped
                             </span>
                           )}

@@ -120,7 +120,7 @@ export const Analytics: React.FC = () => {
 
   // Filter State
   const [showFilters, setShowFilters] = useState(false);
-  const [groupBy, setGroupBy] = useState<"day" | "week" | "month">("month");
+  const [groupBy, setGroupBy] = useState<"day" | "week" | "month">("day");
   const [fromDate, setFromDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(1);
@@ -190,7 +190,7 @@ export const Analytics: React.FC = () => {
         setFromDate(d.toISOString().split("T")[0]);
         const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
         setToDate(end.toISOString().split("T")[0]);
-        setGroupBy("week");
+        setGroupBy("day");
         break;
       }
       case "lastMonth": {
@@ -199,7 +199,7 @@ export const Analytics: React.FC = () => {
         setFromDate(d.toISOString().split("T")[0]);
         const lastEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0);
         setToDate(lastEnd.toISOString().split("T")[0]);
-        setGroupBy("week");
+        setGroupBy("day");
         break;
       }
       case "thisQuarter": {
@@ -208,7 +208,7 @@ export const Analytics: React.FC = () => {
         const endQ = new Date(d.getFullYear(), q * 3 + 3, 0);
         setFromDate(startQ.toISOString().split("T")[0]);
         setToDate(endQ.toISOString().split("T")[0]);
-        setGroupBy("month");
+        setGroupBy("week");
         break;
       }
       case "thisYear": {
@@ -312,6 +312,50 @@ export const Analytics: React.FC = () => {
     );
   };
 
+  const safeData = React.useMemo(() => {
+    return (
+      data ||
+      ({
+        summaryCards: {
+          income: 0,
+          expense: 0,
+          netSavings: 0,
+          savingsRate: 0,
+          net: 0,
+        },
+        trend: [],
+        categoryBreakdown: [],
+        incomeCategoryBreakdown: [],
+      } as AnalyticsData)
+    );
+  }, [data]);
+
+  const currentBreakdown = React.useMemo(() => {
+    return breakdownType === "EXPENSE"
+      ? safeData.categoryBreakdown
+      : safeData.incomeCategoryBreakdown || [];
+  }, [breakdownType, safeData]);
+
+  const sortedBreakdown = React.useMemo(() => {
+    return [...currentBreakdown].sort(
+      (a: { amount?: number }, b: { amount?: number }) =>
+        (b.amount || 0) - (a.amount || 0),
+    );
+  }, [currentBreakdown]);
+
+  const totalBreakdownAmount = React.useMemo(() => {
+    return currentBreakdown.reduce(
+      (sum: number, item: { amount?: number }) => sum + (item.amount || 0),
+      0,
+    );
+  }, [currentBreakdown]);
+
+  const currentTopTransactions = React.useMemo(() => {
+    return topTransactionsType === "EXPENSE"
+      ? safeData.topExpenses || []
+      : safeData.topIncomes || [];
+  }, [topTransactionsType, safeData]);
+
   if (error && !data) {
     return (
       <StateDisplay
@@ -323,30 +367,6 @@ export const Analytics: React.FC = () => {
   }
 
   const isLoading = loading && !data;
-
-  const safeData =
-    data ||
-    ({
-      summaryCards: {
-        income: 0,
-        expense: 0,
-        netSavings: 0,
-        savingsRate: 0,
-        net: 0,
-      },
-      trend: [],
-      categoryBreakdown: [],
-      incomeCategoryBreakdown: [],
-    } as AnalyticsData);
-  const currentBreakdown =
-    breakdownType === "EXPENSE"
-      ? safeData.categoryBreakdown
-      : safeData.incomeCategoryBreakdown || [];
-
-  const currentTopTransactions =
-    topTransactionsType === "EXPENSE"
-      ? safeData.topExpenses || []
-      : safeData.topIncomes || [];
 
   return (
     <div className="flex flex-col h-full gap-6 max-w-7xl mx-auto w-full pb-24">
@@ -496,11 +516,11 @@ export const Analytics: React.FC = () => {
       ) : (
         <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Trend Chart */}
-          <div className="lg:col-span-2 card p-6 flex flex-col gap-6 min-w-0 overflow-hidden">
-            <h2 className="text-heading-3 font-display text-text-primary truncate">
+          <div className="lg:col-span-2 card p-6 flex flex-col justify-between gap-6 min-w-0 overflow-hidden h-full">
+            <h2 className="text-heading-3 font-display text-text-primary truncate shrink-0">
               Income vs Expense Trend
             </h2>
-            <div className="h-96 w-full min-w-0">
+            <div className="w-full min-w-0 flex-1 relative min-h-64">
               {isMounted && safeData.trend.length > 0 ? (
                 <ResponsiveContainer
                   width="100%"
@@ -573,8 +593,8 @@ export const Analytics: React.FC = () => {
           </div>
 
           {/* Category Breakdown */}
-          <div className="card p-6 flex flex-col gap-6 min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between min-w-0 gap-2">
+          <div className="card p-6 flex flex-col justify-between gap-6 min-w-0 overflow-hidden h-full">
+            <div className="flex items-center justify-between min-w-0 gap-2 shrink-0">
               <h2 className="text-heading-3 font-display text-text-primary truncate">
                 Breakdown
               </h2>
@@ -602,38 +622,50 @@ export const Analytics: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-80 w-full min-w-0">
+            <div className="w-full min-w-0 relative flex items-center justify-center shrink-0 h-48 sm:h-52">
               {isMounted && currentBreakdown.length > 0 ? (
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
-                  minWidth={1}
-                  minHeight={1}
-                >
-                  <PieChart>
-                    <Pie
-                      data={currentBreakdown}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={2}
-                      dataKey="amount"
-                    >
-                      {currentBreakdown.map(
-                        (entry: { color?: string }, index: number) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.color || "var(--color-primary)"}
-                          />
-                        ),
-                      )}
-                    </Pie>
-                    <ChartTooltip
-                      content={(props) => renderPieTooltip(props)}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <>
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    minWidth={1}
+                    minHeight={1}
+                  >
+                    <PieChart>
+                      <Pie
+                        data={currentBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={2}
+                        dataKey="amount"
+                      >
+                        {currentBreakdown.map(
+                          (entry: { color?: string }, index: number) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={entry.color || "var(--color-primary)"}
+                            />
+                          ),
+                        )}
+                      </Pie>
+                      <ChartTooltip
+                        content={(props) => renderPieTooltip(props)}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">
+                      {breakdownType === "EXPENSE"
+                        ? "Total Expense"
+                        : "Total Income"}
+                    </span>
+                    <span className="num text-mono-md font-bold text-text-primary mt-0.5">
+                      {formatCurrency(totalBreakdownAmount)}
+                    </span>
+                  </div>
+                </>
               ) : (
                 <StateDisplay
                   type="empty"
@@ -643,9 +675,9 @@ export const Analytics: React.FC = () => {
               )}
             </div>
 
-            {currentBreakdown.length > 0 && (
-              <div className="flex flex-col gap-3 overflow-y-auto max-h-72 pr-2 custom-scrollbar min-w-0 border-t border-border/60 pt-3">
-                {currentBreakdown.map(
+            {sortedBreakdown.length > 0 && (
+              <div className="flex flex-col gap-3 min-w-0 border-t border-border/60 pt-3">
+                {sortedBreakdown.slice(0, 3).map(
                   (category: {
                     categoryId: string;
                     name: string;

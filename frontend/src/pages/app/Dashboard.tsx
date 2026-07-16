@@ -339,17 +339,6 @@ export const Dashboard: React.FC = () => {
     };
   }, [fetchDashboardData]);
 
-  if (!loading && !data) {
-    return (
-      <StateDisplay
-        type="error"
-        title="Failed to load dashboard data"
-        description="Please try again."
-      />
-    );
-  }
-
-  const isLoading = loading && !data;
   const {
     summary = { totalIncome: 0, totalExpense: 0, netSavings: 0, netWorth: 0 },
     categoryBreakdown = [],
@@ -363,6 +352,25 @@ export const Dashboard: React.FC = () => {
       0,
     );
   }, [categoryBreakdown]);
+
+  const sortedCategoryBreakdown = React.useMemo(() => {
+    return [...categoryBreakdown].sort(
+      (a: { amount?: number }, b: { amount?: number }) =>
+        (b.amount || 0) - (a.amount || 0),
+    );
+  }, [categoryBreakdown]);
+
+  if (!loading && !data) {
+    return (
+      <StateDisplay
+        type="error"
+        title="Failed to load dashboard data"
+        description="Please try again."
+      />
+    );
+  }
+
+  const isLoading = loading && !data;
 
   return (
     <div className="space-y-6 pb-16">
@@ -474,8 +482,8 @@ export const Dashboard: React.FC = () => {
       ) : (
         <section className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Spending by Category (Donut) */}
-          <div className="card lg:col-span-5 flex flex-col gap-6 min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between min-w-0 gap-2">
+          <div className="card lg:col-span-5 flex flex-col justify-between gap-6 min-w-0 overflow-hidden h-full">
+            <div className="flex items-center justify-between min-w-0 gap-2 shrink-0">
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold text-text-primary text-heading-sm truncate">
                   Spending by Category
@@ -485,7 +493,7 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="h-80 w-full min-w-0 relative flex items-center justify-center">
+            <div className="w-full min-w-0 relative flex items-center justify-center shrink-0 h-48 sm:h-52">
               {categoryBreakdown.length === 0 ? (
                 <p className="text-text-muted text-body-md py-20">
                   No spending data available
@@ -530,9 +538,9 @@ export const Dashboard: React.FC = () => {
                 </>
               ) : null}
             </div>
-            {categoryBreakdown.length > 0 && (
-              <div className="flex flex-col gap-3 overflow-y-auto max-h-72 pr-2 custom-scrollbar min-w-0 border-t border-border/60 pt-3">
-                {categoryBreakdown.map(
+            {sortedCategoryBreakdown.length > 0 && (
+              <div className="flex flex-col gap-3 min-w-0 border-t border-border/60 pt-3 shrink-0">
+                {sortedCategoryBreakdown.slice(0, 3).map(
                   (
                     entry: {
                       name: string;
@@ -578,8 +586,8 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Monthly Trend (Bar) */}
-          <div className="card lg:col-span-7 flex flex-col gap-6 min-w-0 overflow-hidden">
-            <div className="min-w-0 flex-1">
+          <div className="card lg:col-span-7 flex flex-col justify-between gap-6 min-w-0 overflow-hidden h-full">
+            <div className="min-w-0 shrink-0">
               <h3 className="font-semibold text-text-primary text-heading-sm truncate">
                 Monthly Trend
               </h3>
@@ -587,7 +595,7 @@ export const Dashboard: React.FC = () => {
                 Income vs expense history over time
               </p>
             </div>
-            <div className="h-80 w-full min-w-0">
+            <div className="w-full min-w-0 flex-1 relative min-h-64">
               {monthlyTrend.length === 0 ? (
                 <StateDisplay
                   type="empty"
@@ -1051,7 +1059,7 @@ export const Dashboard: React.FC = () => {
                       onClick={() => toggleRow(tx.id)}
                       className="cursor-pointer md:cursor-default text-body-md"
                     >
-                      <TableCell className="text-text-secondary whitespace-nowrap">
+                      <TableCell className="text-body-md text-text-secondary whitespace-nowrap">
                         {new Date(tx.transactionDate).toLocaleDateString(
                           "en-IN",
                           {
@@ -1062,7 +1070,7 @@ export const Dashboard: React.FC = () => {
                       </TableCell>
                       <TableCell className="text-body-lg font-semibold text-text-primary">
                         <div
-                          className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`max-w-28 sm:max-w-36 lg:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                           title={tx.payee}
                         >
                           {tx.payee}
@@ -1071,7 +1079,7 @@ export const Dashboard: React.FC = () => {
                       <TableCell className="text-text-secondary">
                         {tx.paymentMode && tx.paymentMode !== "OTHER" ? (
                           <span
-                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-body-sm font-medium bg-bg-muted text-text-secondary max-w-28 sm:max-w-36 lg:max-w-44 transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all max-w-none" : "truncate"}`}
                             title={tx.paymentMode}
                           >
                             {tx.paymentMode}
@@ -1083,7 +1091,7 @@ export const Dashboard: React.FC = () => {
                       <TableCell>
                         {catObj ? (
                           <span
-                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all" : "truncate"}`}
+                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-28 sm:max-w-36 lg:max-w-44 transition-all duration-200 align-bottom ${isExpanded ? "whitespace-normal break-all max-w-none" : "truncate"}`}
                             style={{
                               backgroundColor: `${catObj.color}15`,
                               color: catObj.color,
@@ -1096,7 +1104,7 @@ export const Dashboard: React.FC = () => {
                           </span>
                         ) : (
                           <span
-                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-36 sm:max-w-none align-bottom ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                            className={`badge text-body-sm font-medium px-2.5 py-0.5 rounded-md max-w-28 sm:max-w-36 lg:max-w-44 align-bottom ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                           >
                             Uncategorized
                           </span>
@@ -1104,7 +1112,7 @@ export const Dashboard: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div
-                          className={`max-w-36 sm:max-w-64 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word" : "truncate"}`}
+                          className={`max-w-28 sm:max-w-36 lg:max-w-48 transition-all duration-200 ${isExpanded ? "whitespace-normal wrap-break-word max-w-none" : "truncate"}`}
                         >
                           {tx.description ? (
                             <p
@@ -1123,7 +1131,7 @@ export const Dashboard: React.FC = () => {
                           isNegative ? "num-negative" : "num-positive"
                         }`}
                       >
-                        {isNegative ? "-" : "+"}
+                        {isNegative ? "−" : "+"}
                         {formatCurrency(tx.amount)}
                       </TableCell>
                     </TableRow>
